@@ -1,0 +1,10 @@
+{
+  "name": "space",
+  "description": "Modular application architecture for Meteor.",
+  "author": "Code Adventure",
+  "version": "0.1.0",
+  "packages": {
+    "munit": {},
+    "dependance": "0.1.2"
+  }
+}
