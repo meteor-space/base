@@ -21,6 +21,8 @@ class Space.Module
 
       if !module.isInitialized then module.initialize(injector, modules)
 
+    if Meteor.isServer then @npm = Npm
+
     @injector = injector
     @injector.injectInto this
 

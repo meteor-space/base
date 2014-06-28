@@ -163,6 +163,15 @@ Munit.run
     }
 
     {
+      name: 'adds Npm as property to the module'
+
+      func: ->
+        if Meteor.isServer
+          @module.initialize @injector
+          expect(@module.npm.require).to.be.defined
+    }
+
+    {
       name: 'invokes the configure method on itself'
 
       func: ->
