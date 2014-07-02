@@ -7,7 +7,9 @@ class Space.Application extends Space.Module
     super()
 
     @modules = {}
+    
     @injector ?= new Dependance.Injector()
+    @injector.map('Space.Application.Injector').toStaticValue @injector
 
     @initialize()
 

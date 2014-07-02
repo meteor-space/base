@@ -53,6 +53,22 @@ Munit.run
     }
 
     {
+      name: 'maps injector instance with itself'
+
+      func: ->
+
+        injector = new Dependance.Injector()
+
+        staticValueMappingSpy = sinon.spy()
+        injector.map = sinon.stub().returns toStaticValue: staticValueMappingSpy
+
+        @application = new Space.Application injector
+
+        expect(injector.map).to.have.been.calledWithExactly 'Space.Application.Injector'
+        expect(staticValueMappingSpy).to.have.been.calledWithExactly injector
+    }
+
+    {
       name: 'initializes the application'
 
       func: ->
