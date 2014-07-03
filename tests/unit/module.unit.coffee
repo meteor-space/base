@@ -245,3 +245,16 @@ Munit.run
 
 
   ]
+
+Munit.run
+
+  name: 'Space - Module - #run'
+
+  tests: [
+    {
+      name: 'defines a no-op run method'
+
+      func: -> expect(Space.Module::run).to.be.a('function')
+    }
+
+  ]

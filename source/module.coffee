@@ -31,6 +31,8 @@ class Space.Module
 
   configure: ->
 
+  run: ->
+
   @published = {}
 
   @publish: (module, identifier) ->

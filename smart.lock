@@ -17,8 +17,8 @@
       },
       "dependance": {
         "git": "https://github.com/CodeAdventure/meteor-dependance.git",
-        "tag": "v0.1.2",
-        "commit": "b3379523f28e46839bb039f1c791a238a24ad42e"
+        "tag": "v0.1.9",
+        "commit": "6d9f346cc3b7a5fa70d9b6f2c775f3be47dbbbe0"
       },
       "chai": {
         "git": "https://github.com/spacejamio/meteor-chai.git",

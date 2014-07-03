@@ -5,31 +5,65 @@ Munit.run
 
   tests: [
 
-    name: 'application loads required module correctly'
+    {
+      name: 'Application loads required module correctly'
 
-    func: (test) ->
+      func: (test) ->
 
-      testValue = {}
-      testResult = null
+        testValue = {}
+        testResult = null
 
-      class FirstModule extends Space.Module
+        class FirstModule extends Space.Module
 
-        @publish this, 'FirstModule'
+          @publish this, 'FirstModule'
 
-        configure: -> @injector.map('testValue').toStaticValue testValue
+          configure: -> @injector.map('testValue').toStaticValue testValue
 
-      class Application extends Space.Application
+        class Application extends Space.Application
 
-        RequiredModules: ['FirstModule']
+          RequiredModules: ['FirstModule']
 
-        Dependencies: testValue: 'testValue'
+          Dependencies: testValue: 'testValue'
 
-        configure: -> testResult = @testValue
+          configure: -> testResult = @testValue
 
-      app = new Application()
+        app = new Application()
 
-      expect(testResult).to.equal testValue
+        expect(testResult).to.equal testValue
+    }
 
+    {
+      name: 'Modules can be configured before running the application'
+
+      func: (test) ->
+
+        moduleValue = 'module configuration'
+        appValue = 'application configuration'
+
+        testResult = null
+
+        class FirstModule extends Space.Module
+
+          @publish this, 'FirstModule'
+
+          configure: -> @injector.map('moduleValue').toStaticValue moduleValue
+
+          run: -> testResult = @injector.get 'moduleValue'
+
+        class Application extends Space.Application
+
+          RequiredModules: ['FirstModule']
+
+          Dependencies:
+            moduleValue: 'moduleValue'
+
+          configure: -> @injector.override('moduleValue').toStaticValue appValue
+
+        app = new Application()
+        app.run()
+
+        expect(testResult).to.equal appValue
+    }
   ]
 
   tearDown: ->

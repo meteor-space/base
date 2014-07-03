@@ -18,10 +18,6 @@ Munit.run
 
   name: 'Space - Application - constructor'
 
-  tearDown: ->
-    # reset published space modules
-    Space.Module.published = {}
-
   tests: [
     {
       name: 'initializes modules map as empty object'
@@ -81,16 +77,11 @@ Munit.run
         initializeSpy.restore()
     }
 
-
   ]
 
 Munit.run
 
-  name: 'Space - Module - #initialize'
-
-  tearDown: ->
-    # reset published space modules
-    Space.Module.published = {}
+  name: 'Space - Application - #initialize'
 
   tests: [
 
@@ -106,4 +97,28 @@ Munit.run
       expect(superInitialize).to.have.been.calledWithExactly application.injector, application.modules
 
       superInitialize.restore()
+  ]
+
+Munit.run
+
+  name: 'Space - Application - #run'
+
+  tests: [
+
+    name: 'Tells all loaded modules to run.'
+
+    func: ->
+
+      requiredModules =
+        module1: run: sinon.spy()
+        module2: run: sinon.spy()
+
+      application = new Space.Application()
+
+      application.modules = requiredModules
+
+      application.run()
+
+      expect(requiredModules.module1.run).to.have.been.called
+      expect(requiredModules.module2.run).to.have.been.called
   ]

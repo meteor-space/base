@@ -3,7 +3,7 @@
   "description": "Modular application architecture for Meteor.",
   "homepage": "https://github.com/CodeAdventure/meteor-space",
   "author": "Code Adventure",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "git": "https://github.com/CodeAdventure/meteor-space.git",
   "packages": {
     "munit": {},
