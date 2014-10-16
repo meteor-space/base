@@ -1,4 +1,4 @@
-# Space Application Architecture
+# Space Application Architecture [![Build Status](https://travis-ci.org/CodeAdventure/meteor-space.svg?branch=master)](https://travis-ci.org/CodeAdventure/meteor-space)
 
 *Space* is a simple but modular application architecture for Meteor.
 
