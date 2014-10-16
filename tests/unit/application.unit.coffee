@@ -1,93 +1,52 @@
 
-Munit.run
+describe 'Space.Application', ->
 
-  name: 'Space - Application'
+  it 'extends Space.Module', ->
+    expect(new Space.Application()).to.be.instanceof Space.Module
 
-  tests: [
+  describe 'construction', ->
 
-    name: 'extends Space.Module'
+    it 'initializes modules map as empty object', ->
 
-    func: ->
+      @application = new Space.Application()
+      expect(@application.modules).to.eql {}
 
-      application = new Space.Application()
-      expect(application).to.be.instanceof Space.Module
+    it 'creates a new injector instance if none was given', ->
 
-  ]
+      @application = new Space.Application()
+      expect(@application.injector).to.be.instanceof Dependance.Injector
 
-Munit.run
+    it 'uses the provided injector when given', ->
 
-  name: 'Space - Application - constructor'
+      injector = new Dependance.Injector()
+      @application = new Space.Application injector
 
-  tests: [
-    {
-      name: 'initializes modules map as empty object'
+      expect(@application.injector).to.equal injector
 
-      func: ->
+    it 'maps injector instance with itself', ->
 
-        @application = new Space.Application()
-        expect(@application.modules).to.eql {}
-    }
+      injector = new Dependance.Injector()
 
-    {
-      name: 'creates a new injector instance if none was given'
+      staticValueMappingSpy = sinon.spy()
+      injector.map = sinon.stub().returns toStaticValue: staticValueMappingSpy
 
-      func: ->
+      @application = new Space.Application injector
 
-        @application = new Space.Application()
-        expect(@application.injector).to.be.instanceof Dependance.Injector
-    }
+      expect(injector.map).to.have.been.calledWithExactly 'Space.Application.Injector'
+      expect(staticValueMappingSpy).to.have.been.calledWithExactly injector
 
-    {
-      name: 'uses the provided injector when given'
+    it 'initializes the application', ->
 
-      func: ->
+      initializeSpy = sinon.spy Space.Application.prototype, 'initialize'
 
-        injector = new Dependance.Injector()
-        @application = new Space.Application injector
+      @application = new Space.Application()
+      expect(initializeSpy).to.have.been.calledOnce
 
-        expect(@application.injector).to.equal injector
-    }
+      initializeSpy.restore()
 
-    {
-      name: 'maps injector instance with itself'
+  describe '#initialize', ->
 
-      func: ->
-
-        injector = new Dependance.Injector()
-
-        staticValueMappingSpy = sinon.spy()
-        injector.map = sinon.stub().returns toStaticValue: staticValueMappingSpy
-
-        @application = new Space.Application injector
-
-        expect(injector.map).to.have.been.calledWithExactly 'Space.Application.Injector'
-        expect(staticValueMappingSpy).to.have.been.calledWithExactly injector
-    }
-
-    {
-      name: 'initializes the application'
-
-      func: ->
-
-        initializeSpy = sinon.spy Space.Application.prototype, 'initialize'
-
-        @application = new Space.Application()
-        expect(initializeSpy).to.have.been.calledOnce
-
-        initializeSpy.restore()
-    }
-
-  ]
-
-Munit.run
-
-  name: 'Space - Application - #initialize'
-
-  tests: [
-
-    name: 'calls the super method with configured injector and modules'
-
-    func: ->
+    it 'calls the super method with configured injector and modules', ->
 
       superInitialize = sinon.spy Space.Module.prototype, 'initialize'
       application = new Space.Application()
@@ -97,17 +56,10 @@ Munit.run
       expect(superInitialize).to.have.been.calledWithExactly application.injector, application.modules
 
       superInitialize.restore()
-  ]
 
-Munit.run
+  describe '#run', ->
 
-  name: 'Space - Application - #run'
-
-  tests: [
-
-    name: 'Tells all loaded modules to run.'
-
-    func: ->
+    it 'Tells all loaded modules to run.', ->
 
       requiredModules =
         module1: run: sinon.spy()
@@ -121,4 +73,3 @@ Munit.run
 
       expect(requiredModules.module1.run).to.have.been.called
       expect(requiredModules.module2.run).to.have.been.called
-  ]

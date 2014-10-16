@@ -1,117 +1,68 @@
 
-Munit.run
+describe 'Space.Module', ->
 
-  name: 'Space - Module - @publish'
+  beforeEach ->
 
-  tearDown: ->
     # reset published space modules
     Space.Module.published = {}
 
-  tests: [
-    {
-      name: 'adds given module to the static collection of published modules'
+  describe '@publish', ->
 
-      func: ->
+    it 'adds given module to the static collection of published modules', ->
 
-        fakeModule = identifier = 'test'
+      fakeModule = identifier = 'test'
 
-        Space.Module.publish fakeModule, fakeModule.identifier
+      Space.Module.publish fakeModule, fakeModule.identifier
 
-        expect(Space.Module.published[fakeModule.identifier]).to.equal fakeModule
-    }
+      expect(Space.Module.published[fakeModule.identifier]).to.equal fakeModule
 
-    {
-      name: 'throws an error if two modules try to publish under same name'
+    it 'throws an error if two modules try to publish under same name', ->
 
-      func: ->
+      fakeModule1 = identifier: 'test'
+      fakeModule2 = identifier: 'test'
 
-        fakeModule1 = identifier: 'test'
-        fakeModule2 = identifier: 'test'
+      publishTwoModulesWithSameName = ->
+        Space.Module.publish fakeModule1, fakeModule1.identifier
+        Space.Module.publish fakeModule2, fakeModule2.identifier
 
-        publishTwoModulesWithSameName = ->
-          Space.Module.publish fakeModule1, fakeModule1.identifier
-          Space.Module.publish fakeModule2, fakeModule2.identifier
+      expect(publishTwoModulesWithSameName).to.throw Error
 
-        expect(publishTwoModulesWithSameName).to.throw Error
-    }
+  describe '@require', ->
 
+    it 'returns published module for given identifier', ->
 
-  ]
+      fakeModule = identifier = 'test'
+      Space.Module.publish fakeModule, fakeModule.identifier
 
-Munit.run
+      requiredModule = Space.Module.require fakeModule.identifier
 
-  name: 'Space - Module - @require'
+      expect(requiredModule).to.equal fakeModule
 
-  tearDown: ->
-    # reset published space modules
-    Space.Module.published = {}
+    it 'throws and error if no module was registered for given identifier', ->
 
-  tests: [
-    {
-      name: 'returns published module for given identifier'
+      requireUnkownModule = -> Space.Module.require 'unknown module'
+      expect(requireUnkownModule).to.throw Error
 
-      func: ->
+  describe 'constructor', ->
 
-        # SETUP
-        fakeModule = identifier = 'test'
-        Space.Module.publish fakeModule, fakeModule.identifier
+    it 'sets required modules to empty array if none defined', ->
 
-        # ACTION
-        requiredModule = Space.Module.require fakeModule.identifier
+      module = new Space.Module()
 
-        # VERIFY
-        expect(requiredModule).to.equal fakeModule
-    }
+      expect(module.RequiredModules).to.be.instanceof Array
+      expect(module.RequiredModules).to.be.empty
 
-    {
-      name: 'throws and error if no module was registered for given identifier'
+    it 'leaves the defined required modules intact', ->
 
-      func: ->
+      testArray = []
 
-        # ACTION
-        requireUnkownModule = -> Space.Module.require 'unknown module'
+      class TestModule extends Space.Module
+        RequiredModules: testArray
 
-        # VERIFY
-        expect(requireUnkownModule).to.throw Error
-    }
+      module = new TestModule()
 
+      expect(module.RequiredModules).to.equal testArray
 
-  ]
-
-
-Munit.run
-
-  name: 'Space - Module - constructor'
-
-  tests: [
-    {
-      name: 'sets required modules to empty array if none defined'
-
-      func: ->
-
-        module = new Space.Module()
-
-        expect(module.RequiredModules).to.be.instanceof Array
-        expect(module.RequiredModules).to.be.empty
-    }
-
-    {
-      name: 'leaves the defined required modules intact'
-
-      func: ->
-
-        testArray = []
-
-        class TestModule extends Space.Module
-          RequiredModules: testArray
-
-        module = new TestModule()
-
-        expect(module.RequiredModules).to.equal testArray
-    }
-
-
-  ]
 
 Munit.run
 

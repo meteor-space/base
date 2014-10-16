@@ -1,40 +1,38 @@
 Package.describe({
-  summary: 'Modular application architecture for Meteor.'
+  summary: 'Modular application architecture for Meteor.',
+  name: 'space:base',
+  version: '1.0.0'
 });
 
-Package.on_use(function(api) {
+Package.onUse(function(api) {
 
-  // on client and server
+  api.versionsFrom("METEOR@0.9.4");
+
   api.use([
     'coffeescript',
-    'dependance'
+    'codeadventure:dependance@1.0.0'
   ]);
 
-  api.add_files([
-
-    // core classes
-    'source/space.coffee',
+  api.addFiles([
+    'source/namespace.coffee',
     'source/module.coffee',
     'source/application.coffee'
-
   ]);
 
 });
 
-Package.on_test(function(api) {
+Package.onTest(function(api) {
 
   api.use([
     'coffeescript',
-    'munit',
-    'chai',
-    'sinon',
-    'space'
+    'space:base',
+    'spacejamio:munit@2.0.1',
   ]);
 
-  api.add_files([
-    'tests/integration/application_with_modules.integration.coffee',
+  api.addFiles([
     'tests/unit/module.unit.coffee',
-    'tests/unit/application.unit.coffee'
+    'tests/unit/application.unit.coffee',
+    'tests/integration/application_with_modules.integration.coffee',
   ]);
 
 });

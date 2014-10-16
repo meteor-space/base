@@ -1,4 +1,4 @@
-# Space Application Architecture [![Build Status](https://travis-ci.org/CodeAdventure/meteor-space.svg?branch=master)](https://travis-ci.org/CodeAdventure/meteor-space)
+# Space Application Architecture
 
 *Space* is a simple but modular application architecture for Meteor.
 
@@ -69,13 +69,14 @@ Space architecture provides for you.
 Space uses the *dependance* package for the dependency injection.
 For details of how to declare mappings [read the documentation](http://codeadventure.github.io/meteor-dependance)
 
-## Install with Meteorite
-Install the module with: `mrt add space`
+## Install
+`meteor add space:base`
 
 ## Run the tests
 `mrt test-packages ./`
 
 ## Release History
+* 1.0.0 - Publish first version to Meteor package system
 * 0.1.0 - Initial release of Space
 
 ## License
