@@ -27,13 +27,16 @@ describe 'Space.Application', ->
 
       injector = new Dependance.Injector()
 
-      staticValueMappingSpy = sinon.spy()
-      injector.map = sinon.stub().returns toStaticValue: staticValueMappingSpy
+      injectionMapping =
+        toStaticValue: sinon.spy()
+        toClass: sinon.spy()
+
+      injector.map = sinon.stub().returns injectionMapping
 
       @application = new Space.Application injector
 
       expect(injector.map).to.have.been.calledWithExactly 'Space.Application.Injector'
-      expect(staticValueMappingSpy).to.have.been.calledWithExactly injector
+      expect(injectionMapping.toStaticValue).to.have.been.calledWithExactly injector
 
     it 'initializes the application', ->
 
