@@ -61,6 +61,99 @@ class MyApplication extends Space.Application
   configure: -> console.log @testValue
 ```
 
+## Requiring Meteor Core Packages
+Instead of globally accessing Meteor packages in your codebase
+you can add them to your module / application dependencies and
+have them injected automatically after initialisation.
+
+### Example for packages on server and client
+
+```CoffeeScript
+class SharedApp extends Space.Application
+
+  Dependencies:
+    meteor: 'Meteor'
+    tracker: 'Tracker'
+    ejson: 'EJSON'
+    ddp: 'DDP'
+    accounts: 'Accounts'
+    random: 'Random'
+    underscore: 'underscore'
+    reactiveVar: 'ReactiveVar'
+    mongo: 'Mongo'
+
+  configure: ->
+    expect(@meteor).to.be.defined
+    expect(@meteor).to.equal Meteor
+
+    expect(@tracker).to.be.defined
+    expect(@tracker).to.equal Tracker
+
+    expect(@ejson).to.be.defined
+    expect(@ejson).to.equal EJSON
+
+    expect(@ddp).to.be.defined
+    expect(@ddp).to.equal DDP
+
+    expect(@accounts).to.be.defined
+    expect(@accounts).to.equal Package['accounts-base'].Accounts
+
+    expect(@random).to.be.defined
+    expect(@random).to.equal Random
+
+    expect(@underscore).to.be.defined
+    expect(@underscore).to.equal _
+
+    expect(@reactiveVar).to.be.instanceof Package['reactive-var'].ReactiveVar
+
+    expect(@mongo).to.be.defined
+    expect(@mongo).to.equal Mongo
+```
+
+### Example for packages on client only
+
+```CoffeeScript
+class ClientApp extends Space.Application
+
+  Dependencies:
+    templates: 'Template'
+    session: 'Session'
+    blaze: 'Blaze'
+
+  configure: ->
+
+    expect(@templates).to.be.defined
+    expect(@templates).to.equal Template
+
+    expect(@session).to.be.defined
+    expect(@session).to.equal Session
+
+    expect(@blaze).to.be.defined
+    expect(@blaze).to.equal Blaze
+```
+
+### Example for packages on server only
+
+```CoffeeScript
+class ServerApp extends Space.Application
+
+  Dependencies:
+    email: 'Email'
+    process: 'process'
+    Future: 'Future'
+
+  configure: ->
+
+    expect(@email).to.be.defined
+    expect(@email).to.equal Package['email'].Email
+
+    expect(@process).to.be.defined
+    expect(@process).to.equal process
+
+    expect(@Future).to.be.defined
+    expect(@Future).to.equal Npm.require 'fibers/future'
+```
+
 ## Further Examples
 You can look at the tests of this package to see all features that the
 Space architecture provides for you.
@@ -76,6 +169,7 @@ For details of how to declare mappings [read the documentation](http://codeadven
 `mrt test-packages ./`
 
 ## Release History
+* 1.1.0 - Added mappings to core Meteor packages
 * 1.0.0 - Publish first version to Meteor package system
 * 0.1.0 - Initial release of Space
 
