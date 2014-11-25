@@ -1,13 +1,13 @@
 Package.describe({
   summary: 'Modular application architecture for Meteor.',
   name: 'space:base',
-  version: '1.1.0',
+  version: '1.1.1',
   git: 'https://github.com/CodeAdventure/meteor-space.git'
 });
 
 Package.onUse(function(api) {
 
-  api.versionsFrom("METEOR@0.9.4");
+  api.versionsFrom("METEOR@1.0");
 
   api.use([
     'coffeescript',

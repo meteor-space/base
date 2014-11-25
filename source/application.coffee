@@ -14,7 +14,6 @@ class Space.Application extends Space.Module
     # Map Meteor standard packages
 
     @injector.map('Meteor').toStaticValue Meteor
-    @injector.map('Tracker').toStaticValue Tracker
     @injector.map('EJSON').toStaticValue EJSON
     @injector.map('DDP').toStaticValue DDP
     @injector.map('Random').toStaticValue Random
@@ -22,6 +21,7 @@ class Space.Application extends Space.Module
     @injector.map('Mongo').toStaticValue Mongo
 
     if Meteor.isClient
+      @injector.map('Tracker').toStaticValue Tracker
       @injector.map('Template').toStaticValue Template
       @injector.map('Session').toStaticValue Session
       @injector.map('Blaze').toStaticValue Blaze

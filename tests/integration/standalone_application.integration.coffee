@@ -15,7 +15,6 @@ Munit.run
 
         Dependencies:
           meteor: 'Meteor'
-          tracker: 'Tracker'
           ejson: 'EJSON'
           ddp: 'DDP'
           accounts: 'Accounts'
@@ -27,9 +26,6 @@ Munit.run
         configure: ->
           expect(@meteor).to.be.defined
           expect(@meteor).to.equal Meteor
-
-          expect(@tracker).to.be.defined
-          expect(@tracker).to.equal Tracker
 
           expect(@ejson).to.be.defined
           expect(@ejson).to.equal EJSON
@@ -61,11 +57,15 @@ Munit.run
         class ClientApp extends Space.Application
 
           Dependencies:
+            tracker: 'Tracker'
             templates: 'Template'
             session: 'Session'
             blaze: 'Blaze'
 
           configure: ->
+
+            expect(@tracker).to.be.defined
+            expect(@tracker).to.equal Tracker
 
             expect(@templates).to.be.defined
             expect(@templates).to.equal Template
