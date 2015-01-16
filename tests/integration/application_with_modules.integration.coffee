@@ -14,20 +14,15 @@ Munit.run
         testResult = null
 
         class FirstModule extends Space.Module
-
           @publish this, 'FirstModule'
-
           configure: -> @injector.map('testValue').toStaticValue testValue
 
-        class Application extends Space.Application
-
+        App = Space.Application.extend
           RequiredModules: ['FirstModule']
-
           Dependencies: testValue: 'testValue'
-
           configure: -> testResult = @testValue
 
-        app = new Application()
+        new App()
 
         expect(testResult).to.equal testValue
     }
@@ -43,20 +38,15 @@ Munit.run
         testResult = null
 
         class FirstModule extends Space.Module
-
           @publish this, 'FirstModule'
-
           configure: -> @injector.map('moduleValue').toStaticValue moduleValue
-
           run: -> testResult = @injector.get 'moduleValue'
 
         class Application extends Space.Application
 
           RequiredModules: ['FirstModule']
-
           Dependencies:
             moduleValue: 'moduleValue'
-
           configure: -> @injector.override('moduleValue').toStaticValue appValue
 
         app = new Application()

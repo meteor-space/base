@@ -7,7 +7,7 @@ describe 'Space.Module', ->
     Space.Module.published = {}
 
   it 'extends space object', ->
-    expect(Space.Module).to.extend Space.Object
+    expect(Space.Module).to.extend Space.Class
 
   describe '@publish', ->
 

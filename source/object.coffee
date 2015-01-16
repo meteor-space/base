@@ -1,15 +1,28 @@
 
-class Space.Object
+class Space.Class
 
   constructor: (properties) -> @[key] = value for key, value of properties
 
-  @extend: (prototype) ->
-    Extended = class extends this
+  @extend: (extension) ->
 
-    if prototype?
-      if prototype.Static? then prototype.Static.call Extended
-      Extended.prototype[key] = prototype[key] for key of prototype
+    extension ?= {}
+    Constructor = extension.Constructor ? null
+
+    Extended = class extends this
+      constructor: ->
+        if Constructor?
+          Constructor.apply this, arguments
+        else
+          Extended.__super__.constructor.apply this, arguments
+
+    if extension.Static? then extension.Static.call Extended
+    Extended.prototype[key] = extension[key] for key of extension
 
     return Extended
 
-  @create: (properties) -> new this properties
+  @create: ->
+    args = arguments
+    Context = this
+    wrapper = -> Context.apply this, args
+    wrapper extends Context
+    new wrapper()

@@ -1,5 +1,5 @@
 
-class Space.Module extends Space.Object
+class Space.Module extends Space.Class
 
   injector: null
   RequiredModules: null

@@ -2,6 +2,7 @@
 class Space.Application extends Space.Module
 
   constructor: (properties) ->
+    
     super properties
     @modules = {}
 

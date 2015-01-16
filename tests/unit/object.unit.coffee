@@ -1,29 +1,29 @@
 
-describe 'Space.Object', ->
+describe 'Space.Class', ->
 
   describe 'extending classes', ->
 
     it 'creates and returns a subclass', ->
 
-      MyClass = Space.Object.extend()
-      expect(MyClass).to.extend Space.Object
+      MyClass = Space.Class.extend()
+      expect(MyClass).to.extend Space.Class
 
     it 'applies the arguments to the super constructor', ->
 
       [first, second, third] = ['first', 2, {}]
-      constructionSpy = sinon.spy()
+      spy = sinon.spy()
 
-      class Base extends Space.Object
-        constructor: -> constructionSpy.apply this, arguments
-
+      Base = Space.Class.extend Constructor: -> spy.apply this, arguments
       Extended = Base.extend()
-      new Extended first, second, third
 
-      expect(constructionSpy).to.have.been.calledWithExactly first, second, third
+      instance = new Extended first, second, third
+
+      expect(spy).to.have.been.calledWithExactly first, second, third
+      expect(spy).to.have.been.calledOn instance
 
     it 'allows to extend the prototype', ->
 
-      First = Space.Object.extend first: 1, get: (property) -> @[property]
+      First = Space.Class.extend first: 1, get: (property) -> @[property]
       Second = First.extend second: 2, get: -> First::get.apply this, arguments
       class Third extends Second
         get: (property) -> super property
@@ -34,7 +34,7 @@ describe 'Space.Object', ->
 
     it 'allows to define static properties', ->
 
-      class Base extends Space.Object
+      class Base extends Space.Class
         @setStatic: (key, value) -> @[key] = value
 
       MyClass = Base.extend
@@ -49,8 +49,16 @@ describe 'Space.Object', ->
   describe 'creating instances', ->
 
     it 'creates a new instance of given class', ->
-      expect(Space.Object.create()).to.be.instanceof Space.Object
+      expect(Space.Class.create()).to.be.instanceof Space.Class
 
     it 'allows to initialize the instance with given properties', ->
-      instance = Space.Object.create first: 1, get: (property) -> @[property]
+      instance = Space.Class.create first: 1, get: (property) -> @[property]
       expect(instance.get 'first').to.equal 1
+
+    it 'forwards any number of arguments to the constructor', ->
+      Base = Space.Class.extend Constructor: (@first, @second) ->
+
+      instance = Base.create 1, 2
+
+      expect(instance.first).to.equal 1
+      expect(instance.second).to.equal 2
