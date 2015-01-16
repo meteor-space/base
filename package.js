@@ -16,6 +16,7 @@ Package.onUse(function(api) {
 
   api.addFiles([
     'source/namespace.coffee',
+    'source/object.coffee',
     'source/module.coffee',
     'source/application.coffee'
   ]);
@@ -28,19 +29,25 @@ Package.onTest(function(api) {
     'coffeescript',
     'space:base',
 
-    // test weak-dependencies
+    // weak-dependencies
     'ejson',
     'accounts-base',
     'email',
     'session',
     'reactive-var',
 
-    'spacejamio:munit@2.0.1',
+    'practicalmeteor:munit@2.0.2',
+    'space:testing@1.2.1',
   ]);
 
   api.addFiles([
+    
+    // unit tests
+    'tests/unit/object.unit.coffee',
     'tests/unit/module.unit.coffee',
     'tests/unit/application.unit.coffee',
+
+    // integration tests
     'tests/integration/application_with_modules.integration.coffee',
     'tests/integration/standalone_application.integration.coffee',
   ]);
