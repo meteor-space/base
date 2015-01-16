@@ -1,61 +1,47 @@
 
-Munit.run
+describe 'Building applications based on modules', ->
 
-  name: 'Space'
+  # reset published space modules
+  afterEach -> Space.Module.published = {}
 
-  tests: [
+  it 'loads required module correctly', ->
 
-    {
-      name: 'Application loads required module correctly'
+    testValue = {}
+    testResult = null
 
-      func: (test) ->
+    class FirstModule extends Space.Module
+      @publish this, 'FirstModule'
+      configure: -> @injector.map('testValue').toStaticValue testValue
 
-        testValue = {}
-        testResult = null
+    App = Space.Application.extend
+      RequiredModules: ['FirstModule']
+      Dependencies: testValue: 'testValue'
+      configure: -> testResult = @testValue
 
-        class FirstModule extends Space.Module
-          @publish this, 'FirstModule'
-          configure: -> @injector.map('testValue').toStaticValue testValue
+    new App()
 
-        App = Space.Application.extend
-          RequiredModules: ['FirstModule']
-          Dependencies: testValue: 'testValue'
-          configure: -> testResult = @testValue
+    expect(testResult).to.equal testValue
 
-        new App()
+  it 'configures module before running', ->
 
-        expect(testResult).to.equal testValue
-    }
+    moduleValue = 'module configuration'
+    appValue = 'application configuration'
 
-    {
-      name: 'Modules can be configured before running the application'
+    testResult = null
 
-      func: (test) ->
+    class FirstModule extends Space.Module
+      @publish this, 'FirstModule'
+      configure: -> @injector.map('moduleValue').toStaticValue moduleValue
+      run: -> testResult = @injector.get 'moduleValue'
 
-        moduleValue = 'module configuration'
-        appValue = 'application configuration'
+    class Application extends Space.Application
 
-        testResult = null
+      RequiredModules: ['FirstModule']
+      Dependencies:
+        moduleValue: 'moduleValue'
+      configure: -> @injector.override('moduleValue').toStaticValue appValue
 
-        class FirstModule extends Space.Module
-          @publish this, 'FirstModule'
-          configure: -> @injector.map('moduleValue').toStaticValue moduleValue
-          run: -> testResult = @injector.get 'moduleValue'
+    app = new Application()
+    app.run()
 
-        class Application extends Space.Application
-
-          RequiredModules: ['FirstModule']
-          Dependencies:
-            moduleValue: 'moduleValue'
-          configure: -> @injector.override('moduleValue').toStaticValue appValue
-
-        app = new Application()
-        app.run()
-
-        expect(testResult).to.equal appValue
-    }
-  ]
-
-  tearDown: ->
-    # reset published space modules
-    Space.Module.published = {}
+    expect(testResult).to.equal appValue
