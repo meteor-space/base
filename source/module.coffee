@@ -1,11 +1,13 @@
 
-class Space.Module
+class Space.Module extends Space.Object
 
   injector: null
   RequiredModules: null
   isInitialized: false
 
-  constructor: -> @RequiredModules ?= []
+  constructor: (properties) ->
+    super properties
+    @RequiredModules ?= []
 
   initialize: (injector, modules) ->
 

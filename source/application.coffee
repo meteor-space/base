@@ -1,11 +1,8 @@
 
 class Space.Application extends Space.Module
 
-  modules: null
-
-  constructor: (@injector) ->
-    super()
-
+  constructor: (properties) ->
+    super properties
     @modules = {}
 
     @injector ?= new Dependance.Injector()

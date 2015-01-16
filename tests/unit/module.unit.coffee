@@ -6,6 +6,9 @@ describe 'Space.Module', ->
     # reset published space modules
     Space.Module.published = {}
 
+  it 'extends space object', ->
+    expect(Space.Module).to.extend Space.Object
+
   describe '@publish', ->
 
     it 'adds given module to the static collection of published modules', ->
@@ -33,9 +36,7 @@ describe 'Space.Module', ->
 
       fakeModule = identifier = 'test'
       Space.Module.publish fakeModule, fakeModule.identifier
-
       requiredModule = Space.Module.require fakeModule.identifier
-
       expect(requiredModule).to.equal fakeModule
 
     it 'throws and error if no module was registered for given identifier', ->
@@ -46,21 +47,13 @@ describe 'Space.Module', ->
   describe 'constructor', ->
 
     it 'sets required modules to empty array if none defined', ->
-
       module = new Space.Module()
-
       expect(module.RequiredModules).to.be.instanceof Array
       expect(module.RequiredModules).to.be.empty
 
     it 'leaves the defined required modules intact', ->
-
       testArray = []
-
-      class TestModule extends Space.Module
-        RequiredModules: testArray
-
-      module = new TestModule()
-
+      module = Space.Module.create RequiredModules: testArray
       expect(module.RequiredModules).to.equal testArray
 
 

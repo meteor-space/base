@@ -19,21 +19,24 @@ describe 'Space.Application', ->
     it 'uses the provided injector when given', ->
 
       injector = new Dependance.Injector()
-      @application = new Space.Application injector
-
+      @application = new Space.Application injector: injector
       expect(@application.injector).to.equal injector
+
+    it 'can also be created via static create method', ->
+
+      injector = new Dependance.Injector()
+      @application = Space.Application.create injector: injector
+      expect(@application.injector).to.equal injector
+      expect(Space.Application.create().injector).to.be.instanceof Dependance.Injector
 
     it 'maps injector instance with itself', ->
 
       injector = new Dependance.Injector()
-
       injectionMapping =
         toStaticValue: sinon.spy()
         toClass: sinon.spy()
-
       injector.map = sinon.stub().returns injectionMapping
-
-      @application = new Space.Application injector
+      @application = new Space.Application injector: injector
 
       expect(injector.map).to.have.been.calledWithExactly 'Space.Application.Injector'
       expect(injectionMapping.toStaticValue).to.have.been.calledWithExactly injector
@@ -41,10 +44,8 @@ describe 'Space.Application', ->
     it 'initializes the application', ->
 
       initializeSpy = sinon.spy Space.Application.prototype, 'initialize'
-
       @application = new Space.Application()
       expect(initializeSpy).to.have.been.calledOnce
-
       initializeSpy.restore()
 
   describe '#initialize', ->
@@ -53,11 +54,8 @@ describe 'Space.Application', ->
 
       superInitialize = sinon.spy Space.Module.prototype, 'initialize'
       application = new Space.Application()
-
       application.initialize()
-
       expect(superInitialize).to.have.been.calledWithExactly application.injector, application.modules
-
       superInitialize.restore()
 
   describe '#run', ->
@@ -67,12 +65,8 @@ describe 'Space.Application', ->
       requiredModules =
         module1: run: sinon.spy()
         module2: run: sinon.spy()
-
       application = new Space.Application()
-
       application.modules = requiredModules
-
       application.run()
-
       expect(requiredModules.module1.run).to.have.been.called
       expect(requiredModules.module2.run).to.have.been.called
