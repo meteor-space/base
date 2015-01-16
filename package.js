@@ -16,7 +16,7 @@ Package.onUse(function(api) {
 
   api.addFiles([
     'source/namespace.coffee',
-    'source/object.coffee',
+    'source/class.coffee',
     'source/module.coffee',
     'source/application.coffee'
   ]);
@@ -41,9 +41,9 @@ Package.onTest(function(api) {
   ]);
 
   api.addFiles([
-    
+
     // unit tests
-    'tests/unit/object.unit.coffee',
+    'tests/unit/class.unit.coffee',
     'tests/unit/module.unit.coffee',
     'tests/unit/application.unit.coffee',
 
