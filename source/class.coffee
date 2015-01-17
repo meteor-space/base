@@ -5,17 +5,19 @@ class Space.Class
 
   @extend: (extension) ->
 
-    extension ?= {}
-    Constructor = extension.Constructor ? null
+    Constructor = null
 
     Extended = class extends this
       constructor: ->
-        if Constructor?
-          Constructor.apply this, arguments
-        else
-          Extended.__super__.constructor.apply this, arguments
+        if Constructor? then Constructor.apply(this, arguments) else super
 
-    if extension.Static? then extension.Static.call Extended
+    if typeof(extension) is 'function'
+      # Call static constructor method with the class as context
+      extension = extension.call Extended
+    else
+      extension = extension ? {}
+
+    Constructor = extension.Constructor ? null
     Extended.prototype[key] = extension[key] for key of extension
 
     return Extended

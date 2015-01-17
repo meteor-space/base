@@ -37,14 +37,12 @@ describe 'Space.Class', ->
       class Base extends Space.Class
         @setStatic: (key, value) -> @[key] = value
 
-      MyClass = Base.extend
+      MyClass = Base.extend ->
+        @setStatic 'static', 'static'
+        normal: 'normal'
 
-        Static: ->
-          @first = 1
-          @setStatic 'second', 2
-
-      expect(MyClass.first).to.equal 1
-      expect(MyClass.second).to.equal 2
+      expect(MyClass.static).to.equal 'static'
+      expect(MyClass.create().normal).to.equal 'normal'
 
   describe 'creating instances', ->
 
