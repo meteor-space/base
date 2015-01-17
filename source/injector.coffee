@@ -25,6 +25,8 @@ class Space.Injector
 
     @_mappings[id].provide()
 
+  create: (id) -> @get id
+
   injectInto: (value) ->
 
     # Get flat map of dependencies (possibly inherited)
@@ -35,6 +37,9 @@ class Space.Injector
       dependency = @get id
       @injectInto dependency
       value[key] = dependency
+
+    # Notify when dependencies are ready
+    value.onDependenciesReady?()
 
   addProvider: (name, provider) -> @_providers[name] = provider
 

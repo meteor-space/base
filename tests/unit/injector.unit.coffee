@@ -26,6 +26,10 @@ describe 'Space.Injector', ->
       @injector.remove 'test'
       expect(=> @injector.get 'test').to.throw Error
 
+    it 'provides an alias for getting values', ->
+      @injector.map('test').to 'test'
+      expect(@injector.create 'test').to.equal 'test'
+
   # ========== INJECTING DEPENDENCIES ========= #
 
   describe 'injecting dependencies', ->
@@ -57,6 +61,17 @@ describe 'Space.Injector', ->
       @injector.injectInto instance
       expect(instance.base).to.equal 'base'
       expect(instance.extended).to.equal 'extended'
+
+    it 'tells the instance when dependencies are ready', ->
+      value = 'test'
+      instance = Space.Class.create
+        Dependencies: value: 'value'
+        onDependenciesReady: sinon.spy()
+
+      @injector.map('value').asStaticValue()
+      @injector.injectInto instance
+
+      expect(instance.onDependenciesReady).to.have.been.calledOnce
 
   # ============ DEFAULT PROVIDERS ============ #
 
