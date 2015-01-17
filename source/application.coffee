@@ -2,12 +2,12 @@
 class Space.Application extends Space.Module
 
   constructor: (properties) ->
-    
+
     super properties
     @modules = {}
 
-    @injector ?= new Dependance.Injector()
-    @injector.map('Space.Application.Injector').toStaticValue @injector
+    @injector ?= new Space.Injector()
+    @injector.map('Injector').toStaticValue @injector
 
     # Map Meteor standard packages
 

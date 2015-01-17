@@ -14,31 +14,31 @@ describe 'Space.Application', ->
     it 'creates a new injector instance if none was given', ->
 
       @application = new Space.Application()
-      expect(@application.injector).to.be.instanceof Dependance.Injector
+      expect(@application.injector).to.be.instanceof Space.Injector
 
     it 'uses the provided injector when given', ->
 
-      injector = new Dependance.Injector()
+      injector = new Space.Injector()
       @application = new Space.Application injector: injector
       expect(@application.injector).to.equal injector
 
     it 'can also be created via static create method', ->
 
-      injector = new Dependance.Injector()
+      injector = new Space.Injector()
       @application = Space.Application.create injector: injector
       expect(@application.injector).to.equal injector
-      expect(Space.Application.create().injector).to.be.instanceof Dependance.Injector
+      expect(Space.Application.create().injector).to.be.instanceof Space.Injector
 
     it 'maps injector instance with itself', ->
 
-      injector = new Dependance.Injector()
+      injector = new Space.Injector()
       injectionMapping =
         toStaticValue: sinon.spy()
         toClass: sinon.spy()
       injector.map = sinon.stub().returns injectionMapping
       @application = new Space.Application injector: injector
 
-      expect(injector.map).to.have.been.calledWithExactly 'Space.Application.Injector'
+      expect(injector.map).to.have.been.calledWithExactly 'Injector'
       expect(injectionMapping.toStaticValue).to.have.been.calledWithExactly injector
 
     it 'initializes the application', ->

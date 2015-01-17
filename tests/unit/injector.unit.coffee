@@ -1,19 +1,12 @@
 
+Injector = Space.Injector
+
 describe 'Space.Injector', ->
 
-  beforeEach ->
-    @injector = new Space.Injector()
-    @injector.addProvider 'to', Space.Class.extend
-      Constructor: (id, @value) -> @provide = -> @value
-
+  beforeEach -> @injector = new Injector()
   # ============ MAPPINGS ============ #
 
   describe 'working with mappings', ->
-
-    it 'maps a string id to given value', ->
-      value = {}
-      @injector.map('test').to value
-      expect(@injector.get('test')).to.equal value
 
     it 'throws error if mapping doesnt exist', ->
       expect(=> @injector.get('test')).to.throw Error
@@ -65,17 +58,32 @@ describe 'Space.Injector', ->
       expect(instance.base).to.equal 'base'
       expect(instance.extended).to.equal 'extended'
 
-  # ============ ADDING PROVIDERS ============ #
+  # ============ DEFAULT PROVIDERS ============ #
 
-  describe 'adding complex providers', ->
+  describe 'default providers', ->
 
-    it 'adds provider that maps as singleton', ->
+    it 'has static value providers', ->
+      value = toString: -> 'third'
+      @injector.map('first').to value
+      @injector.map('second').toStaticValue value
+      @injector.map(value).asStaticValue()
 
-      @injector.addProvider 'asSingleton', Space.Class.extend
-        Constructor: (@Class) ->
-        provide: ->
-          if not @_singleton? then @_singleton = new @Class()
-          return @_singleton
+      expect(@injector.get('first')).to.equal value
+      expect(@injector.get('second')).to.equal value
+      expect(@injector.get('third')).to.equal value
+
+    it 'has provider that creates new instance for each request', ->
+      class Test
+      @injector.map('Test').toClass Test
+
+      first = @injector.get 'Test'
+      second = @injector.get 'Test'
+
+      expect(first).to.be.instanceof Test
+      expect(second).to.be.instanceof Test
+      expect(first).not.to.equal second
+
+    it 'has provider that maps class as singleton', ->
 
       class Test
         @toString: -> 'Test'
@@ -87,13 +95,7 @@ describe 'Space.Injector', ->
       expect(first).to.be.instanceof Test
       expect(first).to.equal second
 
-    it 'adds provider that maps to singleton', ->
-
-      @injector.addProvider 'toSingleton', Space.Class.extend
-        Constructor: (id, @Class) ->
-        provide: ->
-          if not @_singleton? then @_singleton = new @Class()
-          return @_singleton
+    it 'has provider that maps id to singleton of class', ->
 
       class Test
 
@@ -103,3 +105,17 @@ describe 'Space.Injector', ->
 
       expect(first).to.be.instanceof Test
       expect(first).to.equal second
+
+  # ============ CUSTOM PROVIDERS ============ #
+
+  describe 'adding custom providers', ->
+
+    it 'adds the provider to the api', ->
+
+      loremIpsum = 'lorem ipsum'
+
+      @injector.addProvider 'toLoremIpsum', Space.Class.extend
+        Constructor: -> @provide = -> loremIpsum
+
+      @injector.map('test').toLoremIpsum()
+      expect(@injector.get 'test').to.equal loremIpsum

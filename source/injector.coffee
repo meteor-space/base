@@ -1,27 +1,29 @@
 
 class Space.Injector
 
-  constructor: -> [@mappings, @providers] = [{}, {}]
+  constructor: (providers) ->
+    @_mappings = {}
+    @_providers = providers ? Injector.DEFAULT_PROVIDERS
 
   map: (id, override) ->
 
     # Avoid accidential override of existing mapping
-    if @mappings[id]? and !override
+    if @_mappings[id]? and !override
       throw new Error "A mapping for <#{id}> already exists."
 
-    @mappings[id] = new Mapping id, @providers
+    @_mappings[id] = new Mapping id, @_providers
 
   override: (id) -> @map id, true
 
-  remove: (id) -> delete @mappings[id]
+  remove: (id) -> delete @_mappings[id]
 
   get: (id) ->
 
     # Provide nice error message if a mapping wasn't found
-    if not @mappings[id]?
+    if not @_mappings[id]?
       throw new Error "No mapping for identifier <#{id}> was found."
 
-    @mappings[id].provide()
+    @_mappings[id].provide()
 
   injectInto: (value) ->
 
@@ -34,7 +36,7 @@ class Space.Injector
       @injectInto dependency
       value[key] = dependency
 
-  addProvider: (name, provider) -> @providers[name] = provider
+  addProvider: (name, provider) -> @_providers[name] = provider
 
   _mapDependencies: (value, deps={}) ->
 
@@ -59,3 +61,29 @@ class Mapping
   provide: -> @_provider.provide()
 
   _setup: (provider) -> (value) => @_provider = new provider @id, value
+
+# ========= DEFAULT PROVIDERS ======== #
+
+class ValueProvider
+  constructor: (@id, @value) ->
+  provide: -> @value ? @id
+
+class InstanceProvider
+  constructor: (id, @Class) ->
+  provide: -> new @Class()
+
+class SingletonProvider
+  constructor: (id, @Class) -> if not @Class? then @Class = id
+  provide: ->
+    if not @_singleton? then @_singleton = new @Class()
+    return @_singleton
+
+Space.Injector.DEFAULT_PROVIDERS =
+
+  to: ValueProvider
+  toStaticValue: ValueProvider
+  asStaticValue: ValueProvider
+  toClass: InstanceProvider
+  toInstancesOf: InstanceProvider
+  asSingleton: SingletonProvider
+  toSingleton: SingletonProvider

@@ -11,7 +11,6 @@ Package.onUse(function(api) {
 
   api.use([
     'coffeescript',
-    'codeadventure:dependance@1.0.0'
   ]);
 
   api.addFiles([
