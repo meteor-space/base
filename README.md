@@ -1,48 +1,58 @@
-# Space Application Architecture [![Build Status](https://travis-ci.org/CodeAdventure/meteor-space.svg?branch=master)](https://travis-ci.org/CodeAdventure/meteor-space)
+# space:base [![Build Status](https://travis-ci.org/CodeAdventure/meteor-space.svg?branch=master)](https://travis-ci.org/CodeAdventure/meteor-space)
 
 *Space* is a simple but modular application architecture for Meteor.
 
 It allows you to create applications that are based on
 small encapsulated modules which follow these rules:
 
-1. No global variables (direct references to other modules) in the code
-2. Clear dependencies between modules
-3. Reuse as much as possible through other modules
+1. Explicit dependencies
+2. Highly configurable
+3. Easy to test
 
-When you build modules with *Space* you always declare other required
-modules and the runtime dependencies by putting special properties on
-your prototypes:
+## Explicit dependencies
+Modules declare which other modules they require and what runtime
+dependencies they have, by putting the special properties
+`RequiredModules` and `Dependencies` on their prototypes:
 
-## Defining Modules
-Here is an example using CoffeeScript:
+```JavaScript
+Space.Module.extend(function() {
 
-```Coffeescript
-class MyModule extends Space.Module
+  /* Note: We use a static constructor here,
+     <this> refers to the extending class and
+     this function is only run once when while
+     creating the class */
 
-  @publish this, 'MyModule' # publish this module into the Space environment
+  // Statically register this module in the Space environment
+  this.publish(this, 'MyModule');
 
-  # declare which Space modules you require
-  RequiredModules: [
-    'OtherModule',
-    'YetAnotherModule'
-  ]
+  // Prototype of the module:
+  return {
 
-  # declare your injected runtime dependencies
-  Dependencies:
-    someService: 'OtherModule.SomeService',
-    anotherService: 'YetAnotherModule.AnotherService'
+    // Declare which other Space modules are require
+    RequiredModules: [
+      'OtherModule',
+      'YetAnotherModule'
+    ],
 
-  # this method is called by the Space framework after all
-  # required modules are initialized and the dependencies
-  # are resolved and injected into the instance of this module
-  configure: ->
+    // Declare injected runtime dependencies
+    Dependencies: {
+      someService: 'OtherModule.SomeService',
+      anotherService: 'YetAnotherModule.AnotherService'
+    },
 
-    # add mappings to the global dependency injection system
-    @injector.map('MyModule.TestValue').toStaticValue 'test'
+    // This method is called by the Space framework after all
+    // required modules are initialized and the dependencies
+    // are resolved and injected into the instance of this module.
+    configure: function() {
 
-    # use required dependencies
-    @someService.doSomeMagic()
-    @anotherService.beAwesome()
+      // Add mappings to the shared dependency injection system
+      this.injector.map('MyModule.TestValue').to('test');
+
+      // Use required dependencies
+      this.someService.doSomeMagic()
+      this.anotherService.beAwesome()
+    }
+  };
 ```
 
 ## Creating Applications based on Modules
@@ -56,9 +66,8 @@ class MyApplication extends Space.Application
   Dependencies:
     testValue: 'MyModule.TestValue'
 
-  # this is called when all required modules are initialized
-  # and configured. Now you can use any dependencies and rule the world.
-  configure: -> console.log @testValue
+  # this is called when all required modules are initialized and configured.
+  configure: -> console.log @testValue # logs 'test' (see module above)
 ```
 
 ## Requiring Meteor Core Packages
@@ -83,30 +92,14 @@ class SharedApp extends Space.Application
     mongo: 'Mongo'
 
   configure: ->
-    expect(@meteor).to.be.defined
     expect(@meteor).to.equal Meteor
-
-    expect(@tracker).to.be.defined
     expect(@tracker).to.equal Tracker
-
-    expect(@ejson).to.be.defined
     expect(@ejson).to.equal EJSON
-
-    expect(@ddp).to.be.defined
     expect(@ddp).to.equal DDP
-
-    expect(@accounts).to.be.defined
     expect(@accounts).to.equal Package['accounts-base'].Accounts
-
-    expect(@random).to.be.defined
     expect(@random).to.equal Random
-
-    expect(@underscore).to.be.defined
     expect(@underscore).to.equal _
-
     expect(@reactiveVar).to.be.instanceof Package['reactive-var'].ReactiveVar
-
-    expect(@mongo).to.be.defined
     expect(@mongo).to.equal Mongo
 ```
 
@@ -121,14 +114,8 @@ class ClientApp extends Space.Application
     blaze: 'Blaze'
 
   configure: ->
-
-    expect(@templates).to.be.defined
     expect(@templates).to.equal Template
-
-    expect(@session).to.be.defined
     expect(@session).to.equal Session
-
-    expect(@blaze).to.be.defined
     expect(@blaze).to.equal Blaze
 ```
 
@@ -143,24 +130,14 @@ class ServerApp extends Space.Application
     Future: 'Future'
 
   configure: ->
-
-    expect(@email).to.be.defined
     expect(@email).to.equal Package['email'].Email
-
-    expect(@process).to.be.defined
     expect(@process).to.equal process
-
-    expect(@Future).to.be.defined
     expect(@Future).to.equal Npm.require 'fibers/future'
 ```
 
 ## Further Examples
 You can look at the tests of this package to see all features that the
 Space architecture provides for you.
-
-## Dependency Injection
-Space uses the *dependance* package for the dependency injection.
-For details of how to declare mappings [read the documentation](http://codeadventure.github.io/meteor-dependance)
 
 ## Install
 `meteor add space:base`
@@ -169,6 +146,7 @@ For details of how to declare mappings [read the documentation](http://codeadven
 `mrt test-packages ./`
 
 ## Release History
+* 1.2.0 - Added space class system and space injector (see [full changelog](https://github.com/CodeAdventure/meteor-space/blob/master/CHANGELOG.md#120))
 * 1.1.0 - Added mappings to core Meteor packages
 * 1.0.0 - Publish first version to Meteor package system
 * 0.1.0 - Initial release of Space
