@@ -1,5 +1,5 @@
 
-class Space.Class
+class Space.Object
 
   constructor: (properties) -> @[key] = value for key, value of properties
 

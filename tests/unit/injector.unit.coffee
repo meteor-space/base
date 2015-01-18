@@ -37,7 +37,7 @@ describe 'Space.Injector', ->
     it 'injects static values', ->
       value = {}
       @injector.map('test').to value
-      instance = Space.Class.create Dependencies: value: 'test'
+      instance = Space.Object.create Dependencies: value: 'test'
       @injector.injectInto instance
       expect(instance.value).to.equal value
 
@@ -52,7 +52,7 @@ describe 'Space.Injector', ->
       expect(first.value).to.equal 'value'
 
     it 'handles inherited dependencies', ->
-      Base = Space.Class.extend Dependencies: base: 'base'
+      Base = Space.Object.extend Dependencies: base: 'base'
       Extended = Base.extend Dependencies: extended: 'extended'
       @injector.map('base').to 'base'
       @injector.map('extended').to 'extended'
@@ -64,7 +64,7 @@ describe 'Space.Injector', ->
 
     it 'tells the instance when dependencies are ready', ->
       value = 'test'
-      instance = Space.Class.create
+      instance = Space.Object.create
         Dependencies: value: 'value'
         onDependenciesReady: sinon.spy()
 
@@ -129,7 +129,7 @@ describe 'Space.Injector', ->
 
       loremIpsum = 'lorem ipsum'
 
-      @injector.addProvider 'toLoremIpsum', Space.Class.extend
+      @injector.addProvider 'toLoremIpsum', Space.Object.extend
         Constructor: -> @provide = -> loremIpsum
 
       @injector.map('test').toLoremIpsum()

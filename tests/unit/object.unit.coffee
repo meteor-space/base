@@ -1,19 +1,19 @@
 
-describe 'Space.Class', ->
+describe 'Space.Object', ->
 
-  describe 'extending classes', ->
+  describe 'extending', ->
 
     it 'creates and returns a subclass', ->
 
-      MyClass = Space.Class.extend()
-      expect(MyClass).to.extend Space.Class
+      MyClass = Space.Object.extend()
+      expect(MyClass).to.extend Space.Object
 
     it 'applies the arguments to the super constructor', ->
 
       [first, second, third] = ['first', 2, {}]
       spy = sinon.spy()
 
-      Base = Space.Class.extend Constructor: -> spy.apply this, arguments
+      Base = Space.Object.extend Constructor: -> spy.apply this, arguments
       Extended = Base.extend()
 
       instance = new Extended first, second, third
@@ -23,7 +23,7 @@ describe 'Space.Class', ->
 
     it 'allows to extend the prototype', ->
 
-      First = Space.Class.extend first: 1, get: (property) -> @[property]
+      First = Space.Object.extend first: 1, get: (property) -> @[property]
       Second = First.extend second: 2, get: -> First::get.apply this, arguments
       class Third extends Second
         get: (property) -> super property
@@ -34,7 +34,7 @@ describe 'Space.Class', ->
 
     it 'allows to define static properties', ->
 
-      class Base extends Space.Class
+      class Base extends Space.Object
         @setStatic: (key, value) -> @[key] = value
 
       MyClass = Base.extend ->
@@ -47,14 +47,14 @@ describe 'Space.Class', ->
   describe 'creating instances', ->
 
     it 'creates a new instance of given class', ->
-      expect(Space.Class.create()).to.be.instanceof Space.Class
+      expect(Space.Object.create()).to.be.instanceof Space.Object
 
     it 'allows to initialize the instance with given properties', ->
-      instance = Space.Class.create first: 1, get: (property) -> @[property]
+      instance = Space.Object.create first: 1, get: (property) -> @[property]
       expect(instance.get 'first').to.equal 1
 
     it 'forwards any number of arguments to the constructor', ->
-      Base = Space.Class.extend Constructor: (@first, @second) ->
+      Base = Space.Object.extend Constructor: (@first, @second) ->
 
       instance = Base.create 1, 2
 

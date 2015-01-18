@@ -1,6 +1,11 @@
 Changelog
 =========
 
+### 1.2.2
+
+#### Changes:
+  * Renames `Space.Class` to `Space.Object`
+
 ### 1.2.1
 
 #### Features:
@@ -16,7 +21,7 @@ Changelog
 
 #### Features:
 
-  * Adds `Space.Class` for better Javascript inheritance support
+  * Adds `Space.Object` for better Javascript inheritance support
   * Replaces Dependance with brand new (but compatible) `Space.Injector`
 
 ### 1.1.0
