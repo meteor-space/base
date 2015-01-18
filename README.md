@@ -60,11 +60,15 @@ injector.injectInto(instance);
 instance.sayHello(); // logs: 'hello!'
 ```
 
+This was just first glimpse into dependency injection, there many
+other ways to map your code and you can add your own too:
+
 **[Learn more about Space.Injector](https://github.com/CodeAdventure/meteor-space/wiki/Space.Injector)**
 
-### Excursion: Space.Object
+### Sidebar: Classes and Instances
 
-Space comes with a simple but powerful inheritance system:
+In the examples above we used plain Javascript, but Space comes bundled
+with a simple but powerful inheritance system:
 
 ```javascript
 var BaseClass = Space.Object.extend({
@@ -85,6 +89,9 @@ injector.injectInto(instance);
 instance.sayHello(); // logs: 'hello!' and 'I am Dominik'
 ```
 
+This was just the very basic example, there are many other features
+that help you build awesome classes with Space:
+
 **[Learn more about Space.Object](https://github.com/CodeAdventure/meteor-space/wiki/Space.Object)**
 
 ## 2. Control over Configuration and Initialization
@@ -92,8 +99,6 @@ instance.sayHello(); // logs: 'hello!' and 'I am Dominik'
 Ok, now you declared your dependencies and learned how to inject them.
 The next questions is: "Where should the mapping of string identifiers
 to actual implementations happen?".
-
-Welcome to **Applications** and **Modules**:
 
 ### Applications
 
