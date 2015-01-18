@@ -49,7 +49,7 @@ Package.onTest(function(api) {
     'tests/unit/injector.unit.coffee',
 
     // integration tests
-    'tests/integration/application_with_modules.integration.coffee',
+    'tests/integration/application_with_modules.spec.js',
     'tests/integration/standalone_application.integration.coffee',
   ]);
 
