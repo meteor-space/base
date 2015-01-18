@@ -11,7 +11,7 @@ class Space.Module extends Space.Class
 
   initialize: (injector, modules) ->
 
-    if not injector? then throw new Error 'Space.Module::initialize needs an instance of Dependance.Injector as first argument.'
+    if not injector? then throw new Error 'Space.Module::initialize needs an instance of Space.Injector as first argument.'
 
     for module in @RequiredModules
 
