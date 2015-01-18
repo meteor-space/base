@@ -1,6 +1,17 @@
 Changelog
 =========
 
+### 1.2.1
+
+#### Features:
+
+  * Adds support for static constructor functions while extending classes
+  * Completes API compatibility to dependance injector
+
+#### Bugfixes:
+
+  * Providers are now added to the `Mapping` prototype, not to every instance.
+
 ### 1.2.0
 
 #### Features:

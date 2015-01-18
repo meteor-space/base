@@ -146,6 +146,7 @@ Space architecture provides for you.
 `mrt test-packages ./`
 
 ## Release History
+* 1.2.1 - Completes old injector API compability and fixes some bugs (see [full changelog](https://github.com/CodeAdventure/meteor-space/blob/master/CHANGELOG.md#121))
 * 1.2.0 - Added space class system and space injector (see [full changelog](https://github.com/CodeAdventure/meteor-space/blob/master/CHANGELOG.md#120))
 * 1.1.0 - Added mappings to core Meteor packages
 * 1.0.0 - Publish first version to Meteor package system
