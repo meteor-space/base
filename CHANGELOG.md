@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 1.2.4
+
+Fixes bug where injected values were overwritten
+
 ### 1.2.3
 
 Fixes regression bug where injector didn't inject into values

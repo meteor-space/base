@@ -35,7 +35,7 @@ class Space.Injector
     dependencies = @_mapDependencies value
 
     # Inject into dependencies to create the object graph
-    value[key] = @get(id) for key, id of dependencies
+    value[key] ?= @get(id) for key, id of dependencies
 
     # Notify when dependencies are ready
     value.onDependenciesReady?()

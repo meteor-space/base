@@ -82,6 +82,16 @@ describe 'Space.Injector', ->
 
       expect(instance.onDependenciesReady).to.have.been.calledOnce
 
+    it 'never overrides existing properties', ->
+      instance = Space.Object.create
+        Dependencies: test: 'test'
+        test: 'value'
+
+      @injector.map('test').asStaticValue()
+      @injector.injectInto instance
+
+      expect(instance.test).to.equal 'value'
+
   # ============ DEFAULT PROVIDERS ============ #
 
   describe 'default providers', ->

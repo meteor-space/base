@@ -278,6 +278,7 @@ features that `space:base` provides for you.
 `mrt test-packages ./`
 
 ## Release History
+* 1.2.4 - Fixes bug where injected values were overwritten
 * 1.2.3 - Fixes regression bug where injector didn't inject into values
 * 1.2.2 - Renames `Space.Class` to `Space.Object`
 * 1.2.1 - Completes old injector API compability and fixes some bugs (see [full changelog](https://github.com/CodeAdventure/meteor-space/blob/master/CHANGELOG.md#121))
