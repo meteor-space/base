@@ -23,7 +23,9 @@ class Space.Injector
     if not @_mappings[id]?
       throw new Error "No mapping for identifier <#{id}> was found."
 
-    @_mappings[id].provide()
+    dependency = @_mappings[id].provide()
+    @injectInto dependency
+    return dependency
 
   create: (id) -> @get id
 
@@ -33,10 +35,7 @@ class Space.Injector
     dependencies = @_mapDependencies value
 
     # Inject into dependencies to create the object graph
-    for key, id of dependencies
-      dependency = @get id
-      @injectInto dependency
-      value[key] = dependency
+    value[key] = @get(id) for key, id of dependencies
 
     # Notify when dependencies are ready
     value.onDependenciesReady?()

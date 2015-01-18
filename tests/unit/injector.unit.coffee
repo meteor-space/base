@@ -4,9 +4,18 @@ Injector = Space.Injector
 describe 'Space.Injector', ->
 
   beforeEach -> @injector = new Injector()
+
   # ============ MAPPINGS ============ #
 
   describe 'working with mappings', ->
+
+    it 'injects into requested dependency', ->
+      myObject = Dependencies: test: 'test'
+      testValue = {}
+      @injector.map('test').to testValue
+      @injector.map('myObject').to myObject
+
+      expect(@injector.get('myObject').test).to.equal testValue
 
     it 'throws error if mapping doesnt exist', ->
       expect(=> @injector.get('test')).to.throw Error

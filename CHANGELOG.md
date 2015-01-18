@@ -1,10 +1,13 @@
 Changelog
 =========
 
+### 1.2.3
+
+Fixes regression bug where injector didn't inject into values
+
 ### 1.2.2
 
-#### Changes:
-  * Renames `Space.Class` to `Space.Object`
+Renames `Space.Class` to `Space.Object`
 
 ### 1.2.1
 
