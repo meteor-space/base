@@ -37,8 +37,10 @@ class Space.Injector
     # Inject into dependencies to create the object graph
     value[key] ?= @get(id) for key, id of dependencies
 
-    # Notify when dependencies are ready
-    value.onDependenciesReady?()
+    # Notify when dependencies are ready, never call twice
+    if value.onDependenciesReady? and !value.onDependenciesReady.wasCalled
+      value.onDependenciesReady?()
+      value.onDependenciesReady.wasCalled = true
 
   addProvider: (name, provider) -> @_providers[name] = provider
 

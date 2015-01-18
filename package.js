@@ -1,7 +1,7 @@
 Package.describe({
   summary: 'Modular application architecture for Meteor.',
   name: 'space:base',
-  version: '1.2.4',
+  version: '1.2.5',
   git: 'https://github.com/CodeAdventure/meteor-space.git'
 });
 

@@ -39,6 +39,13 @@ describe 'Space.Injector', ->
       @injector.map('test').to 'test'
       expect(@injector.create 'test').to.equal 'test'
 
+    it 'uses the toString method if its not a string id', ->
+      class TestClass extends Space.Object
+        @toString: -> 'TestClass'
+
+      @injector.map(TestClass).asSingleton()
+      expect(@injector.get('TestClass')).to.be.instanceof TestClass
+
   # ========== INJECTING DEPENDENCIES ========= #
 
   describe 'injecting dependencies', ->
@@ -79,6 +86,7 @@ describe 'Space.Injector', ->
 
       @injector.map('value').asStaticValue()
       @injector.injectInto instance
+      @injector.injectInto instance # shouldnt trigger twice
 
       expect(instance.onDependenciesReady).to.have.been.calledOnce
 
@@ -123,8 +131,8 @@ describe 'Space.Injector', ->
         @toString: -> 'Test'
 
       @injector.map(Test).asSingleton()
-      first = @injector.get(Test)
-      second = @injector.get(Test)
+      first = @injector.get('Test')
+      second = @injector.get('Test')
 
       expect(first).to.be.instanceof Test
       expect(first).to.equal second
