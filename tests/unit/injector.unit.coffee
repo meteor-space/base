@@ -78,18 +78,6 @@ describe 'Space.Injector', ->
       expect(instance.base).to.equal 'base'
       expect(instance.extended).to.equal 'extended'
 
-    it 'tells the instance when dependencies are ready', ->
-      value = 'test'
-      instance = Space.Object.create
-        Dependencies: value: 'value'
-        onDependenciesReady: sinon.spy()
-
-      @injector.map('value').asStaticValue()
-      @injector.injectInto instance
-      @injector.injectInto instance # shouldnt trigger twice
-
-      expect(instance.onDependenciesReady).to.have.been.calledOnce
-
     it 'never overrides existing properties', ->
       instance = Space.Object.create
         Dependencies: test: 'test'
@@ -99,6 +87,36 @@ describe 'Space.Injector', ->
       @injector.injectInto instance
 
       expect(instance.test).to.equal 'value'
+
+    describe 'when dependencies are ready', ->
+
+      it 'tells the instance that they are ready', ->
+        value = 'test'
+        instance = Space.Object.create
+          Dependencies: value: 'value'
+          onDependenciesReady: sinon.spy()
+
+        @injector.map('value').asStaticValue()
+        @injector.injectInto instance
+        @injector.injectInto instance # shouldnt trigger twice
+
+        expect(instance.onDependenciesReady).to.have.been.calledOnce
+
+      it 'tells every single instance exactly once', ->
+        readySpy = sinon.spy()
+        class TestClass extends Space.Object
+          Dependencies: value: 'test'
+          onDependenciesReady: readySpy
+
+        @injector.map('test').to 'test'
+        @injector.map('TestClass').toInstancesOf TestClass
+
+        first = @injector.create 'TestClass'
+        second = @injector.create 'TestClass'
+
+        expect(readySpy).to.have.been.calledTwice
+        expect(readySpy).to.have.been.calledOn first
+        expect(readySpy).to.have.been.calledOn second
 
   # ============ DEFAULT PROVIDERS ============ #
 

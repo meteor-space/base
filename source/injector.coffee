@@ -38,9 +38,14 @@ class Space.Injector
     value[key] ?= @get(id) for key, id of dependencies
 
     # Notify when dependencies are ready, never call twice
-    if value.onDependenciesReady? and !value.onDependenciesReady.wasCalled
-      value.onDependenciesReady?()
-      value.onDependenciesReady.wasCalled = true
+    if value.onDependenciesReady? and !value.__dependenciesInjected__
+      value.onDependenciesReady()
+      # Flag this object as injected
+      Object.defineProperty value, '__dependenciesInjected__',
+        enumerable: false
+        configurable: false
+        writable: false
+        value: true
 
   addProvider: (name, provider) -> @_providers[name] = provider
 
