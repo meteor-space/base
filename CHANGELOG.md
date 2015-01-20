@@ -1,6 +1,9 @@
 Changelog
 =========
 
+### 1.2.6
+Fixes bug where `onDependenciesReady` was only called once per prototype
+
 ### 1.2.5
 Fixes bug where `onDependenciesReady` was called more than once
 
