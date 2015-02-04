@@ -283,17 +283,8 @@ features that `space:base` provides for you.
 `mrt test-packages ./`
 
 ## Release History
-* 1.2.6 - Fixes bug where `onDependenciesReady` was only called once per prototype
-* 1.2.5 - Fixes bug where `onDependenciesReady` was called more than once
-* 1.2.4 - Fixes bug where injected values were overwritten
-* 1.2.3 - Fixes regression bug where injector didn't inject into values
-* 1.2.2 - Renames `Space.Class` to `Space.Object`
-* 1.2.1 - Completes old injector API compability and fixes some bugs (see [full changelog](https://github.com/CodeAdventure/meteor-space/blob/master/CHANGELOG.md#121))
-* 1.2.0 - Added space class system and space injector (see [full changelog](https://github.com/CodeAdventure/meteor-space/blob/master/CHANGELOG.md#120))
-* 1.1.0 - Added mappings to core Meteor packages
-* 1.0.0 - Publish first version to Meteor package system
-* 0.1.0 - Initial release of Space
+You find all release changes in the [changelog](https://github.com/CodeAdventure/meteor-space/blob/master/CHANGELOG.md)
 
 ## License
-Copyright (c) 2014 Code Adventure
+Copyright (c) 2015 Code Adventure
 Licensed under the MIT license.

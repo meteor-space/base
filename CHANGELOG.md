@@ -1,6 +1,9 @@
 Changelog
 =========
 
+### 1.2.7
+Support old js engines that without Object.defineProperty support.
+
 ### 1.2.6
 Fixes bug where `onDependenciesReady` was only called once per prototype
 
