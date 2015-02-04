@@ -40,12 +40,17 @@ class Space.Injector
     # Notify when dependencies are ready, never call twice
     if value.onDependenciesReady? and !value.__dependenciesInjected__
       value.onDependenciesReady()
-      # Flag this object as injected
-      Object.defineProperty value, '__dependenciesInjected__',
-        enumerable: false
-        configurable: false
-        writable: false
-        value: true
+
+      if Object.defineProperty?
+        # Flag this object as injected
+        Object.defineProperty value, '__dependenciesInjected__',
+          enumerable: false
+          configurable: false
+          writable: false
+          value: true
+      else
+        # support old engines without Object.defineProperty
+        value.__dependenciesInjected__ = true
 
   addProvider: (name, provider) -> @_providers[name] = provider
 
