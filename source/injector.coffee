@@ -72,7 +72,7 @@ class Space.Injector
 class Mapping
 
   constructor: (@_id, providers) ->
-    @constructor::[key] = @_setup(provider) for key, provider of providers
+    @[key] = @_setup(provider) for key, provider of providers
 
   provide: -> @_provider.provide()
 
