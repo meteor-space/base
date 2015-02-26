@@ -2,6 +2,10 @@ Changelog
 =========
 
 ### 1.2.7
+Adds global value lookup for injection mapping support: e.g:
+`@injector.map('my.awesome.Class').asSingleton()`
+
+### 1.2.7
 Support old js engines that without Object.defineProperty support.
 
 ### 1.2.6
