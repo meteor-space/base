@@ -31,6 +31,8 @@ class Space.Injector
 
   injectInto: (value) ->
 
+    unless _.isObject(value) then return
+
     # Get flat map of dependencies (possibly inherited)
     dependencies = @_mapDependencies value
 
@@ -80,16 +82,29 @@ class Mapping
 
 # ========= DEFAULT PROVIDERS ======== #
 
+resolvePath = (path) ->
+  path = path.split '.'
+  result = this # start with global namespace
+  for key in path
+    result = result[key]
+  return result
+
 class ValueProvider
-  constructor: (@id, @value) ->
-  provide: -> @value ? @id
+  constructor: (id, @value) ->
+    if not @value?
+      @value = if (typeof id is 'string') then resolvePath(id) else id
+
+  provide: -> @value
 
 class InstanceProvider
   constructor: (id, @Class) ->
   provide: -> new @Class()
 
 class SingletonProvider
-  constructor: (id, @Class) -> if not @Class? then @Class = id
+  constructor: (id, @Class) ->
+    if not @Class? then @Class = id
+    if typeof(@Class) is 'string' then @Class = resolvePath(@Class)
+
   provide: ->
     if not @_singleton? then @_singleton = new @Class()
     return @_singleton

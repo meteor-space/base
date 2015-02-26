@@ -1,5 +1,6 @@
 
 Injector = Space.Injector
+global = this
 
 describe 'Space.Injector', ->
 
@@ -122,49 +123,75 @@ describe 'Space.Injector', ->
 
   describe 'default providers', ->
 
-    it 'has static value providers', ->
-      value = toString: -> 'third'
-      @injector.map('first').to value
-      @injector.map('second').toStaticValue value
-      @injector.map(value).asStaticValue()
+    describe 'static value providers', ->
 
-      expect(@injector.get('first')).to.equal value
-      expect(@injector.get('second')).to.equal value
-      expect(@injector.get('third')).to.equal value
+      it 'maps to static value', ->
+        value = 'test'
+        @injector.map('first').to value
+        @injector.map('second').toStaticValue value
 
-    it 'has provider that creates new instance for each request', ->
-      class Test
-      @injector.map('Test').toClass Test
+        expect(@injector.get('first')).to.equal value
+        expect(@injector.get('second')).to.equal value
 
-      first = @injector.get 'Test'
-      second = @injector.get 'Test'
+      it 'supports global namespace lookup', ->
+        global.Space.__test__ = TestClass: Space.Object.extend()
+        path = 'Space.__test__.TestClass'
+        @injector.map(path).asStaticValue()
 
-      expect(first).to.be.instanceof Test
-      expect(second).to.be.instanceof Test
-      expect(first).not.to.equal second
+        expect(@injector.get(path)).to.equal Space.__test__.TestClass
+        delete global.Space.__test__
 
-    it 'has provider that maps class as singleton', ->
+      it 'can uses static toString method if available', ->
+        class Test
+          @toString: -> 'Test'
 
-      class Test
-        @toString: -> 'Test'
+        @injector.map(Test).asStaticValue()
+        expect(@injector.get('Test')).to.equal Test
 
-      @injector.map(Test).asSingleton()
-      first = @injector.get('Test')
-      second = @injector.get('Test')
+    describe 'instance provider', ->
 
-      expect(first).to.be.instanceof Test
-      expect(first).to.equal second
+      it 'creates new instances for each request', ->
+        class Test
+        @injector.map('Test').toClass Test
 
-    it 'has provider that maps id to singleton of class', ->
+        first = @injector.get 'Test'
+        second = @injector.get 'Test'
 
-      class Test
+        expect(first).to.be.instanceof Test
+        expect(second).to.be.instanceof Test
+        expect(first).not.to.equal second
 
-      @injector.map('Test').toSingleton Test
-      first = @injector.get('Test')
-      second = @injector.get('Test')
+    describe 'singleton provider', ->
 
-      expect(first).to.be.instanceof Test
-      expect(first).to.equal second
+      it 'maps class as singleton', ->
+        class Test
+          @toString: -> 'Test'
+        @injector.map(Test).asSingleton()
+        first = @injector.get('Test')
+        second = @injector.get('Test')
+
+        expect(first).to.be.instanceof Test
+        expect(first).to.equal second
+
+      it 'maps id to singleton of class', ->
+        class Test
+        @injector.map('Test').toSingleton Test
+        first = @injector.get('Test')
+        second = @injector.get('Test')
+
+        expect(first).to.be.instanceof Test
+        expect(first).to.equal second
+
+      it 'looks up the value on global namespace if only a path is given', ->
+        global.Space.__test__ = TestClass: Space.Object.extend()
+        @injector.map('Space.__test__.TestClass').asSingleton()
+
+        first = @injector.get('Space.__test__.TestClass')
+        second = @injector.get('Space.__test__.TestClass')
+
+        expect(first).to.be.instanceof Space.__test__.TestClass
+        expect(first).to.equal second
+        delete global.Space.__test__
 
   # ============ CUSTOM PROVIDERS ============ #
 
