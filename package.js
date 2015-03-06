@@ -48,6 +48,7 @@ Package.onTest(function(api) {
     'tests/unit/module.unit.coffee',
     'tests/unit/application.unit.coffee',
     'tests/unit/injector.unit.coffee',
+    'tests/unit/helpers.unit.coffee',
 
     // integration tests
     'tests/integration/application_with_modules.spec.js',
