@@ -82,17 +82,10 @@ class Mapping
 
 # ========= DEFAULT PROVIDERS ======== #
 
-resolvePath = (path) ->
-  path = path.split '.'
-  result = this # start with global namespace
-  for key in path
-    result = result[key]
-  return result
-
 class ValueProvider
   constructor: (id, @value) ->
     if not @value?
-      @value = if (typeof id is 'string') then resolvePath(id) else id
+      @value = if (typeof id is 'string') then Space.resolvePath(id) else id
 
   provide: -> @value
 
@@ -103,7 +96,7 @@ class InstanceProvider
 class SingletonProvider
   constructor: (id, @Class) ->
     if not @Class? then @Class = id
-    if typeof(@Class) is 'string' then @Class = resolvePath(@Class)
+    if typeof(@Class) is 'string' then @Class = Space.resolvePath(@Class)
 
   provide: ->
     if not @_singleton? then @_singleton = new @Class()

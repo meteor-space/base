@@ -15,6 +15,7 @@ Package.onUse(function(api) {
 
   api.addFiles([
     'source/namespace.coffee',
+    'source/helpers.coffee',
     'source/object.coffee',
     'source/injector.coffee',
     'source/module.coffee',
