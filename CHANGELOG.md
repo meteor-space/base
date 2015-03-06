@@ -1,7 +1,10 @@
 Changelog
 =========
 
-### 1.2.7
+### 1.2.9
+Introduces general purpose helpers on the Space namespace
+
+### 1.2.8
 Adds global value lookup for injection mapping support: e.g:
 `@injector.map('my.awesome.Class').asSingleton()`
 
