@@ -7,6 +7,8 @@ class Space.Injector
 
   map: (id, override) ->
 
+    if not id? then throw new Error 'Cannot map undefined value.'
+
     # Avoid accidential override of existing mapping
     if @_mappings[id]? and !override
       throw new Error "A mapping for <#{id}> already exists."

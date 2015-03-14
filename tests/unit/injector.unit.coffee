@@ -47,6 +47,10 @@ describe 'Space.Injector', ->
       @injector.map(TestClass).asSingleton()
       expect(@injector.get('TestClass')).to.be.instanceof TestClass
 
+    it 'throws error if you try to map undefined', ->
+      expect(=> @injector.map(undefined)).to.throw 'Cannot map undefined value.'
+      expect(=> @injector.map(null)).to.throw 'Cannot map undefined value.'
+
   # ========== INJECTING DEPENDENCIES ========= #
 
   describe 'injecting dependencies', ->
