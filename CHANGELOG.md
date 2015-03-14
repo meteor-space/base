@@ -1,6 +1,9 @@
 Changelog
 =========
 
+### 1.3.1
+Throw error when trying to map `undefined` or `null` value.
+
 ### 1.3.0
 Adds helpers specs and fixes edge case bug with resolve path helper
 
