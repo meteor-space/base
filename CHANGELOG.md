@@ -1,6 +1,9 @@
 Changelog
 =========
 
+### 1.3.0
+Adds helpers specs and fixes edge case bug with resolve path helper
+
 ### 1.2.9
 Introduces general purpose helpers on the Space namespace
 
