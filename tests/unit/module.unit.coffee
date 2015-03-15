@@ -2,12 +2,10 @@
 describe 'Space.Module', ->
 
   beforeEach ->
-
-    # reset published space modules
+    # Reset published space modules
     Space.Module.published = {}
 
-  it 'extends space object', ->
-    expect(Space.Module).to.extend Space.Object
+  it 'extends space object', -> expect(Space.Module).to.extend Space.Object
 
   describe '@publish', ->
 
@@ -56,19 +54,29 @@ describe 'Space.Module', ->
       module = Space.Module.create RequiredModules: testArray
       expect(module.RequiredModules).to.equal testArray
 
+  describe '#run', ->
 
-Munit.run
+    it 'defines a no-op run method', ->
+      expect(Space.Module::run).to.be.a('function')
 
-  name: 'Space - Module - #initialize'
 
-  setup: ->
+describe 'Space.Module - #initialize', ->
+
+  beforeEach ->
     @injector = injectInto: sinon.spy()
     @requireStub = sinon.stub Space.Module, 'require'
     @module = new Space.Module()
 
     # faked required modules to spy on
-    @fakeModule1 = name: 'module1', constructor: sinon.stub(), initialize: sinon.spy()
-    @fakeModule2 = name: 'module2', constructor: sinon.stub(), initialize: sinon.spy()
+    @fakeModule1 =
+      name: 'module1'
+      constructor: sinon.stub()
+      initialize: sinon.spy()
+
+    @fakeModule2 =
+      name: 'module2'
+      constructor: sinon.stub()
+      initialize: sinon.spy()
 
     @fakeModule1.constructor.returns @fakeModule1
     @fakeModule2.constructor.returns @fakeModule2
@@ -77,128 +85,64 @@ Munit.run
     @requireStub.withArgs(@fakeModule1.name).returns @fakeModule1.constructor
     @requireStub.withArgs(@fakeModule2.name).returns @fakeModule2.constructor
 
-  tearDown: ->
-    @requireStub.restore()
+  afterEach -> @requireStub.restore()
 
-  tests: [
+  it 'asks the injector to inject dependencies into the module', ->
 
-    {
-      name: 'asks the injector to inject dependencies into the module'
+    @module.initialize @injector
+    expect(@injector.injectInto).to.have.been.calledWith @module
 
-      func: ->
-        @module.initialize @injector
-        expect(@injector.injectInto).to.have.been.calledWith @module
-    }
+  it 'throws an error if no injector is provided', ->
 
-    {
-      name: 'throws an error if no injector is provided'
+    initializeWithoutInjector = => @module.initialize()
+    expect(initializeWithoutInjector).to.throw Error
 
-      func: ->
-        initializeWithoutInjector = => @module.initialize()
-        expect(initializeWithoutInjector).to.throw Error
-    }
+  it 'sets the initialized flag correctly', ->
 
-    {
-      name: 'sets the initialized flag correctly'
+    @module.initialize @injector
+    expect(@module.isInitialized).to.be.true
 
-      func: ->
-        @module.initialize @injector
-        expect(@module.isInitialized).to.be.true
-    }
+  it.server 'adds Npm as property to the module', ->
 
-    {
-      name: 'adds Npm as property to the module'
+    @module.initialize @injector
+    expect(@module.npm.require).to.be.defined
 
-      func: ->
-        if Meteor.isServer
-          @module.initialize @injector
-          expect(@module.npm.require).to.be.defined
-    }
+  it 'invokes the configure method on itself', ->
 
-    {
-      name: 'invokes the configure method on itself'
+    configureSpy = sinon.spy @module, 'configure'
+    @module.initialize @injector
+    expect(configureSpy).to.have.been.calledOnce
 
-      func: ->
-        configureSpy = sinon.spy @module, 'configure'
+  it 'looks up required modules and adds them to the modules object', ->
 
-        @module.initialize @injector
+    # make our SUT module require our fake modules
+    @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
+    modules = {}
+    @module.initialize @injector, modules
+    expect(modules["#{@fakeModule1.name}"]).to.equal @fakeModule1
+    expect(modules["#{@fakeModule2.name}"]).to.equal @fakeModule2
 
-        expect(configureSpy).to.have.been.calledOnce
-    }
+  it 'creates the required modules by calling the constructor with new', ->
 
-    {
-      name: 'looks up required modules and adds them to the modules object'
+    @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
+    @module.initialize @injector, {}
+    expect(@fakeModule1.constructor).to.have.been.calledWithNew
+    expect(@fakeModule2.constructor).to.have.been.calledWithNew
 
-      func: ->
-        # make our SUT module require our fake modules
-        @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
+  it 'initializes required modules when they are not yet initialized', ->
 
-        # ACTION
-        modules = {}
-        @module.initialize @injector, modules
+    @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
+    @module.initialize @injector, {}
+    expect(@fakeModule1.initialize).to.have.been.called
+    expect(@fakeModule2.initialize).to.have.been.called
 
-        # VERIFY
-        expect(modules["#{@fakeModule1.name}"]).to.equal @fakeModule1
-        expect(modules["#{@fakeModule2.name}"]).to.equal @fakeModule2
-    }
+  it 'doesnt initialize required modules if they are already initialized', ->
 
-    {
-      name: 'creates the required modules by calling the constructor with new'
+    @fakeModule1.isInitialized = true
+    @fakeModule2.isInitialized = true
 
-      func: ->
-        @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
+    @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
+    @module.initialize @injector, {}
 
-        # ACTION
-        @module.initialize @injector, {}
-
-        # VERIFY
-        expect(@fakeModule1.constructor).to.have.been.calledWithNew
-        expect(@fakeModule2.constructor).to.have.been.calledWithNew
-    }
-
-    {
-      name: 'initializes required modules when they are not yet initialized'
-
-      func: ->
-        @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
-
-        # ACTION
-        @module.initialize @injector, {}
-
-        # VERIFY
-        expect(@fakeModule1.initialize).to.have.been.called
-        expect(@fakeModule2.initialize).to.have.been.called
-    }
-
-    {
-      name: 'does not initialize required modules if they are already initialized'
-
-      func: ->
-        @fakeModule1.isInitialized = true
-        @fakeModule2.isInitialized = true
-
-        @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
-
-        # ACTION
-        @module.initialize @injector, {}
-
-        # VERIFY
-        expect(@fakeModule1.initialize).not.to.have.been.called
-        expect(@fakeModule2.initialize).not.to.have.been.called
-    }
-
-
-  ]
-
-Munit.run
-
-  name: 'Space - Module - #run'
-
-  tests: [
-    {
-      name: 'defines a no-op run method'
-
-      func: -> expect(Space.Module::run).to.be.a('function')
-    }
-
-  ]
+    expect(@fakeModule1.initialize).not.to.have.been.called
+    expect(@fakeModule2.initialize).not.to.have.been.called
