@@ -1,6 +1,9 @@
 Changelog
 =========
 
+### 1.3.2
+Fixes bug with running dependent modules in correct order.
+
 ### 1.3.1
 Throw error when trying to map `undefined` or `null` value.
 
