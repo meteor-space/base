@@ -41,6 +41,6 @@ class Space.Application extends Space.Module
 
     @initialize()
 
-  initialize: -> super(@injector, @modules)
+  initialize: -> super this, @injector
 
-  run: -> @modules[module].run() for module of @modules
+  run: -> @modules[module].start() for module of @modules

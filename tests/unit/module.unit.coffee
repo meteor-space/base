@@ -63,6 +63,7 @@ describe 'Space.Module', ->
 describe 'Space.Module - #initialize', ->
 
   beforeEach ->
+    @app = modules: {}
     @injector = injectInto: sinon.spy()
     @requireStub = sinon.stub Space.Module, 'require'
     @module = new Space.Module()
@@ -89,7 +90,7 @@ describe 'Space.Module - #initialize', ->
 
   it 'asks the injector to inject dependencies into the module', ->
 
-    @module.initialize @injector
+    @module.initialize @app, @injector
     expect(@injector.injectInto).to.have.been.calledWith @module
 
   it 'throws an error if no injector is provided', ->
@@ -99,40 +100,39 @@ describe 'Space.Module - #initialize', ->
 
   it 'sets the initialized flag correctly', ->
 
-    @module.initialize @injector
+    @module.initialize @app, @injector
     expect(@module.isInitialized).to.be.true
 
   it.server 'adds Npm as property to the module', ->
 
-    @module.initialize @injector
+    @module.initialize @app, @injector
     expect(@module.npm.require).to.be.defined
 
   it 'invokes the configure method on itself', ->
 
     configureSpy = sinon.spy @module, 'configure'
-    @module.initialize @injector
+    @module.initialize @app, @injector
     expect(configureSpy).to.have.been.calledOnce
 
   it 'looks up required modules and adds them to the modules object', ->
 
     # make our SUT module require our fake modules
     @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
-    modules = {}
-    @module.initialize @injector, modules
-    expect(modules["#{@fakeModule1.name}"]).to.equal @fakeModule1
-    expect(modules["#{@fakeModule2.name}"]).to.equal @fakeModule2
+    @module.initialize @app, @injector
+    expect(@app.modules["#{@fakeModule1.name}"]).to.equal @fakeModule1
+    expect(@app.modules["#{@fakeModule2.name}"]).to.equal @fakeModule2
 
   it 'creates the required modules by calling the constructor with new', ->
 
     @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
-    @module.initialize @injector, {}
+    @module.initialize @app, @injector
     expect(@fakeModule1.constructor).to.have.been.calledWithNew
     expect(@fakeModule2.constructor).to.have.been.calledWithNew
 
   it 'initializes required modules when they are not yet initialized', ->
 
     @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
-    @module.initialize @injector, {}
+    @module.initialize @app, @injector
     expect(@fakeModule1.initialize).to.have.been.called
     expect(@fakeModule2.initialize).to.have.been.called
 
@@ -142,7 +142,7 @@ describe 'Space.Module - #initialize', ->
     @fakeModule2.isInitialized = true
 
     @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
-    @module.initialize @injector, {}
+    @module.initialize @app, @injector
 
     expect(@fakeModule1.initialize).not.to.have.been.called
     expect(@fakeModule2.initialize).not.to.have.been.called

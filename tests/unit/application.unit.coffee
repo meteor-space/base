@@ -53,20 +53,20 @@ describe 'Space.Application', ->
     it 'calls the super method with configured injector and modules', ->
 
       superInitialize = sinon.spy Space.Module.prototype, 'initialize'
-      application = new Space.Application()
-      application.initialize()
-      expect(superInitialize).to.have.been.calledWithExactly application.injector, application.modules
+      app = new Space.Application()
+      app.initialize()
+      expect(superInitialize).to.have.been.calledWithExactly app, app.injector
       superInitialize.restore()
 
   describe '#run', ->
 
-    it 'Tells all loaded modules to run.', ->
+    it 'Tells all loaded modules to start.', ->
 
       requiredModules =
-        module1: run: sinon.spy()
-        module2: run: sinon.spy()
-      application = new Space.Application()
-      application.modules = requiredModules
-      application.run()
-      expect(requiredModules.module1.run).to.have.been.called
-      expect(requiredModules.module2.run).to.have.been.called
+        module1: start: sinon.spy()
+        module2: start: sinon.spy()
+      app = new Space.Application()
+      app.modules = requiredModules
+      app.run()
+      expect(requiredModules.module1.start).to.have.been.called
+      expect(requiredModules.module2.start).to.have.been.called

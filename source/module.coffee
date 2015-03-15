@@ -4,34 +4,48 @@ class Space.Module extends Space.Object
   injector: null
   RequiredModules: null
   isInitialized: false
+  isConfigured: false
+  isStarted: false
+
+  @ERRORS:
+    injectorMissing: 'Instance of Space.Injector needed to initialize module.'
 
   constructor: (properties) ->
     super properties
     @RequiredModules ?= []
 
-  initialize: (injector, modules) ->
+  initialize: (@app, @injector) ->
 
-    if not injector? then throw new Error 'Space.Module::initialize needs an instance of Space.Injector as first argument.'
+    if not injector? then throw new Error Space.Module.ERRORS.injectorMissing
 
-    for module in @RequiredModules
+    # Setup required modules
+    for moduleId in @RequiredModules
 
-      unless modules[module]?
-        moduleClass = Space.Module.require(module, this.constructor.name)
-        modules[module] = new moduleClass()
+      # Create a new module instance if non exist in the app
+      unless app.modules[moduleId]?
+        moduleClass = Space.Module.require(moduleId, this.constructor.name)
+        app.modules[moduleId] = new moduleClass()
 
-      module = modules[module]
+      # Initialize required module
+      module = app.modules[moduleId]
+      if !module.isInitialized then module.initialize app, injector
 
-      if !module.isInitialized then module.initialize(injector, modules)
-
+    # Give every module access Npm
     if Meteor.isServer then @npm = Npm
 
-    @injector = injector
     @injector.injectInto this
-
     @isInitialized = true
     @configure()
+    @isConfigured = true
 
   configure: ->
+
+  start: ->
+    for moduleId in @RequiredModules
+      module = @app.modules[moduleId]
+      unless module.isStarted then module.start()
+    if !@isStarted then @run()
+    @isStarted = true
 
   run: ->
 
@@ -49,6 +63,7 @@ class Space.Module extends Space.Object
     module = Space.Module.published[requiredModule]
 
     if not module?
-      throw new Error "Could not find module <#{requiredModule}> required by <#{requestingModule}>"
+      throw new Error "Could not find module <#{requiredModule}>
+                      required by <#{requestingModule}>"
     else
       return module
