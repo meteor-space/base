@@ -60,3 +60,18 @@ describe 'Space.Object', ->
 
       expect(instance.first).to.equal 1
       expect(instance.second).to.equal 2
+
+  describe 'mixins', ->
+
+    it 'adds methods to the prototype', ->
+      testMixin = test: ->
+      TestClass = Space.Object.extend()
+      TestClass.mixin testMixin
+      expect(TestClass::test).to.equal testMixin.test
+
+    it 'merges object properties', ->
+      testMixin = Dependencies: second: 'second'
+      TestClass = Space.Object.extend Dependencies: first: 'first'
+      TestClass.mixin testMixin
+      expect(TestClass::Dependencies.first).to.equal 'first'
+      expect(TestClass::Dependencies.second).to.equal 'second'
