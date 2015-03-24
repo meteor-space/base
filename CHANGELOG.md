@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 1.4.0
+Adds basic mixin capabilities to Space.Object that allows to extend
+the prototype of a given class without direct inheritance
+
 ### 1.3.2
 Fixes bug with running dependent modules in correct order.
 
