@@ -1,7 +1,7 @@
 Package.describe({
   summary: 'Modular application architecture for Meteor.',
   name: 'space:base',
-  version: '1.4.0',
+  version: '1.4.1',
   git: 'https://github.com/CodeAdventure/meteor-space.git'
 });
 
@@ -11,6 +11,7 @@ Package.onUse(function(api) {
 
   api.use([
     'coffeescript',
+    'underscore'
   ]);
 
   api.addFiles([
@@ -38,7 +39,7 @@ Package.onTest(function(api) {
     'reactive-var',
 
     'practicalmeteor:munit@2.0.2',
-    'space:testing@1.2.1',
+    'space:testing@1.3.0',
   ]);
 
   api.addFiles([
