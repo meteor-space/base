@@ -1,14 +1,19 @@
 
 class Space.Module extends Space.Object
 
+  @ERRORS:
+    injectorMissing: 'Instance of Space.Injector needed to initialize module.'
+
   injector: null
   RequiredModules: null
   isInitialized: false
   isConfigured: false
   isStarted: false
 
-  @ERRORS:
-    injectorMissing: 'Instance of Space.Injector needed to initialize module.'
+  # An array of paths to classes that you want to become
+  # singletons in your application e.g: ['Space.messaging.EventBus']
+  # these are automatically mapped and created on `app.run()`
+  Singletons: []
 
   constructor: (properties) ->
     super properties
@@ -34,23 +39,40 @@ class Space.Module extends Space.Object
     if Meteor.isServer then @npm = Npm
 
     @injector.injectInto this
+    # Map classes that are declared as singletons
+    @injector.map(singleton).asSingleton() for singleton in @Singletons
     @isInitialized = true
     @configure()
     @isConfigured = true
 
-  configure: ->
-
   start: ->
+    # Start all required modules first if necessary
     for moduleId in @RequiredModules
       module = @app.modules[moduleId]
       unless module.isStarted then module.start()
-    if !@isStarted then @run()
+
+    if !@isStarted
+      # Create the singleton instances that are declared
+      @injector.create(singleton) for singleton in @Singletons
+      # Let the user do other stuff on module startup
+      @run()
+
     @isStarted = true
 
+  # Override this method to configure your mappings etc. after the
+  # module was initialized but the application is not running yet.
+  configure: ->
+
+  # Override this method for final initialization when the application runs
   run: ->
 
+  # ========== STATIC MODULE MANAGAMENT ============ #
+
+  # All published modules register themselves here
   @published = {}
 
+  # Publishes a module into the space environment to make it
+  # visible and requireable for other modules and the application
   @publish: (module, identifier) ->
 
     if Space.Module.published[identifier]?
@@ -58,6 +80,7 @@ class Space.Module extends Space.Object
     else
       Space.Module.published[identifier] = module
 
+  # Retrieve a module by indentifier
   @require: (requiredModule, requestingModule) ->
 
     module = Space.Module.published[requiredModule]
