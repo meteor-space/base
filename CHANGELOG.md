@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 1.4.2
+Make it possible to declare `Singletons: []` on any module with paths to classes
+that should be mapped and created as singletons automatically.  
+
 ### 1.4.1
 Fixes some package dependency issues
 
