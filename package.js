@@ -11,6 +11,7 @@ Package.onUse(function(api) {
 
   api.use([
     'coffeescript',
+    'check',
     'underscore'
   ]);
 
@@ -18,6 +19,7 @@ Package.onUse(function(api) {
     'source/namespace.coffee',
     'source/helpers.coffee',
     'source/object.coffee',
+    'source/struct.coffee',
     'source/injector.coffee',
     'source/module.coffee',
     'source/application.coffee'
@@ -29,6 +31,7 @@ Package.onTest(function(api) {
 
   api.use([
     'coffeescript',
+    'check',
     'space:base',
 
     // weak-dependencies
@@ -47,6 +50,7 @@ Package.onTest(function(api) {
     // unit tests
     'tests/unit/object.unit.coffee',
     'tests/unit/module.unit.coffee',
+    'tests/unit/struct.unit.coffee',
     'tests/unit/application.unit.coffee',
     'tests/unit/injector.unit.coffee',
     'tests/unit/helpers.unit.coffee',
