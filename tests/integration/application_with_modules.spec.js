@@ -16,7 +16,7 @@ describe('Building applications based on modules', function() {
         configure: function() {
           this.injector.map('testValue').toStaticValue(testValue);
         }
-      }
+      };
     });
 
     Space.Application.create({
@@ -32,7 +32,7 @@ describe('Building applications based on modules', function() {
 
     var moduleValue = 'module configuration';
     var appValue = 'application configuration';
-    var testResult = null
+    var testResult = null;
 
     Space.Module.extend(function() {
 
