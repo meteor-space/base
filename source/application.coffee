@@ -10,7 +10,6 @@ class Space.Application extends Space.Module
     @injector.map('Injector').toStaticValue @injector
 
     # Map Meteor standard packages
-
     @injector.map('Meteor').toStaticValue Meteor
     @injector.map('EJSON').toStaticValue EJSON
     @injector.map('DDP').toStaticValue DDP
@@ -42,5 +41,4 @@ class Space.Application extends Space.Module
     @initialize()
 
   initialize: -> super this, @injector
-
-  run: -> @modules[module].start() for module of @modules
+  

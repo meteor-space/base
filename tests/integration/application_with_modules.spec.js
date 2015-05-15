@@ -42,7 +42,7 @@ describe('Building applications based on modules', function() {
         configure: function() {
           this.injector.map('moduleValue').to(moduleValue);
         },
-        run: function() {
+        startup: function() {
           testResult = this.injector.get('moduleValue');
         }
       };
@@ -56,7 +56,7 @@ describe('Building applications based on modules', function() {
       }
     });
 
-    app.run()
-    expect(testResult).to.equal(appValue)
+    app.start();
+    expect(testResult).to.equal(appValue);
   });
 });

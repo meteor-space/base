@@ -57,7 +57,7 @@ describe 'Space.Module', ->
   describe '#run', ->
 
     it 'defines a no-op run method', ->
-      expect(Space.Module::run).to.be.a('function')
+      expect(Space.Module::startup).to.be.a('function')
 
 
 describe 'Space.Module - #initialize', ->

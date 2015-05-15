@@ -58,15 +58,15 @@ describe 'Space.Application', ->
       expect(superInitialize).to.have.been.calledWithExactly app, app.injector
       superInitialize.restore()
 
-  describe '#run', ->
+  describe '#start', ->
 
     it 'Tells all loaded modules to start.', ->
 
-      requiredModules =
+      app = new Space.Application()
+      app.RequiredModules = ['module1', 'module2']
+      app.modules =
         module1: start: sinon.spy()
         module2: start: sinon.spy()
-      app = new Space.Application()
-      app.modules = requiredModules
-      app.run()
-      expect(requiredModules.module1.start).to.have.been.called
-      expect(requiredModules.module2.start).to.have.been.called
+      app.start()
+      expect(app.modules.module1.start).to.have.been.called
+      expect(app.modules.module2.start).to.have.been.called

@@ -55,16 +55,16 @@ class Space.Module extends Space.Object
       # Create the singleton instances that are declared
       @injector.create(singleton) for singleton in @Singletons
       # Let the user do other stuff on module startup
-      @run()
+      @startup()
 
     @isStarted = true
 
-  # Override this method to configure your mappings etc. after the
+  # Override to configure your mappings etc. after the
   # module was initialized but the application is not running yet.
   configure: ->
 
-  # Override this method for final initialization when the application runs
-  run: ->
+  # Override for final initialization when the application runs
+  startup: ->
 
   # ========== STATIC MODULE MANAGAMENT ============ #
 
