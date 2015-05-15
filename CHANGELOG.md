@@ -1,6 +1,14 @@
 Changelog
 =========
 
+### 2.0.0
+#### Breaking Changes:
+
+- Unified the API for starting `Space.Module` and `Space.Application`. This
+means you have to call `yourApp.start()` instead of `yourApp.run()` now.
+- Renamed the `run` hook for modules and applications to `startup`, so instead
+of defining `run: function() { … }` you need `startup: function() { … }` inside your modules and apps now.
+
 ### 1.4.2
 Make it possible to declare `Singletons: []` on any module with paths to classes
 that should be mapped and created as singletons automatically.  
