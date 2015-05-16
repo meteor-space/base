@@ -1,6 +1,9 @@
 Changelog
 =========
 
+### 2.0.1
+@Sanjo fixed an issue with weak-dependencies injection in `Space.Application`.
+
 ### 2.0.0
 #### Breaking Changes:
 
