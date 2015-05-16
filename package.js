@@ -15,6 +15,20 @@ Package.onUse(function(api) {
     'underscore'
   ]);
 
+  api.use([
+    'ejson',
+    'ddp',
+    'random',
+    'mongo',
+    'tracker',
+    'templating',
+    'session',
+    'blaze',
+    'email',
+    'accounts-base',
+    'reactive-var'
+  ], {weak: true});
+
   api.addFiles([
     'source/namespace.coffee',
     'source/helpers.coffee',
