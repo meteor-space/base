@@ -12,17 +12,25 @@ class Space.Application extends Space.Module
     # Map Meteor standard packages
 
     @injector.map('Meteor').toStaticValue Meteor
-    @injector.map('EJSON').toStaticValue EJSON
-    @injector.map('DDP').toStaticValue DDP
-    @injector.map('Random').toStaticValue Random
+    if Package.ejson?
+      @injector.map('EJSON').toStaticValue Package.ejson.EJSON
+    if Package.ddp?
+      @injector.map('DDP').toStaticValue Package.ddp.DDP
+    if Package.random?
+      @injector.map('Random').toStaticValue Package.random.Random
     @injector.map('underscore').toStaticValue _
-    @injector.map('Mongo').toStaticValue Mongo
+    if Package.mongo?
+      @injector.map('Mongo').toStaticValue Package.mongo.Mongo
 
     if Meteor.isClient
-      @injector.map('Tracker').toStaticValue Tracker
-      @injector.map('Template').toStaticValue Template
-      @injector.map('Session').toStaticValue Session
-      @injector.map('Blaze').toStaticValue Blaze
+      if Package.tracker?
+        @injector.map('Tracker').toStaticValue Package.tracker.Tracker
+      if Package.templating?
+        @injector.map('Template').toStaticValue Package.templating.Template
+      if Package.session?
+        @injector.map('Session').toStaticValue Package.session.Session
+      if Package.blaze?
+        @injector.map('Blaze').toStaticValue Package.blaze.Blaze
 
     if Meteor.isServer
       @injector.map('check').toStaticValue check
