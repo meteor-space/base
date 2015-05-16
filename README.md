@@ -114,14 +114,24 @@ var app = Space.Application.create({
     this.injector.map('ExternalLib').to(SomeLibrary);
     this.injector.map('MyDependendClass').toSingleton(MyClass);
   },
-  run: function() {
+  startup: function() {
     // Create the singleton instance of my class
     this.injector.create('MyDependendClass');
   }
 });
 
-app.run(); // You decide when your app starts to run
+app.start(); // You decide when your app starts
+```
 
+because singletons are needed so often, there is even a much shorter way
+to express the above:
+
+```javascript
+var app = Space.Application.create({
+  // Let the framework map and create the singleton instances for you
+  Singletons: ['MyDependendClass', 'MyOtherSingleton']
+});
+app.start(); // You decide when your app starts
 ```
 
 ### Modules
