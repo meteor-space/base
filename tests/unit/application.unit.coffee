@@ -33,13 +33,13 @@ describe 'Space.Application', ->
 
       injector = new Space.Injector()
       injectionMapping =
-        toStaticValue: sinon.spy()
-        toClass: sinon.spy()
+        to: sinon.spy()
+        toInstancesOf: sinon.spy()
       injector.map = sinon.stub().returns injectionMapping
       @application = new Space.Application injector: injector
 
       expect(injector.map).to.have.been.calledWithExactly 'Injector'
-      expect(injectionMapping.toStaticValue).to.have.been.calledWithExactly injector
+      expect(injectionMapping.to).to.have.been.calledWithExactly injector
 
     it 'initializes the application', ->
 

@@ -7,46 +7,45 @@ class Space.Application extends Space.Module
     @modules = {}
 
     @injector ?= new Space.Injector()
-    @injector.map('Injector').toStaticValue @injector
+    @injector.map('Injector').to @injector
 
     # Map Meteor standard packages
-    @injector.map('Meteor').toStaticValue Meteor
+    @injector.map('Meteor').to Meteor
     if Package.ejson?
-      @injector.map('EJSON').toStaticValue Package.ejson.EJSON
+      @injector.map('EJSON').to Package.ejson.EJSON
     if Package.ddp?
-      @injector.map('DDP').toStaticValue Package.ddp.DDP
+      @injector.map('DDP').to Package.ddp.DDP
     if Package.random?
-      @injector.map('Random').toStaticValue Package.random.Random
-    @injector.map('underscore').toStaticValue _
+      @injector.map('Random').to Package.random.Random
+    @injector.map('underscore').to _
     if Package.mongo?
-      @injector.map('Mongo').toStaticValue Package.mongo.Mongo
+      @injector.map('Mongo').to Package.mongo.Mongo
 
     if Meteor.isClient
       if Package.tracker?
-        @injector.map('Tracker').toStaticValue Package.tracker.Tracker
+        @injector.map('Tracker').to Package.tracker.Tracker
       if Package.templating?
-        @injector.map('Template').toStaticValue Package.templating.Template
+        @injector.map('Template').to Package.templating.Template
       if Package.session?
-        @injector.map('Session').toStaticValue Package.session.Session
+        @injector.map('Session').to Package.session.Session
       if Package.blaze?
-        @injector.map('Blaze').toStaticValue Package.blaze.Blaze
+        @injector.map('Blaze').to Package.blaze.Blaze
 
     if Meteor.isServer
-      @injector.map('check').toStaticValue check
-      @injector.map('Match').toStaticValue Match
-      @injector.map('process').toStaticValue process
-      @injector.map('Future').toStaticValue Npm.require 'fibers/future'
+      @injector.map('check').to check
+      @injector.map('Match').to Match
+      @injector.map('process').to process
+      @injector.map('Future').to Npm.require 'fibers/future'
 
     if Package.email?
-      @injector.map('Email').toStaticValue Package.email.Email
+      @injector.map('Email').to Package.email.Email
 
     if Package['accounts-base']?
-      @injector.map('Accounts').toStaticValue Package['accounts-base'].Accounts
+      @injector.map('Accounts').to Package['accounts-base'].Accounts
 
     if Package['reactive-var']?
-      @injector.map('ReactiveVar').toClass Package['reactive-var'].ReactiveVar
+      @injector.map('ReactiveVar').toInstancesOf Package['reactive-var'].ReactiveVar
 
     @initialize()
 
   initialize: -> super this, @injector
-  
