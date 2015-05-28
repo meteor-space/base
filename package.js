@@ -35,6 +35,7 @@ Package.onUse(function(api) {
     'source/object.coffee',
     'source/struct.coffee',
     'source/injector.coffee',
+    'source/injector_annotations.coffee',
     'source/module.coffee',
     'source/application.coffee'
   ]);
@@ -55,6 +56,7 @@ Package.onTest(function(api) {
     'session',
     'reactive-var',
 
+    'grigio:babel@0.1.3',
     'practicalmeteor:munit@2.0.2',
     'space:testing@1.3.0',
   ]);
@@ -67,6 +69,7 @@ Package.onTest(function(api) {
     'tests/unit/struct.unit.coffee',
     'tests/unit/application.unit.coffee',
     'tests/unit/injector.unit.coffee',
+    'tests/unit/injector_annotations.unit.es6',
     'tests/unit/helpers.unit.coffee',
 
     // integration tests
