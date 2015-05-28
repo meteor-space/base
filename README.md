@@ -1,5 +1,7 @@
 # space:base [![Build Status](https://travis-ci.org/CodeAdventure/meteor-space.svg?branch=master)](https://travis-ci.org/CodeAdventure/meteor-space)
 
+![Space Brand Mood](docs/images/space-brand-mood.jpg?raw=true)
+
 **Space** is a modular application architecture for Meteor with the
 following goals:
 
