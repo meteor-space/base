@@ -1,39 +1,39 @@
 ![Space Brand Mood](docs/images/space-brand-mood.jpg?raw=true)
 
-# space:base [![Build Status](https://travis-ci.org/CodeAdventure/meteor-space.svg?branch=master)](https://travis-ci.org/CodeAdventure/meteor-space)
+# SPACE [![Build Status](https://travis-ci.org/CodeAdventure/meteor-space.svg?branch=master)](https://travis-ci.org/CodeAdventure/meteor-space)
 
-**Space** is a modular application architecture for Meteor with the
-following goals:
+Modular application architecture for Meteor with the following goals:
 
-1. Dependencies in your code are explicit
-2. You have full control over configuration and initialization
-3. Testing your stuff is easy
+1. Explicit dependencies in your code
+2. Full control over configuration and initialization
+3. Testability
 
 ## Why?
-As your Meteor app grows, you add more and more packages and dependencies
+As your Meteor app grows, you keep adding packages and dependencies
 to it and sprinkle your configuration and initialization logic into
 `Meteor.startup` blocks all over the code base. If you don't use *some*
-structure, you will end up throwing your laptop against the wall because
-it will become difficult to keep an overview.
+structure, you will end up throwing your laptop against the wall.
 
 ## 1. Explicit Dependencies
-Space comes with a very lightweight dependency injection system. It tries
+Space comes with a lightweight dependency injection system. It tries
 to keep your code as clean as possible and doesn't force you to wrap your
 functions with library calls.
 
-If an object needs some other code during runtime, it simply declares its
-**dependency**:
+If an object needs other code during runtime, it simply declares its
+**dependencies**:
 
 ```javascript
 var dependendObject = {
-  Dependencies: { lib: 'OtherCode' },
-  sayHello: function() { this.lib.sayHello(); }
+  Dependencies: {
+    lib: 'OtherCode'
+  },
+  sayHello: function() {
+    this.lib.sayHello();
+  }
 };
 ```
-*I use a very dense coding style here to keep these examples short*
-
 Now `dependendObject` declares very explicitly that it needs `OtherCode`
-which it will access via `this.lib` later on. But where should `OtherCode`
+which it will access via `this.lib` later on. But where does `OtherCode`
 come from?
 
 This is where the `Space.Injector` helps out:
@@ -49,6 +49,7 @@ injector.injectInto(dependendObject);
 
 dependendObject.sayHello(); // logs: 'hello!'
 ```
+*I use a very dense coding style here to keep these examples short*
 
 Of course, this also works with Javascript constructors and prototypes:
 
