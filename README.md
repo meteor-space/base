@@ -202,79 +202,90 @@ Space.Application.create({
   }
 ```
 
-### Requiring Meteor Core Packages
-Instead of globally accessing Meteor packages in your codebase
-you can add them to your module / application dependencies and
-have them injected automatically after initialisation.
+**[Learn more about Modules and Applications](https://github.com/CodeAdventure/meteor-space/wiki/Space.Injector)**
 
-#### Example: Packages on Server and Client
+## 3. Testability
+
+You may ask why you should deal with dependency injection if you can access your dependencies directly like this:
 
 ```javascript
-Space.Application.create({
-
-  Dependencies: {
-    meteor: 'Meteor',
-    tracker: 'Tracker',
-    ejson: 'EJSON',
-    ddp: 'DDP',
-    accounts: 'Accounts',
-    random: 'Random',
-    underscore: 'underscore',
-    reactiveVar: 'ReactiveVar',
-    mongo: 'Mongo'
-  },
-
-  configure: function() {
-    expect(this.meteor).to.equal(Meteor);
-    expect(this.tracker).to.equal(Tracker);
-    expect(this.ejson).to.equal(EJSON);
-    expect(this.ddp).to.equal(DDP);
-    expect(this.accounts).to.equal(Package['accounts-base'].Accounts);
-    expect(this.random).to.equal(Random);
-    expect(this.underscore).to.equal(_);
-    expect(this.reactiveVar).to.be.instanceof(Package['reactive-var'].ReactiveVar);
-    expect(this.mongo).to.equal(Mongo);
+var Customer = Space.Object.extend({
+  getPurchases: function() {
+    return Purchases.find({ customerId: this.id }).fetch();
   }
 });
 ```
 
-#### Example: Packages on Client only
+This works well, until you write your first unit tests. The problem is that this class 
+directly references `Purchases` and there is only one way you can test this (sanely): 
+
+By temporarily replacing `Purchases` globally with some mock/stub
 
 ```javascript
-Space.Application.create({
+describe('Customer.getPurchases'), function() {
 
-  Dependencies: {
-    templates: 'Template',
-    session: 'Session',
-    blaze: 'Blaze',
-  },
+  beforeEach(function() {
+    // Save a backup of the global Purchases collection
+    this.savedPurchasesCollection = Purchases;
+    // Replace the collection with an anonymous one
+    Purchases = new Mongo.Collection(null);
+  })
+    
+  afterEach(function() {
+    // Restore the global purchases collection
+    Purchases = this.savedPurchasesCollection;
+  })
 
-  configure: function() {
-    expect(this.templates).to.equal(Template);
-    expect(this.session).to.equal(Session);
-    expect(this.blaze).to.equal(Blaze);
-  }
-});
+  it('queries the purchases collection and returns fetched results'), function() {
+    // Prepare
+    var testPurchase = { _id: '123', productId: 'xyz' };
+    Purchases.insert(testPurchase);
+    // Test
+    var customer = new Customer();
+    var purchases = customer.getPurchases();
+    expect(purchases).to.deep.equal([testPurchase]);
+  })
+})
 ```
 
-### Example for packages on server only
+In this example it does not look too bad but this pattern quickly becomes tedious if you have more than 1-2 dependencies you want to replace during your tests.
+
+Here is how you can write a test like this when using space:
 
 ```javascript
-Space.Application.create({
-
-  Dependencies: {
-    email: 'Email',
-    process: 'process',
-    Future: 'Future',
-  },
-
-  configure: function() {
-    expect(this.email).to.equal(Package['email'].Email);
-    expect(this.process).to.equal(process);
-    expect(this.Future).to.equal(Npm.require('fibers/future'));
+var Customer = Space.Object.extend({
+  // Annotate your dependencies
+  Dependencies: { purchases: 'Purchases' },
+  getPurchases: function() {
+    this.purchases.find({ customerId: this.id }).fetch();
   }
 });
+
+describe('Customer.getPurchases'), function() {
+
+  beforeEach(function() {
+    // Inject the dependency directly on creation
+    this.customer = new Customer({ purchases: new Mongo.Collection(null) });
+  })
+
+  it 'queries the purchases collection and returns fetched results', function() {
+    // Prepare
+    testPurchase = { _id: '123', productId: 'xyz' };
+    this.customer.purchases.insert(testPurchase);
+    // Test
+    var purchases = customer.getPurchases();
+    expect(purchases).to.deep.equal([testPurchase]);
+  })
+})
 ```
+
+Since the `Dependencies` property is just a simple prototype annotation that has no meaning outside
+the Space framework, you can just inject the dependencies yourself during the tests. This
+pattern works great, because your code remains completely framework agnostic (you could
+replace Space by any other DI framework or do it yourself). The positive side effect is that you
+explicitely declare your dependencies now. This helps you keep an eye on the complexity and coupling.
+If you realize that a class has more than 5 dependencies, it might be a good indicator that it is
+doing too much.
 
 ## Further Examples
 Look through the tests of this package to see all
