@@ -210,6 +210,7 @@ You may ask why you should deal with dependency injection if you can access your
 
 ```javascript
 var Customer = Space.Object.extend({
+  id: null,
   getPurchases: function() {
     return Purchases.find({ customerId: this.id }).fetch();
   }
@@ -222,13 +223,14 @@ directly references `Purchases` and there is only one way you can test this (san
 By temporarily replacing `Purchases` globally with some mock/stub
 
 ```javascript
-describe('Customer.getPurchases'), function() {
+describe('Customer.getPurchases', function() {
 
   beforeEach(function() {
     // Save a backup of the global Purchases collection
     this.savedPurchasesCollection = Purchases;
     // Replace the collection with an anonymous one
     Purchases = new Mongo.Collection(null);
+    this.customerId = 'xyz';
   })
     
   afterEach(function() {
@@ -236,9 +238,9 @@ describe('Customer.getPurchases'), function() {
     Purchases = this.savedPurchasesCollection;
   })
 
-  it('queries the purchases collection and returns fetched results'), function() {
+  it('queries the purchases collection and returns fetched results', function() {
     // Prepare
-    var testPurchase = { _id: '123', productId: 'xyz' };
+    var testPurchase = { _id: '123', customerId: this.customerId };
     Purchases.insert(testPurchase);
     // Test
     var customer = new Customer();
@@ -256,21 +258,26 @@ Here is how you can write a test like this when using space:
 var Customer = Space.Object.extend({
   // Annotate your dependencies
   Dependencies: { purchases: 'Purchases' },
+  id: null,
   getPurchases: function() {
     this.purchases.find({ customerId: this.id }).fetch();
   }
 });
 
-describe('Customer.getPurchases'), function() {
+describe('Customer.getPurchases', function() {
 
   beforeEach(function() {
-    // Inject the dependency directly on creation
-    this.customer = new Customer({ purchases: new Mongo.Collection(null) });
+    this.customerId = 'xyz';
+    // Inject dependencies directly on creation
+    this.customer = new Customer({
+      id: this.customerId,
+      purchases: new Mongo.Collection(null) // dependency
+    });
   })
 
   it 'queries the purchases collection and returns fetched results', function() {
     // Prepare
-    testPurchase = { _id: '123', productId: 'xyz' };
+    testPurchase = { _id: '123', customerId: this.customerId };
     this.customer.purchases.insert(testPurchase);
     // Test
     var purchases = customer.getPurchases();
