@@ -209,12 +209,13 @@ Space.Application.create({
 You may ask why you should deal with dependency injection if you can access your dependencies directly like this:
 
 ```javascript
-var Customer = Space.Object.extend({
-  id: null,
-  getPurchases: function() {
-    return Purchases.find({ customerId: this.id }).fetch();
-  }
-});
+var Customer = function(id) {
+  this.id = id;
+};
+
+Customer.prototype.getPurchases = function() {
+  return Purchases.find({ customerId: this.id }).fetch();
+}
 ```
 
 This works well, until you write your first unit tests. The problem is that this class 
@@ -243,7 +244,7 @@ describe('Customer.getPurchases', function() {
     var testPurchase = { _id: '123', customerId: this.customerId };
     Purchases.insert(testPurchase);
     // Test
-    var customer = new Customer();
+    var customer = new Customer(this.customerId);
     var purchases = customer.getPurchases();
     expect(purchases).to.deep.equal([testPurchase]);
   })
