@@ -152,44 +152,35 @@ dependencies they have, by putting the special properties
 `RequiredModules` and `Dependencies` on their prototypes:
 
 ```javascript
-Space.Module.extend(function() {
+var MyModule = Space.Module.extend({
+  // Declare which other Space modules are require
+  RequiredModules: [
+    'OtherModule',
+    'YetAnotherModule'
+  ],
+ 
+  // Declare injected runtime dependencies
+  Dependencies: {
+    someService: 'OtherModule.SomeService',
+    anotherService: 'YetAnotherModule.AnotherService'
+  },
+ 
+  // This method is called by the Space framework after all
+  // required modules are initialized and the dependencies
+  // are resolved and injected into the instance of this module.
+  configure: function() {
+ 
+    // Add mappings to the shared dependency injection system
+    this.injector.map('MyModule.TestValue').to('test');
+ 
+    // Use required dependencies
+    this.someService.doSomeMagic()
+    this.anotherService.beAwesome()
+  }
+});
 
-  /* Note: We use a static constructor here,
-     <this> refers to the extending class and
-     this function is only run once when while
-     creating the class */
-
-  // Statically register this module in the Space environment
-  this.publish(this, 'MyModule');
-
-  // Prototype of the module:
-  return {
-
-    // Declare which other Space modules are require
-    RequiredModules: [
-      'OtherModule',
-      'YetAnotherModule'
-    ],
-
-    // Declare injected runtime dependencies
-    Dependencies: {
-      someService: 'OtherModule.SomeService',
-      anotherService: 'YetAnotherModule.AnotherService'
-    },
-
-    // This method is called by the Space framework after all
-    // required modules are initialized and the dependencies
-    // are resolved and injected into the instance of this module.
-    configure: function() {
-
-      // Add mappings to the shared dependency injection system
-      this.injector.map('MyModule.TestValue').to('test');
-
-      // Use required dependencies
-      this.someService.doSomeMagic()
-      this.anotherService.beAwesome()
-    }
-  };
+// Publish this module to make it available to other modules and/or the app
+Space.Module.publish(MyModule, 'MyModule');
 ```
 
 ### Creating Applications based on Modules
