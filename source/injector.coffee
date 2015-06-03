@@ -1,25 +1,34 @@
 
 class Space.Injector
 
+  @ERRORS:
+    cannotMapUndefinedId: -> new Error 'Cannot map undefined value.'
+    mappingExists: (id) -> new Error "A mapping for <#{id}> already exists."
+    valueNotResolved: (path) -> new Error "Could not resolve <#{path}>."
+
   constructor: (providers) ->
     @_mappings = {}
     @_providers = providers ? Injector.DEFAULT_PROVIDERS
 
   map: (id, override) ->
-    if not id? then throw new Error 'Cannot map undefined value.'
+    if not id? then throw Injector.ERRORS.cannotMapUndefinedId()
     # Avoid accidential override of existing mapping
-    if @_mappings[id]? and !override
-      throw new Error "A mapping for <#{id}> already exists."
+    if @_mappings[id]? and !override then throw Injector.ERRORS.mappingExists()
     @_mappings[id] = new Mapping id, @_providers
+
+  autoMap: (id) ->
+    value = @_resolveValue id
+    if _.isFunction(value)
+      @map(id).toSingleton value
+    else
+      @map(id).to value
 
   override: (id) -> @map id, true
 
   remove: (id) -> delete @_mappings[id]
 
   get: (id) ->
-    # Provide nice error message if a mapping wasn't found
-    if not @_mappings[id]?
-      throw new Error "No mapping for identifier <#{id}> was found."
+    if not @_mappings[id]? then @autoMap id
     dependency = @_mappings[id].provide()
     @injectInto dependency
     return dependency
@@ -56,6 +65,11 @@ class Space.Injector
     # Add dependencies of current value
     deps[key] = id for key, id of value.Dependencies
     return deps
+
+  _resolveValue: (path) ->
+    value = Space.resolvePath path
+    if not value? then throw Injector.ERRORS.valueNotResolved(path)
+    return value
 
 # ========= PRIVATE CLASSES ========== #
 

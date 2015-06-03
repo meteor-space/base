@@ -19,7 +19,19 @@ describe 'Space.Injector', ->
       expect(@injector.get('myObject').test).to.equal testValue
 
     it 'throws error if mapping doesnt exist', ->
-      expect(=> @injector.get('test')).to.throw Error
+      expect(=> @injector.get('blablub')).to.throw Error
+
+    it 'auto-maps singletons', ->
+      first = @injector.get 'Space.Injector'
+      second = @injector.get 'Space.Injector'
+      expect(first).to.be.instanceof Space.Injector
+      expect(first).to.equal second
+
+    it 'auto-maps static values', ->
+      expect(@injector.get('Space')).to.equal Space
+
+    it 'throws if the auto-map value is undefined', ->
+      expect(=> @injector.get('NotExistingValue')).to.throw Error
 
     it 'throws error if mapping would be overriden', ->
       @injector.map('test').to 'test'
