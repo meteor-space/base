@@ -30,7 +30,6 @@ Package.onUse(function(api) {
   ], {weak: true});
 
   api.addFiles([
-    'source/namespace.coffee',
     'source/helpers.coffee',
     'source/object.coffee',
     'source/struct.coffee',
