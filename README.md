@@ -1,39 +1,39 @@
-# space:base [![Build Status](https://travis-ci.org/CodeAdventure/meteor-space.svg?branch=master)](https://travis-ci.org/CodeAdventure/meteor-space)
-
 ![Space Brand Mood](docs/images/space-brand-mood.jpg?raw=true)
 
-**Space** is a modular application architecture for Meteor with the
-following goals:
+# SPACE [![Build Status](https://travis-ci.org/CodeAdventure/meteor-space.svg?branch=master)](https://travis-ci.org/CodeAdventure/meteor-space)
 
-1. Dependencies in your code are explicit
-2. You have full control over configuration and initialization
-3. Testing your stuff is easy
+Modular application architecture for Meteor with the following goals:
+
+1. Explicit dependencies in your code
+2. Full control over configuration and initialization
+3. Testability
 
 ## Why?
-As your Meteor app grows, you add more and more packages and dependencies
+As your Meteor app grows, you keep adding packages and dependencies
 to it and sprinkle your configuration and initialization logic into
 `Meteor.startup` blocks all over the code base. If you don't use *some*
-structure, you will end up throwing your laptop against the wall because
-it will become difficult to keep an overview.
+structure, you will end up throwing your laptop against the wall.
 
 ## 1. Explicit Dependencies
-Space comes with a very lightweight dependency injection system. It tries
+Space comes with a lightweight dependency injection system. It tries
 to keep your code as clean as possible and doesn't force you to wrap your
 functions with library calls.
 
-If an object needs some other code during runtime, it simply declares its
-**dependency**:
+If an object needs other code during runtime, it simply declares its
+**dependencies**:
 
 ```javascript
 var dependendObject = {
-  Dependencies: { lib: 'OtherCode' },
-  sayHello: function() { this.lib.sayHello(); }
+  Dependencies: {
+    lib: 'OtherCode'
+  },
+  sayHello: function() {
+    this.lib.sayHello();
+  }
 };
 ```
-*I use a very dense coding style here to keep these examples short*
-
 Now `dependendObject` declares very explicitly that it needs `OtherCode`
-which it will access via `this.lib` later on. But where should `OtherCode`
+which it will access via `this.lib` later on. But where does `OtherCode`
 come from?
 
 This is where the `Space.Injector` helps out:
@@ -49,6 +49,7 @@ injector.injectInto(dependendObject);
 
 dependendObject.sayHello(); // logs: 'hello!'
 ```
+*I use a very dense coding style here to keep these examples short*
 
 Of course, this also works with Javascript constructors and prototypes:
 
@@ -151,44 +152,35 @@ dependencies they have, by putting the special properties
 `RequiredModules` and `Dependencies` on their prototypes:
 
 ```javascript
-Space.Module.extend(function() {
+var MyModule = Space.Module.extend({
+  // Declare which other Space modules are require
+  RequiredModules: [
+    'OtherModule',
+    'YetAnotherModule'
+  ],
+ 
+  // Declare injected runtime dependencies
+  Dependencies: {
+    someService: 'OtherModule.SomeService',
+    anotherService: 'YetAnotherModule.AnotherService'
+  },
+ 
+  // This method is called by the Space framework after all
+  // required modules are initialized and the dependencies
+  // are resolved and injected into the instance of this module.
+  configure: function() {
+ 
+    // Add mappings to the shared dependency injection system
+    this.injector.map('MyModule.TestValue').to('test');
+ 
+    // Use required dependencies
+    this.someService.doSomeMagic()
+    this.anotherService.beAwesome()
+  }
+});
 
-  /* Note: We use a static constructor here,
-     <this> refers to the extending class and
-     this function is only run once when while
-     creating the class */
-
-  // Statically register this module in the Space environment
-  this.publish(this, 'MyModule');
-
-  // Prototype of the module:
-  return {
-
-    // Declare which other Space modules are require
-    RequiredModules: [
-      'OtherModule',
-      'YetAnotherModule'
-    ],
-
-    // Declare injected runtime dependencies
-    Dependencies: {
-      someService: 'OtherModule.SomeService',
-      anotherService: 'YetAnotherModule.AnotherService'
-    },
-
-    // This method is called by the Space framework after all
-    // required modules are initialized and the dependencies
-    // are resolved and injected into the instance of this module.
-    configure: function() {
-
-      // Add mappings to the shared dependency injection system
-      this.injector.map('MyModule.TestValue').to('test');
-
-      // Use required dependencies
-      this.someService.doSomeMagic()
-      this.anotherService.beAwesome()
-    }
-  };
+// Publish this module to make it available to other modules and/or the app
+Space.Module.publish(MyModule, 'MyModule');
 ```
 
 ### Creating Applications based on Modules
@@ -210,79 +202,98 @@ Space.Application.create({
   }
 ```
 
-### Requiring Meteor Core Packages
-Instead of globally accessing Meteor packages in your codebase
-you can add them to your module / application dependencies and
-have them injected automatically after initialisation.
+**[Learn more about Modules and Applications](https://github.com/CodeAdventure/meteor-space/wiki/Space.Injector)**
 
-#### Example: Packages on Server and Client
+## 3. Testability
 
-```javascript
-Space.Application.create({
-
-  Dependencies: {
-    meteor: 'Meteor',
-    tracker: 'Tracker',
-    ejson: 'EJSON',
-    ddp: 'DDP',
-    accounts: 'Accounts',
-    random: 'Random',
-    underscore: 'underscore',
-    reactiveVar: 'ReactiveVar',
-    mongo: 'Mongo'
-  },
-
-  configure: function() {
-    expect(this.meteor).to.equal(Meteor);
-    expect(this.tracker).to.equal(Tracker);
-    expect(this.ejson).to.equal(EJSON);
-    expect(this.ddp).to.equal(DDP);
-    expect(this.accounts).to.equal(Package['accounts-base'].Accounts);
-    expect(this.random).to.equal(Random);
-    expect(this.underscore).to.equal(_);
-    expect(this.reactiveVar).to.be.instanceof(Package['reactive-var'].ReactiveVar);
-    expect(this.mongo).to.equal(Mongo);
-  }
-});
-```
-
-#### Example: Packages on Client only
+You may ask why you should deal with dependency injection if you can access your dependencies directly like this:
 
 ```javascript
-Space.Application.create({
+var Customer = function(id) {
+  this.id = id;
+};
 
-  Dependencies: {
-    templates: 'Template',
-    session: 'Session',
-    blaze: 'Blaze',
-  },
-
-  configure: function() {
-    expect(this.templates).to.equal(Template);
-    expect(this.session).to.equal(Session);
-    expect(this.blaze).to.equal(Blaze);
-  }
-});
+Customer.prototype.getPurchases = function() {
+  return Purchases.find({ customerId: this.id }).fetch();
+}
 ```
 
-### Example for packages on server only
+This works well, until you write your first unit tests. The problem is that this class 
+directly references `Purchases` and there is only one way you can test this (sanely): 
+
+By temporarily replacing `Purchases` globally with some mock/stub
 
 ```javascript
-Space.Application.create({
+describe('Customer.getPurchases', function() {
 
-  Dependencies: {
-    email: 'Email',
-    process: 'process',
-    Future: 'Future',
-  },
+  beforeEach(function() {
+    // Save a backup of the global Purchases collection
+    this.savedPurchasesCollection = Purchases;
+    // Replace the collection with an anonymous one
+    Purchases = new Mongo.Collection(null);
+    this.customerId = 'xyz';
+  })
+    
+  afterEach(function() {
+    // Restore the global purchases collection
+    Purchases = this.savedPurchasesCollection;
+  })
 
-  configure: function() {
-    expect(this.email).to.equal(Package['email'].Email);
-    expect(this.process).to.equal(process);
-    expect(this.Future).to.equal(Npm.require('fibers/future'));
+  it('queries the purchases collection and returns fetched results', function() {
+    // Prepare
+    var testPurchase = { _id: '123', customerId: this.customerId };
+    Purchases.insert(testPurchase);
+    // Test
+    var customer = new Customer(this.customerId);
+    var purchases = customer.getPurchases();
+    expect(purchases).to.deep.equal([testPurchase]);
+  })
+})
+```
+
+In this example it does not look too bad but this pattern quickly becomes tedious if you have more than 1-2 dependencies you want to replace during your tests.
+
+Here is how you can write a test like this when using space:
+
+```javascript
+var Customer = Space.Object.extend({
+  // Annotate your dependencies
+  Dependencies: { purchases: 'Purchases' },
+  id: null,
+  getPurchases: function() {
+    this.purchases.find({ customerId: this.id }).fetch();
   }
 });
+
+describe('Customer.getPurchases', function() {
+
+  beforeEach(function() {
+    this.customerId = 'xyz';
+    // Inject dependencies directly on creation
+    this.customer = new Customer({
+      id: this.customerId,
+      purchases: new Mongo.Collection(null) // dependency
+    });
+  })
+
+  it 'queries the purchases collection and returns fetched results', function() {
+    // Prepare
+    testPurchase = { _id: '123', customerId: this.customerId };
+    this.customer.purchases.insert(testPurchase);
+    // Test
+    var purchases = customer.getPurchases();
+    expect(purchases).to.deep.equal([testPurchase]);
+  })
+})
 ```
+
+Since the `Dependencies` property is just a simple prototype annotation that has no meaning outside
+the Space framework, you can just inject the dependencies yourself during the tests. This
+pattern works great, because your code remains completely framework agnostic (you could
+replace Space by any other DI framework or do it yourself). The positive side effect is that you
+explicitely declare your dependencies now. This helps you keep an eye on the complexity and coupling.
+If you realize that a class has more than 5 dependencies, it might be a good indicator that it is
+doing too much.
 
 ## Further Examples
 Look through the tests of this package to see all
