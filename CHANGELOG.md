@@ -1,6 +1,14 @@
 Changelog
 =========
 
+### 2.1.0
+Introduces lazy auto-mapping of singletons and static values if they are
+requested by other parts via the `Dependencies` property. For the first request
+it looks up the dependency on the global context and maps functions as singletons
+and other values as static. Be aware that some part of the system has to require
+your singleton before it ever exists. In some cases this is not what you want
+(e.g event handling)
+
 ### 2.0.1
 @Sanjo fixed an issue with weak-dependencies injection in `Space.Application`.
 
