@@ -23,7 +23,7 @@ If an object needs other code during runtime, it simply declares its
 **dependencies**:
 
 ```javascript
-var dependendObject = {
+var dependentObject = {
   Dependencies: {
     lib: 'OtherCode'
   },
@@ -32,7 +32,7 @@ var dependendObject = {
   }
 };
 ```
-Now `dependendObject` declares very explicitly that it needs `OtherCode`
+Now `dependentObject` declares very explicitly that it needs `OtherCode`
 which it will access via `this.lib` later on. But where does `OtherCode`
 come from?
 
@@ -45,9 +45,9 @@ var injector = new Space.Injector();
 // maps the string identifier 'OtherCode' to the library object
 injector.map('OtherCode').to(library);
 // injects all dependencies into the dependent object
-injector.injectInto(dependendObject);
+injector.injectInto(dependentObject);
 
-dependendObject.sayHello(); // logs: 'hello!'
+dependentObject.sayHello(); // logs: 'hello!'
 ```
 *I use a very dense coding style here to keep these examples short*
 
@@ -115,11 +115,11 @@ var app = Space.Application.create({
   configure: function () {
     // every app has its own injector by default
     this.injector.map('ExternalLib').to(SomeLibrary);
-    this.injector.map('MyDependendClass').toSingleton(MyClass);
+    this.injector.map('MyDependentClass').toSingleton(MyClass);
   },
   startup: function() {
     // Create the singleton instance of my class
-    this.injector.create('MyDependendClass');
+    this.injector.create('MyDependentClass');
   }
 });
 
@@ -132,7 +132,7 @@ to express the above:
 ```javascript
 var app = Space.Application.create({
   // Let the framework map and create the singleton instances for you
-  Singletons: ['MyDependendClass', 'MyOtherSingleton']
+  Singletons: ['MyDependentClass', 'MyOtherSingleton']
 });
 app.start(); // You decide when your app starts
 ```
@@ -158,21 +158,21 @@ var MyModule = Space.Module.extend({
     'OtherModule',
     'YetAnotherModule'
   ],
- 
+
   // Declare injected runtime dependencies
   Dependencies: {
     someService: 'OtherModule.SomeService',
     anotherService: 'YetAnotherModule.AnotherService'
   },
- 
+
   // This method is called by the Space framework after all
   // required modules are initialized and the dependencies
   // are resolved and injected into the instance of this module.
   configure: function() {
- 
+
     // Add mappings to the shared dependency injection system
     this.injector.map('MyModule.TestValue').to('test');
- 
+
     // Use required dependencies
     this.someService.doSomeMagic()
     this.anotherService.beAwesome()
@@ -218,8 +218,8 @@ Customer.prototype.getPurchases = function() {
 }
 ```
 
-This works well, until you write your first unit tests. The problem is that this class 
-directly references `Purchases` and there is only one way you can test this (sanely): 
+This works well, until you write your first unit tests. The problem is that this class
+directly references `Purchases` and there is only one way you can test this (sanely):
 
 By temporarily replacing `Purchases` globally with some mock/stub
 
@@ -233,7 +233,7 @@ describe('Customer.getPurchases', function() {
     Purchases = new Mongo.Collection(null);
     this.customerId = 'xyz';
   })
-    
+
   afterEach(function() {
     // Restore the global purchases collection
     Purchases = this.savedPurchasesCollection;
@@ -303,7 +303,7 @@ features that `space:base` provides for you.
 `meteor add space:base`
 
 ## Run the tests
-`mrt test-packages ./`
+`meteor test-packages ./`
 
 ## Release History
 You find all release changes in the [changelog](https://github.com/CodeAdventure/meteor-space/blob/master/CHANGELOG.md)
