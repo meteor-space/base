@@ -68,6 +68,10 @@ class Space.Module extends Space.Object
 
   # ========== STATIC MODULE MANAGAMENT ============ #
 
+  @create: (moduleName, prototype) ->
+    prototype.toString = -> moduleName # For better debugging
+    @publish Space.Module.extend(prototype), moduleName
+
   # All published modules register themselves here
   @published = {}
 
