@@ -10,13 +10,10 @@ describe('Building applications based on modules', function() {
     var testValue = {};
     var testResult = null;
 
-    Space.Module.extend(function() {
-      this.publish(this, 'FirstModule');
-      return {
-        configure: function() {
-          this.injector.map('testValue').toStaticValue(testValue);
-        }
-      };
+    Space.Module.define('FirstModule', {
+      configure: function() {
+        this.injector.map('testValue').toStaticValue(testValue);
+      }
     });
 
     Space.Application.create({
@@ -34,18 +31,13 @@ describe('Building applications based on modules', function() {
     var appValue = 'application configuration';
     var testResult = null;
 
-    Space.Module.extend(function() {
-
-      this.publish(this, 'FirstModule');
-
-      return {
-        configure: function() {
-          this.injector.map('moduleValue').to(moduleValue);
-        },
-        startup: function() {
-          testResult = this.injector.get('moduleValue');
-        }
-      };
+    Space.Module.define('FirstModule', {
+      configure: function() {
+        this.injector.map('moduleValue').to(moduleValue);
+      },
+      startup: function() {
+        testResult = this.injector.get('moduleValue');
+      }
     });
 
     var app = Space.Application.create({

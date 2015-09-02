@@ -49,6 +49,6 @@ class Space.Application extends Space.Module
 
   initialize: -> super this, @injector
 
-  @create: (appName, prototype) ->
+  @define: (appName, prototype) ->
     prototype.toString = -> appName # For better debugging
     return @extend prototype
