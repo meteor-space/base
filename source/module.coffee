@@ -70,7 +70,7 @@ class Space.Module extends Space.Object
 
   @define: (moduleName, prototype) ->
     prototype.toString = -> moduleName # For better debugging
-    @publish Space.Module.extend(prototype), moduleName
+    @publish Space.Module.extend(moduleName, prototype), moduleName
 
   # All published modules register themselves here
   @published = {}
