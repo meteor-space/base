@@ -36,8 +36,8 @@ class Space.Application extends Space.Module
       @injector.map('process').to process
       @injector.map('Future').to Npm.require 'fibers/future'
 
-    if Package.email?
-      @injector.map('Email').to Package.email.Email
+      if Package.email?
+        @injector.map('Email').to Package.email.Email
 
     if Package['accounts-base']?
       @injector.map('Accounts').to Package['accounts-base'].Accounts
