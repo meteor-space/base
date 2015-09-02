@@ -1,6 +1,16 @@
 Changelog
 =========
 
+### 2.2.0
+- Improves `Space.Object.extend` capabilities to work smoothly with Javascript
+and provide multiple ways to extend core classes.
+- Improves general debugging experience by throwing errors when values can
+not be resolved with `Space.resolvePath`
+- `Space.resolvePath` now also takes into account published space modules, which
+solves the problem of Meteor package scoping.
+- adds `Space.Module.define` and `Space.Application.define` which makes it easier
+to flesh out modules and apps in Javascript (without having to call `publish`)
+
 ### 2.1.0
 Introduces lazy auto-mapping of singletons and static values if they are
 requested by other parts via the `Dependencies` property. For the first request
