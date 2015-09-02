@@ -4,38 +4,96 @@ class Space.Object
   # Assign given properties to the instance
   constructor: (properties) -> @[key] = value for key, value of properties
 
-  # Extend the base class that this method is called on statically:
-  # e.g: Space.Object.extend { prop1: 'value' }
-  # would create a new anonymous class that extends Space.Object and
-  # gets the parameter <extension> assigned as prototype
-  @extend: (extension) ->
+  # Extends this class and return a child class with inherited prototype
+  # and static properties.
+  #
+  # There are five ways you can call this method:
+  #
+  # 1. Space.Object.extend()
+  # --------------------------------------------
+  # Creates an anonymous child class without extra prototype properties.
+  # Basically the same as `class extend Space.Object` in coffeescript
+  #
+  # 2. Space.Object.extend({ prop: 'first', … })
+  # --------------------------------------------
+  # Creates an anonymous child class with extra prototype properties.
+  # Same as:
+  # class extend Space.Object
+  #   prop: 'first'
+  #
+  # 3. Space.Object.extend(namespace, className)
+  # --------------------------------------------
+  # Creates a named class which inherits from Space.Object and assigns
+  # it to the given namespace object.
+  #
+  # 4. Space.Object.extend(className, prototype)
+  # --------------------------------------------
+  # Creates a named class which inherits from Space.Object and extra prototype
+  # properties which are assigned to the new class
+  #
+  # 5. Space.Object.extend(namespace, className, prototype)
+  # --------------------------------------------
+  # Creates a named class which inherits from Space.Object, has extra prototype
+  # properties and is assigned to the given namespace.
+  @extend: (args...) ->
 
-    # The new class has no special constructor by default
-    Constructor = null
+    # Defaults
+    namespace = {}
+    className = '_Class' # Same as coffeescript
+    extension = {}
 
-    # Use coffeescript to do the inheritance with support for
-    # static properties which are copied to subclasses automatically
-    # <this> is the static class that #extend was called on
-    # e.g.: for Space.Object.extend <this> would be Space.Object
-    Extended = class extends this
-      # The default constructor invokes the custom provided constructor
-      # if available. This allows to provide a custom one when using Javascript.
-      constructor: ->
-        if Constructor? then Constructor.apply(this, arguments) else super
+    # Only one param: (extension) ->
+    if args.length is 1 then extension = args[0]
 
-    # This mimics the capabilities of coffeescript to script the
-    # class object statically in Javascript
-    if typeof(extension) is 'function'
-      # Call static method with the class as context
-      extension = extension.call Extended
-    else
-      extension = extension ? {}
+    # Two params must be: (namespace, className) OR (className, extension) ->
+    if args.length is 2
+      if _.isObject(args[0]) and _.isString(args[1])
+        namespace = args[0]
+        className = args[1]
+        extension = {}
+      else if _.isString(args[0]) and _.isObject(args[1])
+        namespace = null
+        className = args[0]
+        extension = args[1]
+
+    # All three params: (namespace, className, extension) ->
+    if args.length is 3
+      namespace = args[0]
+      className = args[1]
+      extension = args[2]
+
+    check namespace, Match.ObjectIncluding({})
+    check className, String
+    check extension, Match.ObjectIncluding({})
 
     # Assign the optional custom constructor for this class
-    Constructor = extension.Constructor ? null
+    Parent = this
+    Constructor = extension.Constructor ? -> Parent.apply(this, arguments)
+
+    # Create a named constructor for this class so that debugging
+    # consoles are displaying the class name nicely.
+    Child = new Function('initialize', 'return function ' + className + '() {
+      initialize.apply(this, arguments);
+    }')(Constructor)
+
+    # Copy the static properties of this class over to the extended
+    Child[key] = this[key] for key of this
+
+    # Javascript prototypal inheritance "magic"
+    Ctor = ->
+      @constructor = Child
+      return
+    Ctor.prototype = Parent.prototype
+    Child.prototype = new Ctor()
+    Child.__super__ = Parent.prototype
+
     # Copy the extension over to the class prototype
-    Extended.prototype[key] = extension[key] for key of extension
-    return Extended
+    Child.prototype[key] = extension[key] for key of extension
+
+    # Add the class to the namespace
+    namespace?[className] = Child
+
+    return Child
 
   # Create and instance of the class that this method is called on
   # e.g.: Space.Object.create() would return an instance of Space.Object

@@ -1,48 +1,47 @@
 
 describe 'Space.Object', ->
 
+  beforeEach -> @namespace = {}
+
   describe 'extending', ->
 
     it 'creates and returns a subclass', ->
 
-      MyClass = Space.Object.extend()
-      expect(MyClass).to.extend Space.Object
+      Space.Object.extend(@namespace, 'MyClass')
+      expect(@namespace.MyClass).to.extend Space.Object
 
     it 'applies the arguments to the super constructor', ->
 
       [first, second, third] = ['first', 2, {}]
       spy = sinon.spy()
 
-      Base = Space.Object.extend Constructor: -> spy.apply this, arguments
-      Extended = Base.extend()
-
-      instance = new Extended first, second, third
+      Space.Object.extend @namespace, 'Base', {
+        Constructor: -> spy.apply this, arguments
+      }
+      @namespace.Base.extend(@namespace, 'Extended')
+      instance = new @namespace.Extended first, second, third
 
       expect(spy).to.have.been.calledWithExactly first, second, third
       expect(spy).to.have.been.calledOn instance
 
     it 'allows to extend the prototype', ->
 
-      First = Space.Object.extend first: 1, get: (property) -> @[property]
-      Second = First.extend second: 2, get: -> First::get.apply this, arguments
+      First = Space.Object.extend {
+        first: 1,
+        get: (property) -> @[property]
+      }
+
+      Second = First.extend {
+        second: 2,
+        get: -> First::get.apply this, arguments
+      }
+
       class Third extends Second
         get: (property) -> super property
 
       instance = new Third()
       expect(instance.get('first')).to.equal 1
       expect(instance.get('second')).to.equal 2
-
-    it 'allows to define static properties', ->
-
-      class Base extends Space.Object
-        @setStatic: (key, value) -> @[key] = value
-
-      MyClass = Base.extend ->
-        @setStatic 'static', 'static'
-        normal: 'normal'
-
-      expect(MyClass.static).to.equal 'static'
-      expect(MyClass.create().normal).to.equal 'normal'
 
   describe 'creating instances', ->
 
