@@ -52,7 +52,7 @@ class Space.Object
         className = args[1]
         extension = {}
       else if _.isString(args[0]) and _.isObject(args[1])
-        namespace = null
+        namespace = {}
         className = args[0]
         extension = args[1]
 
@@ -62,7 +62,7 @@ class Space.Object
       className = args[1]
       extension = args[2]
 
-    check namespace, Match.ObjectIncluding({})
+    check namespace, Match.OneOf(Match.ObjectIncluding({}), Function)
     check className, String
     check extension, Match.ObjectIncluding({})
 
