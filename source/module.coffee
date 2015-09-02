@@ -78,7 +78,7 @@ class Space.Module extends Space.Object
   # Publishes a module into the space environment to make it
   # visible and requireable for other modules and the application
   @publish: (module, identifier) ->
-
+    module.publishedAs = identifier
     if Space.Module.published[identifier]?
       throw new Error "Two modules tried to be published as <#{identifier}>"
     else
