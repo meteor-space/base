@@ -12,4 +12,7 @@ Space.resolvePath = (path) ->
   result = global # Start with global namespace
   for key in path # Move down the object chain
     result = result?[key] ? null
+    # Take published space modules into account
+    # to solve the Meteor package scoping problem
+    if !result? then result = Space.Module.published[key]
   return result
