@@ -100,7 +100,7 @@ describe 'Space.Injector', ->
         Dependencies: test: 'test'
         test: 'value'
 
-      @injector.map('test').asStaticValue()
+      @injector.map('test').to('test')
       @injector.injectInto instance
 
       expect(instance.test).to.equal 'value'
@@ -113,7 +113,7 @@ describe 'Space.Injector', ->
           Dependencies: value: 'value'
           onDependenciesReady: sinon.spy()
 
-        @injector.map('value').asStaticValue()
+        @injector.map('value').to('value')
         @injector.injectInto instance
         @injector.injectInto instance # shouldnt trigger twice
 
