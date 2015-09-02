@@ -51,4 +51,4 @@ class Space.Application extends Space.Module
 
   @define: (appName, prototype) ->
     prototype.toString = -> appName # For better debugging
-    return @extend prototype
+    return @extend appName, prototype
