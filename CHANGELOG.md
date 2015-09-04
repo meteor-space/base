@@ -1,6 +1,11 @@
 Changelog
 =========
 
+### 2.3.0
+- Adds `Space.namespace('MyNamespace')` which simplifies working with Meteor
+package scopes. Up until now Space could not resolve exported variables from
+packages in your app because Meteor is hiding them from the `space:base` package.
+
 ### 2.2.0
 - Improves `Space.Object.extend` capabilities to work smoothly with Javascript
 and provide multiple ways to extend core classes.
