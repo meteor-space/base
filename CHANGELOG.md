@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 2.3.1
+Only updated the Github repository links after moving it to the new
+https://github.com/meteor-space organization.
+
 ### 2.3.0
 - Adds `Space.namespace('MyNamespace')` which simplifies working with Meteor
 package scopes. Up until now Space could not resolve exported variables from
