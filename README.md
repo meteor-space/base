@@ -1,8 +1,8 @@
 ![Space Brand Mood](docs/images/space-brand-mood.jpg?raw=true)
 
-# SPACE [![Build Status](https://travis-ci.org/CodeAdventure/meteor-space.svg?branch=master)](https://travis-ci.org/CodeAdventure/meteor-space)
+# SPACE [![Build Status](https://travis-ci.org/meteor-space/base.svg?branch=master)](https://travis-ci.org/meteor-space/base)
 
-Modular application architecture for Meteor with the following goals:
+Modular application architecture for Meteor, with following goals:
 
 1. Explicit dependencies in your code
 2. Full control over configuration and initialization
@@ -206,7 +206,8 @@ Space.Application.create({
 
 ## 3. Testability
 
-You may ask why you should deal with dependency injection if you can access your dependencies directly like this:
+You may ask why you should deal with dependency injection if you can access your
+dependencies directly like this:
 
 ```javascript
 var Customer = function(id) {
@@ -251,7 +252,8 @@ describe('Customer.getPurchases', function() {
 })
 ```
 
-In this example it does not look too bad but this pattern quickly becomes tedious if you have more than 1-2 dependencies you want to replace during your tests.
+In this example it does not look too bad but this pattern quickly becomes tedious
+if you have more than 1-2 dependencies you want to replace during your tests.
 
 Here is how you can write a test like this when using space:
 
@@ -287,13 +289,14 @@ describe('Customer.getPurchases', function() {
 })
 ```
 
-Since the `Dependencies` property is just a simple prototype annotation that has no meaning outside
-the Space framework, you can just inject the dependencies yourself during the tests. This
-pattern works great, because your code remains completely framework agnostic (you could
-replace Space by any other DI framework or do it yourself). The positive side effect is that you
-explicitely declare your dependencies now. This helps you keep an eye on the complexity and coupling.
-If you realize that a class has more than 5 dependencies, it might be a good indicator that it is
-doing too much.
+Since the `Dependencies` property is just a simple prototype annotation that has
+no meaning outside the Space framework, you can just inject the dependencies
+yourself during the tests. This pattern works great, because your code remains
+completely framework agnostic (you could replace Space by any other DI framework
+or do it yourself). The positive side effect is that you explicitely declare your
+dependencies now. This helps you keep an eye on the complexity and coupling. If
+you realize that a class has more than 5 dependencies, it might be a good i
+ndicator that it is doing too much.
 
 ## Further Examples
 Look through the tests of this package to see all
@@ -306,8 +309,7 @@ features that `space:base` provides for you.
 `meteor test-packages ./`
 
 ## Release History
-You find all release changes in the [changelog](https://github.com/CodeAdventure/meteor-space/blob/master/CHANGELOG.md)
+You find all release changes in the [changelog](https://github.com/meteor-space/base/blob/master/CHANGELOG.md)
 
 ## License
-Copyright (c) 2015 Code Adventure
 Licensed under the MIT license.
