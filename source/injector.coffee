@@ -128,7 +128,10 @@ class Mapping
           # Loop over their Dependencies and override the one this mapping
           # is managing if it exists (it should)
           dependencies = dependee.Dependencies ? {}
-          (dependee[key] = value) for key, id of dependencies when id is @_id
+          for key, id of dependencies
+            if id is @_id
+              dependee[key] = value
+              dependee.onDependencyChanged?(key, value)
 
       # Reset the flag to override dependencies
       @_overrideInDependents = false

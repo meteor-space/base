@@ -96,6 +96,23 @@ describe 'Space.Injector', ->
       expect(firstMapping.hasDependee(myObject)).to.be.false
       expect(secondMapping.hasDependee(myObject)).to.be.false
 
+    it 'tells the dependent object when a dependency changed', ->
+      dependentObject = {
+        Dependencies: {
+          test: 'Test'
+        }
+        onDependencyChanged: sinon.spy()
+      }
+      firstValue = {}
+      secondValue = {}
+      @injector.map('Test').to firstValue
+      @injector.injectInto dependentObject
+      @injector.override('Test').to secondValue
+
+      expect(dependentObject.onDependencyChanged).to.have.been.calledWith(
+        'test', secondValue
+      )
+
   # ========== INJECTING DEPENDENCIES ========= #
 
   describe 'injecting dependencies', ->
