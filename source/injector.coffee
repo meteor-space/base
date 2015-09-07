@@ -10,11 +10,20 @@ class Space.Injector
     @_mappings = {}
     @_providers = providers ? Injector.DEFAULT_PROVIDERS
 
+  toString: -> 'Instance <Space.Injector>'
+
   map: (id, override) ->
     if not id? then throw Injector.ERRORS.cannotMapUndefinedId()
+    mapping = @_mappings[id]
     # Avoid accidential override of existing mapping
-    if @_mappings[id]? and !override then throw Injector.ERRORS.mappingExists()
-    @_mappings[id] = new Mapping id, @_providers
+    if mapping? and !override
+      throw Injector.ERRORS.mappingExists(id)
+    else if mapping? and override
+      mapping.markForOverride()
+      return mapping
+    else
+      @_mappings[id] = new Mapping id, @_providers
+      return @_mappings[id]
 
   autoMap: (id) ->
     value = @_resolveValue id
@@ -27,9 +36,9 @@ class Space.Injector
 
   remove: (id) -> delete @_mappings[id]
 
-  get: (id) ->
+  get: (id, dependentObject=null) ->
     if not @_mappings[id]? then @autoMap id
-    dependency = @_mappings[id].provide()
+    dependency = @_mappings[id].provide(dependentObject)
     @injectInto dependency
     return dependency
 
@@ -40,7 +49,7 @@ class Space.Injector
     # Get flat map of dependencies (possibly inherited)
     dependencies = @_mapDependencies value
     # Inject into dependencies to create the object graph
-    value[key] ?= @get(id) for key, id of dependencies
+    value[key] ?= @get(id, value) for key, id of dependencies
     # Notify when dependencies are ready, never call twice
     if value.onDependenciesReady? and !value.__dependenciesInjected__
       value.onDependenciesReady()
@@ -56,6 +65,12 @@ class Space.Injector
         value.__dependenciesInjected__ = true
 
   addProvider: (name, provider) -> @_providers[name] = provider
+
+  getMappingFor: (id) -> @_mappings[id]
+
+  release: (dependee) ->
+    for id, mapping of @_mappings
+      mapping.release(dependee) if mapping.hasDependee(dependee)
 
   _mapDependencies: (value, deps={}) ->
     Class = value.constructor ? null
@@ -75,30 +90,76 @@ class Space.Injector
 
 class Mapping
 
+  _id: null
+  _provider: null
+  _dependents: null
+  _overrideInDependents: false
+
   constructor: (@_id, providers) ->
+    @_dependents = []
     @[key] = @_setup(provider) for key, provider of providers
 
-  provide: -> @_provider.provide()
+  toString: -> 'Instance <Mapping>'
 
-  _setup: (provider) -> (value) => @_provider = new provider @_id, value
+  provide: (dependee) ->
+    # Register depented objects for this mapping so that their
+    # dependencies can overwritten later on.
+    @_dependents.push(dependee)if dependee? and not @hasDependee(dependee)
+    @_provider.provide()
+
+  markForOverride: -> @_overrideInDependents = true
+
+  hasDependee: (dependee) -> @getIndexOfDependee(dependee) > -1
+
+  getIndexOfDependee: (dependee) -> @_dependents.indexOf(dependee)
+
+  release: (dependee) -> @_dependents.splice(@getIndexOfDependee(dependee), 1)
+
+  _setup: (provider) ->
+    return (value) => # We are inside an API call like injector.map('this').to('that')
+      # Set the provider of this mapping to what the API user chose
+      @_provider = new provider @_id, value
+      # Override the dependency in all dependent objects if this mapping is flagged
+      if @_overrideInDependents
+        # Get the value from the provider
+        value = @_provider.provide()
+        # Loop over the dependees
+        for dependee in @_dependents
+          # Loop over their Dependencies and override the one this mapping
+          # is managing if it exists (it should)
+          dependencies = dependee.Dependencies ? {}
+          (dependee[key] = value) for key, id of dependencies when id is @_id
+
+      # Reset the flag to override dependencies
+      @_overrideInDependents = false
 
 # ========= DEFAULT PROVIDERS ======== #
 
 class ValueProvider
+
   constructor: (id, @value) ->
     if not @value?
       @value = if (typeof id is 'string') then Space.resolvePath(id) else id
 
+  toString: -> 'Instance <ValueProvider>'
+
   provide: -> @value
 
 class InstanceProvider
+
   constructor: (id, @Class) ->
+
+  toString: -> 'Instance <InstanceProvider>'
+
   provide: -> new @Class()
 
 class SingletonProvider
+
   constructor: (id, @Class) ->
     if not @Class? then @Class = id
     if typeof(@Class) is 'string' then @Class = Space.resolvePath(@Class)
+
+  toString: -> 'Instance <SingletonProvider>'
 
   provide: ->
     if not @_singleton? then @_singleton = new @Class()

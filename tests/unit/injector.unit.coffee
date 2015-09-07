@@ -38,11 +38,6 @@ describe 'Space.Injector', ->
       override = => @injector.map('test').to 'other'
       expect(override).to.throw Error
 
-    it 'allows to override mappings', ->
-      @injector.map('test').to 'test'
-      @injector.override('test').to 'other'
-      expect(@injector.get('test')).to.equal 'other'
-
     it 'can remove existing mappings', ->
       @injector.map('test').to 'test'
       @injector.remove 'test'
@@ -62,6 +57,44 @@ describe 'Space.Injector', ->
     it 'throws error if you try to map undefined', ->
       expect(=> @injector.map(undefined)).to.throw 'Cannot map undefined value.'
       expect(=> @injector.map(null)).to.throw 'Cannot map undefined value.'
+
+  describe 'overriding mappings', ->
+
+    it 'allows to override mappings', ->
+      @injector.map('test').to 'test'
+      @injector.override('test').to 'other'
+      expect(@injector.get('test')).to.equal 'other'
+
+    it 'dynamically updates all dependent objects with the new dependency', ->
+      myObject = Dependencies: test: 'test'
+      firstValue = { first: true }
+      secondValue = { second: true }
+      @injector.map('test').to firstValue
+      @injector.injectInto myObject
+      expect(myObject.test).to.equal firstValue
+      @injector.override('test').to secondValue
+      expect(myObject.test).to.equal secondValue
+
+    it 'allows to de-register a dependent object from the mappings', ->
+      myObject = {
+        Dependencies:
+          first: 'First'
+          second: 'Second'
+      }
+      firstValue = { first: true }
+      secondValue = { second: true }
+      @injector.map('First').to firstValue
+      @injector.map('Second').to secondValue
+
+      @injector.injectInto myObject
+      firstMapping = @injector.getMappingFor 'First'
+      secondMapping = @injector.getMappingFor 'Second'
+      expect(firstMapping.hasDependee(myObject)).to.be.true
+      expect(secondMapping.hasDependee(myObject)).to.be.true
+      # Release the reference to the dependee
+      @injector.release(myObject)
+      expect(firstMapping.hasDependee(myObject)).to.be.false
+      expect(secondMapping.hasDependee(myObject)).to.be.false
 
   # ========== INJECTING DEPENDENCIES ========= #
 
