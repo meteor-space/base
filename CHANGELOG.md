@@ -1,6 +1,20 @@
 Changelog
 =========
 
+### 2.4.0
+Introduces dynamic overriding of injected dependencies in the running system.
+Now you can call `injector.override('Test').to('newValue')` and all objects
+that had the previous value of `Test` injected will be updated with the new
+value dynamically. This makes it possible to swap out complete sub-systems
+while the application is running. Of course it also comes with the potential
+of memory leaks, because now the injection mappings have to hold references
+to each and every object that dependencies are injected to. That's where the
+new `Space.Injector::release` API comes to play. If you have an object that
+should be garbage collected but has dependencies injected you need to release
+it from the Injector to let the mappings remove the references. In reality you
+rarely have to manage this yourself because other packages like `space:ui` will
+handle this transparently in the background.
+
 ### 2.3.1
 Only updated the Github repository links after moving it to the new
 https://github.com/meteor-space organization.
