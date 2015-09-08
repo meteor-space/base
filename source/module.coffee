@@ -4,24 +4,28 @@ class Space.Module extends Space.Object
   @ERRORS:
     injectorMissing: 'Instance of Space.Injector needed to initialize module.'
 
-  injector: null
+  Configuration: {}
   RequiredModules: null
-  isInitialized: false
-  isConfigured: false
-  isStarted: false
-
   # An array of paths to classes that you want to become
   # singletons in your application e.g: ['Space.messaging.EventBus']
   # these are automatically mapped and created on `app.run()`
   Singletons: []
 
-  constructor: (properties) ->
-    super properties
+  injector: null
+  isInitialized: false
+  isConfigured: false
+  isStarted: false
+
+  constructor: ->
+    super
     @RequiredModules ?= []
 
-  initialize: (@app, @injector) ->
+  initialize: (@app, @injector, mergedConfig={}, userConfig={}) ->
 
-    if not injector? then throw new Error Space.Module.ERRORS.injectorMissing
+    if not @injector? then throw new Error Space.Module.ERRORS.injectorMissing
+
+    _.extend(mergedConfig, this.constructor::Configuration, userConfig)
+    @Configuration = mergedConfig
 
     # Setup required modules
     for moduleId in @RequiredModules
@@ -33,7 +37,8 @@ class Space.Module extends Space.Object
 
       # Initialize required module
       module = app.modules[moduleId]
-      if !module.isInitialized then module.initialize app, injector
+      if !module.isInitialized
+        module.initialize(app, injector, mergedConfig, userConfig)
 
     # Give every module access Npm
     if Meteor.isServer then @npm = Npm

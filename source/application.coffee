@@ -1,12 +1,12 @@
 
 class Space.Application extends Space.Module
 
-  constructor: (properties) ->
-
-    super properties
+  constructor: (options={}) ->
+    super
     @modules = {}
-
-    @injector ?= new Space.Injector()
+    @injector = options.injector ? new Space.Injector()
+    mergedConfig = {}
+    @injector.map('Configuration').to mergedConfig
     @injector.map('Injector').to @injector
 
     # Map Meteor standard packages
@@ -45,9 +45,7 @@ class Space.Application extends Space.Module
     if Package['reactive-var']?
       @injector.map('ReactiveVar').toInstancesOf Package['reactive-var'].ReactiveVar
 
-    @initialize()
-
-  initialize: -> super this, @injector
+    @initialize this, @injector, mergedConfig, options.Configuration
 
   @define: (appName, prototype) ->
     prototype.toString = -> appName # For better debugging
