@@ -198,44 +198,47 @@ Space.Application.create({
 You can define default configurations for each module and application and
 override any part of it when creating an application instance like here:
 
-```coffeescript
-class FirstModule extends Space.Module
-  @publish this, 'FirstModule'
+```javascript
+Space.Module.define('FirstModule', {
   Configuration: {
-    firstToChange: 'first'
+    firstToChange: 'first',
     firstToKeep: 'first'
   }
-class SecondModule extends Space.Module
-  @publish this, 'SecondModule'
-  RequiredModules: ['FirstModule']
+});
+
+Space.Module.define('SecondModule', {
+  RequiredModules: ['FirstModule'],
   Configuration: {
-    secondToChange: 'second'
+    secondToChange: 'second',
     secondToKeep: 'second'
   }
-class TestApp extends Space.Application
-  RequiredModules: ['SecondModule']
+});
+
+TestApp = Space.Application.extend({
+  RequiredModules: ['SecondModule'],
   Configuration: {
-    appConfigToChange: 'app'
+    appConfigToChange: 'app',
     appConfigToKeep: 'app'
   }
-app = new TestApp({
+});
+
+var app = new TestApp({
   Configuration: {
-    firstToChange: 'firstChanged'
-    secondToChange: 'secondChanged'
+    firstToChange: 'firstChanged',
+    secondToChange: 'secondChanged',
     appConfigToChange: 'appChanged'
   }
-})
-expect(app.injector.get 'Configuration').to.deep.equal {
-  firstToChange: 'firstChanged'
-  firstToKeep: 'first'
-  secondToChange: 'secondChanged'
-  secondToKeep: 'second'
-  appConfigToChange: 'appChanged'
-  appConfigToKeep: 'app'
-}
-```
+});
 
-**[Learn more about Modules and Applications](https://github.com/CodeAdventure/meteor-space/wiki/Space.Injector)**
+expect(app.injector.get('Configuration')).to.deep.equal({
+  firstToChange: 'firstChanged',
+  firstToKeep: 'first',
+  secondToChange: 'secondChanged',
+  secondToKeep: 'second',
+  appConfigToChange: 'appChanged',
+  appConfigToKeep: 'app'
+});
+```
 
 ## 3. Testability
 
