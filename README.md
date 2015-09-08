@@ -109,8 +109,7 @@ Applications are the command center of your code. Here you configure
 and initialize all the different pieces:
 
 ```javascript
-var app = Space.Application.create({
-
+var App = Space.Application.extend({
   // This is automatically called on creation
   configure: function () {
     // every app has its own injector by default
@@ -123,6 +122,7 @@ var app = Space.Application.create({
   }
 });
 
+app = new App()
 app.start(); // You decide when your app starts
 ```
 
@@ -152,54 +152,87 @@ dependencies they have, by putting the special properties
 `RequiredModules` and `Dependencies` on their prototypes:
 
 ```javascript
-var MyModule = Space.Module.extend({
+var MyModule = Space.Module.define('MyModule', {
   // Declare which other Space modules are require
   RequiredModules: [
     'OtherModule',
     'YetAnotherModule'
   ],
-
   // Declare injected runtime dependencies
   Dependencies: {
     someService: 'OtherModule.SomeService',
     anotherService: 'YetAnotherModule.AnotherService'
   },
-
   // This method is called by the Space framework after all
   // required modules are initialized and the dependencies
   // are resolved and injected into the instance of this module.
   configure: function() {
-
     // Add mappings to the shared dependency injection system
     this.injector.map('MyModule.TestValue').to('test');
-
     // Use required dependencies
     this.someService.doSomeMagic()
     this.anotherService.beAwesome()
   }
 });
-
-// Publish this module to make it available to other modules and/or the app
-Space.Module.publish(MyModule, 'MyModule');
 ```
 
 ### Creating Applications based on Modules
 
 ```javascript
 Space.Application.create({
-
   // Applications also declare which modules they need:
   RequiredModules: ['MyModule'],
-
   // And their runtime dependencies from required modules:
   Dependencies: {
     testValue: 'MyModule.TestValue'
   },
-
   // This is called when all required modules are configured.
   configure: function() {
     console.log(this.testValue); // logs 'test' (see module above)
   }
+})
+```
+
+### Configuring Modules and Applications
+
+You can define default configurations for each module and application and
+override any part of it when creating an application instance like here:
+
+```coffeescript
+class FirstModule extends Space.Module
+  @publish this, 'FirstModule'
+  Configuration: {
+    firstToChange: 'first'
+    firstToKeep: 'first'
+  }
+class SecondModule extends Space.Module
+  @publish this, 'SecondModule'
+  RequiredModules: ['FirstModule']
+  Configuration: {
+    secondToChange: 'second'
+    secondToKeep: 'second'
+  }
+class TestApp extends Space.Application
+  RequiredModules: ['SecondModule']
+  Configuration: {
+    appConfigToChange: 'app'
+    appConfigToKeep: 'app'
+  }
+app = new TestApp({
+  Configuration: {
+    firstToChange: 'firstChanged'
+    secondToChange: 'secondChanged'
+    appConfigToChange: 'appChanged'
+  }
+})
+expect(app.injector.get 'Configuration').to.deep.equal {
+  firstToChange: 'firstChanged'
+  firstToKeep: 'first'
+  secondToChange: 'secondChanged'
+  secondToKeep: 'second'
+  appConfigToChange: 'appChanged'
+  appConfigToKeep: 'app'
+}
 ```
 
 **[Learn more about Modules and Applications](https://github.com/CodeAdventure/meteor-space/wiki/Space.Injector)**
