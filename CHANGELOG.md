@@ -1,6 +1,20 @@
 Changelog
 =========
 
+### 2.4.1
+Introduces better way to configure modules and applications. Now you can
+define a default `Configuration` property on the prototype and override
+specific values of it when creating the application instance like this:
+```javascript
+new TestApp({
+  Configuration: {
+    propertyToOverride: 'customValue',
+  }
+});
+```
+All configurations are merged into a single `Configuration` object available
+via the application injector like this: `injector.get('Configuration')`.
+
 ### 2.4.0
 Introduces dynamic overriding of injected dependencies in the running system.
 Now you can call `injector.override('Test').to('newValue')` and all objects
