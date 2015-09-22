@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 2.4.2
+Fixes some bugs with the new Meteor dependency tracker and the default
+dependency injections in Space applications.
+
 ### 2.4.1
 Introduces better way to configure modules and applications. Now you can
 define a default `Configuration` property on the prototype and override
