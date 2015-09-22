@@ -7,7 +7,7 @@ Package.describe({
 
 Package.onUse(function(api) {
 
-  api.versionsFrom("METEOR@1.0");
+  api.versionsFrom("METEOR@1.1.0.2");
 
   api.use([
     'coffeescript',
@@ -44,11 +44,18 @@ Package.onUse(function(api) {
 Package.onTest(function(api) {
 
   api.use([
+    'meteor',
     'coffeescript',
     'check',
     'space:base',
 
     // weak-dependencies
+    'ddp',
+    'random',
+    'underscore',
+    'mongo',
+    'tracker',
+    'templating',
     'ejson',
     'accounts-base',
     'email',

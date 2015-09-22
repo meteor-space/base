@@ -10,6 +10,7 @@ class Space.Application extends Space.Module
     @injector.map('Injector').to @injector
 
     # Map Meteor standard packages
+    @injector.map('Meteor').to Meteor
     if Package.ejson?
       @injector.map('EJSON').to Package.ejson.EJSON
     if Package.ddp?
