@@ -88,8 +88,15 @@ describe 'Space.Application', ->
       app = new Space.Application()
       app.RequiredModules = ['module1', 'module2']
       app.modules =
-        module1: start: sinon.spy()
-        module2: start: sinon.spy()
+        module1:
+          start: sinon.spy()
+          afterApplicationStart: sinon.spy()
+        module2:
+          start: sinon.spy()
+          afterApplicationStart: sinon.spy()
       app.start()
+
       expect(app.modules.module1.start).to.have.been.called
       expect(app.modules.module2.start).to.have.been.called
+      expect(app.modules.module1.afterApplicationStart).to.have.been.called
+      expect(app.modules.module2.afterApplicationStart).to.have.been.called
