@@ -1,6 +1,10 @@
 
 class Space.Application extends Space.Module
 
+  @define: (appName, prototype) ->
+    prototype.toString = -> appName # For better debugging
+    return @extend appName, prototype
+
   constructor: (options={}) ->
     super
     @modules = {}
@@ -48,6 +52,6 @@ class Space.Application extends Space.Module
 
     @initialize this, @injector, mergedConfig, options.Configuration
 
-  @define: (appName, prototype) ->
-    prototype.toString = -> appName # For better debugging
-    return @extend appName, prototype
+  start: ->
+    super
+    @afterApplicationStart()
