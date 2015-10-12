@@ -50,34 +50,46 @@ describe 'Space.Application', ->
       class FirstModule extends Space.Module
         @publish this, 'FirstModule'
         Configuration: {
-          firstToChange: 'first'
-          firstToKeep: 'first'
+          first: {
+            toChange: 'first'
+            toKeep: 'first'
+          }
         }
       class SecondModule extends Space.Module
         @publish this, 'SecondModule'
         RequiredModules: ['FirstModule']
         Configuration: {
-          secondToChange: 'second'
-          secondToKeep: 'second'
+          second: {
+            toChange: 'second'
+            toKeep: 'second'
+          }
         }
       class TestApp extends Space.Application
         RequiredModules: ['SecondModule']
         Configuration: {
-          appConfigToChange: 'app'
-          appConfigToKeep: 'app'
+          toChange: 'app'
+          toKeep: 'app'
         }
-      app = new TestApp({
-        firstToChange: 'firstChanged'
-        secondToChange: 'secondChanged'
-        appConfigToChange: 'appChanged'
-      })
+      app = new TestApp Configuration: {
+        toChange: 'appPropChanged'
+        first: {
+          toChange: 'firstChanged'
+        }
+        second: {
+          toChange: 'secondChanged'
+        }
+      }
       expect(app.injector.get 'Configuration').to.deep.equal {
-        firstToChange: 'firstChanged'
-        firstToKeep: 'first'
-        secondToChange: 'secondChanged'
-        secondToKeep: 'second'
-        appConfigToChange: 'appChanged'
-        appConfigToKeep: 'app'
+        toChange: 'appPropChanged'
+        toKeep: 'app'
+        first: {
+          toChange: 'firstChanged'
+          toKeep: 'first'
+        }
+        second: {
+          toChange: 'secondChanged'
+          toKeep: 'second'
+        }
       }
 
   describe '#start', ->

@@ -5,10 +5,10 @@ class Space.Application extends Space.Module
     prototype.toString = -> appName # For better debugging
     return @extend appName, prototype
 
-  constructor: (appConfig={}) ->
+  constructor: (options={}) ->
     super
     @modules = {}
-    @injector = appConfig.injector ? new Space.Injector()
+    @injector = options.injector ? new Space.Injector()
     mergedConfig = {}
     @injector.map('Configuration').to mergedConfig
     @injector.map('Injector').to @injector
@@ -50,7 +50,7 @@ class Space.Application extends Space.Module
     if Package['reactive-var']?
       @injector.map('ReactiveVar').toInstancesOf Package['reactive-var'].ReactiveVar
 
-    @initialize this, @injector, mergedConfig, appConfig
+    @initialize this, @injector, mergedConfig, options.Configuration
 
   start: ->
     super
