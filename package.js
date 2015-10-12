@@ -30,6 +30,7 @@ Package.onUse(function(api) {
   ], {weak: true});
 
   api.addFiles([
+    'source/lib/underscore_deep_extend_mixin.js',
     'source/helpers.coffee',
     'source/object.coffee',
     'source/struct.coffee',
