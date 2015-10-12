@@ -32,7 +32,7 @@ describe 'Meteor integration in applications', ->
         expect(@random).to.equal Random
 
         expect(@underscore).to.be.defined
-        expect(@underscore).to.equal _
+        expect(@underscore).to.equal Package.underscore._
 
         expect(@reactiveVar).to.be.instanceof Package['reactive-var'].ReactiveVar
 

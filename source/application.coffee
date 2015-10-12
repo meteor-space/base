@@ -21,7 +21,7 @@ class Space.Application extends Space.Module
       @injector.map('DDP').to Package.ddp.DDP
     if Package.random?
       @injector.map('Random').to Package.random.Random
-    @injector.map('underscore').to _
+    @injector.map('underscore').to Package.underscore._
     if Package.mongo?
       @injector.map('Mongo').to Package.mongo.Mongo
 
