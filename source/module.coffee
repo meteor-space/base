@@ -24,7 +24,7 @@ class Space.Module extends Space.Object
 
     if not @injector? then throw new Error Space.Module.ERRORS.injectorMissing
 
-    _.extend(mergedConfig, @constructor::Configuration, userConfig)
+    _.deepExtend(mergedConfig, @constructor::Configuration, userConfig)
     @Configuration = mergedConfig
 
     # Setup required modules

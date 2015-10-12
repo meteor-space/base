@@ -67,11 +67,9 @@ describe 'Space.Application', ->
           appConfigToKeep: 'app'
         }
       app = new TestApp({
-        Configuration: {
-          firstToChange: 'firstChanged'
-          secondToChange: 'secondChanged'
-          appConfigToChange: 'appChanged'
-        }
+        firstToChange: 'firstChanged'
+        secondToChange: 'secondChanged'
+        appConfigToChange: 'appChanged'
       })
       expect(app.injector.get 'Configuration').to.deep.equal {
         firstToChange: 'firstChanged'
