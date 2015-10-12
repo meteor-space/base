@@ -45,24 +45,23 @@ class Space.Injector
   create: (id) -> @get id
 
   injectInto: (value) ->
-    unless _.isObject(value) then return
+    unless _.isObject(value) and !value.__dependenciesInjected__ then return
+    if Object.defineProperty?
+      # Flag this object as injected
+      Object.defineProperty value, '__dependenciesInjected__',
+        enumerable: false
+        configurable: false
+        writable: false
+        value: true
+    else
+      # support old engines without Object.defineProperty
+      value.__dependenciesInjected__ = true
     # Get flat map of dependencies (possibly inherited)
     dependencies = @_mapDependencies value
     # Inject into dependencies to create the object graph
     value[key] ?= @get(id, value) for key, id of dependencies
-    # Notify when dependencies are ready, never call twice
-    if value.onDependenciesReady? and !value.__dependenciesInjected__
-      value.onDependenciesReady()
-      if Object.defineProperty?
-        # Flag this object as injected
-        Object.defineProperty value, '__dependenciesInjected__',
-          enumerable: false
-          configurable: false
-          writable: false
-          value: true
-      else
-        # support old engines without Object.defineProperty
-        value.__dependenciesInjected__ = true
+    # Notify when dependencies are ready
+    if value.onDependenciesReady? then value.onDependenciesReady()
 
   addProvider: (name, provider) -> @_providers[name] = provider
 
