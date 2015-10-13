@@ -20,11 +20,10 @@ class Space.Module extends Space.Object
     super
     @RequiredModules ?= []
 
-  initialize: (@app, @injector, mergedConfig={}, userConfig={}) ->
+  initialize: (@app, @injector, mergedConfig={}) ->
 
     if not @injector? then throw new Error Space.Module.ERRORS.injectorMissing
-
-    _.deepExtend(mergedConfig, @constructor::Configuration, userConfig)
+    _.deepExtend(mergedConfig, @constructor::Configuration)
     @Configuration = mergedConfig
 
     # Setup required modules
@@ -37,8 +36,7 @@ class Space.Module extends Space.Object
 
       # Initialize required module
       module = @app.modules[moduleId]
-      if !module.isInitialized
-        module.initialize(@app, @injector, mergedConfig, userConfig)
+      module.initialize(@app, @injector, mergedConfig) if !module.isInitialized
 
     # Give every module access Npm
     if Meteor.isServer then @npm = Npm

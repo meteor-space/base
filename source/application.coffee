@@ -1,6 +1,10 @@
 
 class Space.Application extends Space.Module
 
+  Configuration: {
+    appId: null
+  }
+
   @define: (appName, prototype) ->
     prototype.toString = -> appName # For better debugging
     return @extend appName, prototype
@@ -50,7 +54,8 @@ class Space.Application extends Space.Module
     if Package['reactive-var']?
       @injector.map('ReactiveVar').toInstancesOf Package['reactive-var'].ReactiveVar
 
-    @initialize this, @injector, mergedConfig, options.Configuration
+    @initialize this, @injector, mergedConfig
+    _.deepExtend(mergedConfig, options.Configuration)
 
   start: ->
     super
