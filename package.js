@@ -1,13 +1,13 @@
 Package.describe({
   summary: 'Modular application architecture for Meteor.',
   name: 'space:base',
-  version: '2.4.2',
+  version: '2.5.0',
   git: 'https://github.com/meteor-space/base.git'
 });
 
 Package.onUse(function(api) {
 
-  api.versionsFrom("METEOR@1.1.0.2");
+  api.versionsFrom("METEOR@1.0");
 
   api.use([
     'coffeescript',
@@ -30,6 +30,7 @@ Package.onUse(function(api) {
   ], {weak: true});
 
   api.addFiles([
+    'source/lib/underscore_deep_extend_mixin.js',
     'source/helpers.coffee',
     'source/object.coffee',
     'source/struct.coffee',

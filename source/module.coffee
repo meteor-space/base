@@ -20,12 +20,9 @@ class Space.Module extends Space.Object
     super
     @RequiredModules ?= []
 
-  initialize: (@app, @injector, mergedConfig={}, userConfig={}) ->
+  initialize: (@app, @injector, mergedConfig={}) ->
 
     if not @injector? then throw new Error Space.Module.ERRORS.injectorMissing
-
-    _.extend(mergedConfig, @constructor::Configuration, userConfig)
-    @Configuration = mergedConfig
 
     # Setup required modules
     for moduleId in @RequiredModules
@@ -37,8 +34,12 @@ class Space.Module extends Space.Object
 
       # Initialize required module
       module = @app.modules[moduleId]
-      if !module.isInitialized
-        module.initialize(@app, @injector, mergedConfig, userConfig)
+      module.initialize(@app, @injector, mergedConfig) if !module.isInitialized
+
+    # After the required modules have been configured, merge in the own
+    # configuration to give the chance for overwriting.
+    _.deepExtend(mergedConfig, @constructor::Configuration)
+    @Configuration = mergedConfig
 
     # Give every module access Npm
     if Meteor.isServer then @npm = Npm
@@ -64,12 +65,23 @@ class Space.Module extends Space.Object
 
     @isStarted = true
 
+  # Provide a hook for when the application and all modules started
+  afterApplicationStart: ->
+    @app.modules[moduleId].afterApplicationStart() for moduleId in @RequiredModules
+
   # Override to configure your mappings etc. after the
   # module was initialized but the application is not running yet.
   configure: ->
 
   # Override for final initialization when the application runs
   startup: ->
+
+  # Override for resetting DB collections etc.
+  reset: -> @app.modules[moduleId].reset() for moduleId in @RequiredModules
+
+
+  # Override for stopping observe-handles etc.
+  stop: -> @app.modules[moduleId].stop() for moduleId in @RequiredModules
 
   # ========== STATIC MODULE MANAGAMENT ============ #
 

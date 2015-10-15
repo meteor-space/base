@@ -50,36 +50,46 @@ describe 'Space.Application', ->
       class FirstModule extends Space.Module
         @publish this, 'FirstModule'
         Configuration: {
-          firstToChange: 'first'
-          firstToKeep: 'first'
+          first: {
+            toChange: 'first'
+            toKeep: 'first'
+          }
         }
       class SecondModule extends Space.Module
         @publish this, 'SecondModule'
         RequiredModules: ['FirstModule']
         Configuration: {
-          secondToChange: 'second'
-          secondToKeep: 'second'
+          second: {
+            toChange: 'second'
+            toKeep: 'second'
+          }
         }
       class TestApp extends Space.Application
         RequiredModules: ['SecondModule']
         Configuration: {
-          appConfigToChange: 'app'
-          appConfigToKeep: 'app'
+          toChange: 'app'
+          toKeep: 'app'
         }
-      app = new TestApp({
-        Configuration: {
-          firstToChange: 'firstChanged'
-          secondToChange: 'secondChanged'
-          appConfigToChange: 'appChanged'
+      app = new TestApp Configuration: {
+        toChange: 'appPropChanged'
+        first: {
+          toChange: 'firstChanged'
         }
-      })
+        second: {
+          toChange: 'secondChanged'
+        }
+      }
       expect(app.injector.get 'Configuration').to.deep.equal {
-        firstToChange: 'firstChanged'
-        firstToKeep: 'first'
-        secondToChange: 'secondChanged'
-        secondToKeep: 'second'
-        appConfigToChange: 'appChanged'
-        appConfigToKeep: 'app'
+        toChange: 'appPropChanged'
+        toKeep: 'app'
+        first: {
+          toChange: 'firstChanged'
+          toKeep: 'first'
+        }
+        second: {
+          toChange: 'secondChanged'
+          toKeep: 'second'
+        }
       }
 
   describe '#start', ->
@@ -88,8 +98,15 @@ describe 'Space.Application', ->
       app = new Space.Application()
       app.RequiredModules = ['module1', 'module2']
       app.modules =
-        module1: start: sinon.spy()
-        module2: start: sinon.spy()
+        module1:
+          start: sinon.spy()
+          afterApplicationStart: sinon.spy()
+        module2:
+          start: sinon.spy()
+          afterApplicationStart: sinon.spy()
       app.start()
+
       expect(app.modules.module1.start).to.have.been.called
       expect(app.modules.module2.start).to.have.been.called
+      expect(app.modules.module1.afterApplicationStart).to.have.been.called
+      expect(app.modules.module2.afterApplicationStart).to.have.been.called

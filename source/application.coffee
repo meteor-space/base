@@ -1,6 +1,14 @@
 
 class Space.Application extends Space.Module
 
+  Configuration: {
+    appId: null
+  }
+
+  @define: (appName, prototype) ->
+    prototype.toString = -> appName # For better debugging
+    return @extend appName, prototype
+
   constructor: (options={}) ->
     super
     @modules = {}
@@ -17,7 +25,7 @@ class Space.Application extends Space.Module
       @injector.map('DDP').to Package.ddp.DDP
     if Package.random?
       @injector.map('Random').to Package.random.Random
-    @injector.map('underscore').to _
+    @injector.map('underscore').to Package.underscore._
     if Package.mongo?
       @injector.map('Mongo').to Package.mongo.Mongo
 
@@ -46,8 +54,9 @@ class Space.Application extends Space.Module
     if Package['reactive-var']?
       @injector.map('ReactiveVar').toInstancesOf Package['reactive-var'].ReactiveVar
 
-    @initialize this, @injector, mergedConfig, options.Configuration
+    @initialize this, @injector, mergedConfig
+    _.deepExtend(mergedConfig, options.Configuration)
 
-  @define: (appName, prototype) ->
-    prototype.toString = -> appName # For better debugging
-    return @extend appName, prototype
+  start: ->
+    super
+    @afterApplicationStart()

@@ -1,6 +1,18 @@
 Changelog
 =========
 
+### 2.5.0
+Several improvements and bug fixes have been made:
+- Keep the required min version of Meteor down to 1.0
+- Added `afterApplicationStart` hook for modules and apps that is called
+  after everything has been configured and started.
+- Improved configuration api to allow overriding of arbitrarily nested
+  configuration values. This is super awesome for overriding configs of
+  modules.
+- Added  `Space.Object#type` api for adding debug info about class types.
+- Added `stop` hook for modules and apps that is similar to `reset` but
+  should be used for really drastic cleanup (like stopping observers etc.)
+
 ### 2.4.2
 Fixes some bugs with the new Meteor dependency tracker and the default
 dependency injections in Space applications.
