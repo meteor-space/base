@@ -76,6 +76,13 @@ class Space.Module extends Space.Object
   # Override for final initialization when the application runs
   startup: ->
 
+  # Override for resetting DB collections etc.
+  reset: -> @app.modules[moduleId].reset() for moduleId in @RequiredModules
+
+
+  # Override for stopping observe-handles etc.
+  stop: -> @app.modules[moduleId].stop() for moduleId in @RequiredModules
+
   # ========== STATIC MODULE MANAGAMENT ============ #
 
   @define: (moduleName, prototype) ->
