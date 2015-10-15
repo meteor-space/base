@@ -104,6 +104,8 @@ class Space.Object
 
     return Child
 
+  @type: (name) -> @toString = this::toString = -> name
+
   # Create and instance of the class that this method is called on
   # e.g.: Space.Object.create() would return an instance of Space.Object
   @create: ->
