@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 2.5.1
+- Thanks @sanjo for a patch that fixes dependency injection if two components
+  depend on each other.
+
 ### 2.5.0
 Several improvements and bug fixes have been made:
 - Keep the required min version of Meteor down to 1.0
