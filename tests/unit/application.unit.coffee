@@ -100,13 +100,13 @@ describe 'Space.Application', ->
       app.modules =
         module1:
           start: sinon.spy()
-          afterApplicationStart: sinon.spy()
+          afterStarted: sinon.spy()
         module2:
           start: sinon.spy()
-          afterApplicationStart: sinon.spy()
+          afterStarted: sinon.spy()
       app.start()
 
       expect(app.modules.module1.start).to.have.been.called
       expect(app.modules.module2.start).to.have.been.called
-      expect(app.modules.module1.afterApplicationStart).to.have.been.called
-      expect(app.modules.module2.afterApplicationStart).to.have.been.called
+      expect(app.modules.module1.afterStarted).to.have.been.called
+      expect(app.modules.module2.afterStarted).to.have.been.called

@@ -59,4 +59,4 @@ class Space.Application extends Space.Module
 
   start: ->
     super
-    @afterApplicationStart()
+    @afterStarted()

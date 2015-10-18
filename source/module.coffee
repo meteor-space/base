@@ -66,8 +66,8 @@ class Space.Module extends Space.Object
     @isStarted = true
 
   # Provide a hook for when the application and all modules started
-  afterApplicationStart: ->
-    @app.modules[moduleId].afterApplicationStart() for moduleId in @RequiredModules
+  afterStarted: ->
+    @app.modules[moduleId].afterStarted() for moduleId in @RequiredModules
 
   # Override to configure your mappings etc. after the
   # module was initialized but the application is not running yet.
