@@ -46,12 +46,6 @@ describe 'Space.Module', ->
       module = Space.Module.create RequiredModules: testArray
       expect(module.RequiredModules).to.equal testArray
 
-  describe '#run', ->
-
-    it 'defines a no-op run method', ->
-      expect(Space.Module::startup).to.be.a('function')
-
-
 describe 'Space.Module - #initialize', ->
 
   beforeEach ->
@@ -96,10 +90,10 @@ describe 'Space.Module - #initialize', ->
     @module.initialize @app, @injector
     expect(@module.npm.require).to.be.defined
 
-  it 'invokes the configure method on itself', ->
-    configureSpy = sinon.spy @module, 'configure'
+  it 'invokes the onInitialize method on itself', ->
+    @module.onInitialize = sinon.spy()
     @module.initialize @app, @injector
-    expect(configureSpy).to.have.been.calledOnce
+    expect(@module.onInitialize).to.have.been.calledOnce
 
   it 'looks up required modules and adds them to the modules object', ->
     # make our SUT module require our fake modules

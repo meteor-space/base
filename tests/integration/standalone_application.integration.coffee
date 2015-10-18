@@ -15,7 +15,7 @@ describe 'Meteor integration in applications', ->
         reactiveVar: 'ReactiveVar'
         mongo: 'Mongo'
 
-      configure: ->
+      onInitialize: ->
         expect(@meteor).to.be.defined
         expect(@meteor).to.equal Meteor
 
@@ -39,7 +39,6 @@ describe 'Meteor integration in applications', ->
         expect(@mongo).to.be.defined
         expect(@mongo).to.equal Mongo
 
-
       new SharedApp()
 
     # CLIENT ONLY
@@ -54,7 +53,7 @@ describe 'Meteor integration in applications', ->
           session: 'Session'
           blaze: 'Blaze'
 
-        configure: ->
+        onInitialize: ->
 
           expect(@tracker).to.be.defined
           expect(@tracker).to.equal Tracker
@@ -82,16 +81,11 @@ describe 'Meteor integration in applications', ->
           process: 'process'
           Future: 'Future'
 
-        configure: ->
-
+        onInitialize: ->
           expect(@email).to.be.defined
           expect(@email).to.equal Package['email'].Email
-
           expect(@process).to.be.defined
           expect(@process).to.equal process
-
           expect(@Future).to.be.defined
           expect(@Future).to.equal Npm.require 'fibers/future'
-
-
       new ServerApp()

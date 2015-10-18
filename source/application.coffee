@@ -55,8 +55,6 @@ class Space.Application extends Space.Module
       @injector.map('ReactiveVar').to Package['reactive-var'].ReactiveVar
 
     @initialize this, @injector, mergedConfig
-    _.deepExtend(mergedConfig, options.Configuration)
 
-  start: ->
-    super
-    @afterStarted()
+  # Make it possible to override configuration (at any nested level)
+  configure: (options) -> _.deepExtend @Configuration, options

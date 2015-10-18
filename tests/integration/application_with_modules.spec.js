@@ -1,7 +1,7 @@
 
 describe('Building applications based on modules', function() {
 
-  afterEach(function() {
+  beforeEach(function() {
     Space.Module.published = {}; // reset published space modules
   });
 
@@ -11,7 +11,7 @@ describe('Building applications based on modules', function() {
     var testResult = null;
 
     Space.Module.define('FirstModule', {
-      configure: function() {
+      onInitialize: function() {
         this.injector.map('testValue').toStaticValue(testValue);
       }
     });
@@ -19,7 +19,7 @@ describe('Building applications based on modules', function() {
     Space.Application.create({
       RequiredModules: ['FirstModule'],
       Dependencies: { testValue: 'testValue' },
-      configure: function () { testResult = this.testValue; }
+      onInitialize: function () { testResult = this.testValue; }
     });
 
     expect(testResult).to.equal(testValue);
@@ -32,10 +32,10 @@ describe('Building applications based on modules', function() {
     var testResult = null;
 
     Space.Module.define('FirstModule', {
-      configure: function() {
+      onInitialize: function() {
         this.injector.map('moduleValue').to(moduleValue);
       },
-      startup: function() {
+      onStart: function() {
         testResult = this.injector.get('moduleValue');
       }
     });
@@ -43,7 +43,7 @@ describe('Building applications based on modules', function() {
     var app = Space.Application.create({
       RequiredModules: ['FirstModule'],
       Dependencies: { moduleValue: 'moduleValue' },
-      configure: function() {
+      onInitialize: function() {
         this.injector.override('moduleValue').toStaticValue(appValue);
       }
     });

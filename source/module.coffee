@@ -14,7 +14,9 @@ class Space.Module extends Space.Object
   injector: null
   isInitialized: false
   isConfigured: false
-  isStarted: false
+  isRunning: false
+  isReset: false
+  isStopped: false
 
   constructor: ->
     super
@@ -34,8 +36,9 @@ class Space.Module extends Space.Object
 
       # Initialize required module
       module = @app.modules[moduleId]
+      module.beforeInitialize?()
       module.initialize(@app, @injector, mergedConfig) if !module.isInitialized
-
+    @beforeInitialize?()
     # After the required modules have been configured, merge in the own
     # configuration to give the chance for overwriting.
     _.deepExtend(mergedConfig, @constructor::Configuration)
@@ -47,41 +50,17 @@ class Space.Module extends Space.Object
     @injector.injectInto this
     # Map classes that are declared as singletons
     @injector.map(singleton).asSingleton() for singleton in @Singletons
+    @onInitialize?()
     @isInitialized = true
-    @configure()
-    @isConfigured = true
+    @afterInitialize?()
 
-  start: ->
-    # Start all required modules first if necessary
-    for moduleId in @RequiredModules
-      module = @app.modules[moduleId]
-      unless module.isStarted then module.start()
+  start: -> @_runLifeCycleHook 'start', 'isRunning', =>
+    # Create the singleton instances that are declared
+    @injector.create(singleton) for singleton in @Singletons
 
-    if !@isStarted
-      # Create the singleton instances that are declared
-      @injector.create(singleton) for singleton in @Singletons
-      # Let the user do other stuff on module startup
-      @startup()
+  reset: -> @_runLifeCycleHook 'reset', 'isReset'
 
-    @isStarted = true
-
-  # Provide a hook for when the application and all modules started
-  afterStarted: ->
-    @app.modules[moduleId].afterStarted() for moduleId in @RequiredModules
-
-  # Override to configure your mappings etc. after the
-  # module was initialized but the application is not running yet.
-  configure: ->
-
-  # Override for final initialization when the application runs
-  startup: ->
-
-  # Override for resetting DB collections etc.
-  reset: -> @app.modules[moduleId].reset() for moduleId in @RequiredModules
-
-
-  # Override for stopping observe-handles etc.
-  stop: -> @app.modules[moduleId].stop() for moduleId in @RequiredModules
+  stop: -> @_runLifeCycleHook 'stop', 'isStopped'
 
   # ========== STATIC MODULE MANAGAMENT ============ #
 
@@ -111,3 +90,28 @@ class Space.Module extends Space.Object
                       required by <#{requestingModule}>"
     else
       return module
+
+  # Invokes the given lifecycle hook on all required modules and then on itself
+  _runLifeCycleHook: (hookName, hookRan, hookAction) ->
+    # Don't invoke hooks when the given boolean (e.g: isRunning) is true!
+    if this[hookRan] then return
+    # Capitalize the first char of the hook name
+    capitalizedHook = hookName.charAt(0).toUpperCase() + hookName.slice(1)
+    # Give the chance to act before the hook is invoked
+    @_invokeHook "before#{capitalizedHook}", hookRan
+    # Run the main hook on all required modules but not itself
+    @_invokeHook hookName, hookRan, false
+    # Run the hook action that was provided for this hook
+    hookAction?()
+    # Give the chance to act when this module's hook is invoked in module-order
+    @_invokeHook "on#{capitalizedHook}", hookRan
+    # Flag this hook as invoked
+    this[hookRan] = true
+    @_invokeHook "after#{capitalizedHook}"
+
+  _invokeHook: (hookName, hookRan, runOnItself=true) ->
+    for moduleId in @RequiredModules
+      module = @app.modules[moduleId]
+      shouldRun = if hookRan? then !module[hookRan] else true
+      module[hookName]?() if shouldRun
+    this[hookName]?() if runOnItself
