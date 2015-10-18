@@ -52,7 +52,7 @@ class Space.Application extends Space.Module
       @injector.map('Accounts').to Package['accounts-base'].Accounts
 
     if Package['reactive-var']?
-      @injector.map('ReactiveVar').toInstancesOf Package['reactive-var'].ReactiveVar
+      @injector.map('ReactiveVar').to Package['reactive-var'].ReactiveVar
 
     @initialize this, @injector, mergedConfig
     _.deepExtend(mergedConfig, options.Configuration)

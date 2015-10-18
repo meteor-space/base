@@ -34,7 +34,7 @@ describe 'Meteor integration in applications', ->
         expect(@underscore).to.be.defined
         expect(@underscore).to.equal Package.underscore._
 
-        expect(@reactiveVar).to.be.instanceof Package['reactive-var'].ReactiveVar
+        expect(@reactiveVar).to.equal Package['reactive-var'].ReactiveVar
 
         expect(@mongo).to.be.defined
         expect(@mongo).to.equal Mongo
