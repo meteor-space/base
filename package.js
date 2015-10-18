@@ -1,7 +1,7 @@
 Package.describe({
-  summary: 'Modular application architecture for Meteor.',
+  summary: 'Modular Application Architecture for Meteor.',
   name: 'space:base',
-  version: '2.5.1',
+  version: '3.0.0',
   git: 'https://github.com/meteor-space/base.git'
 });
 
@@ -64,8 +64,8 @@ Package.onTest(function(api) {
     'reactive-var',
 
     'grigio:babel@0.1.3',
-    'practicalmeteor:munit@2.0.2',
-    'space:testing@1.3.0',
+    'practicalmeteor:munit@2.1.5',
+    'space:testing@1.5.0',
   ]);
 
   api.addFiles([
@@ -82,6 +82,7 @@ Package.onTest(function(api) {
     // integration tests
     'tests/integration/application_with_modules.spec.js',
     'tests/integration/standalone_application.integration.coffee',
+    'tests/integration/lifecycle_hooks.tests.js',
   ]);
 
 });

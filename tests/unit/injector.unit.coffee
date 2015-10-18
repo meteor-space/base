@@ -89,12 +89,12 @@ describe 'Space.Injector', ->
       @injector.injectInto myObject
       firstMapping = @injector.getMappingFor 'First'
       secondMapping = @injector.getMappingFor 'Second'
-      expect(firstMapping.hasDependee(myObject)).to.be.true
-      expect(secondMapping.hasDependee(myObject)).to.be.true
-      # Release the reference to the dependee
+      expect(firstMapping.hasDependent(myObject)).to.be.true
+      expect(secondMapping.hasDependent(myObject)).to.be.true
+      # Release the reference to the dependent
       @injector.release(myObject)
-      expect(firstMapping.hasDependee(myObject)).to.be.false
-      expect(secondMapping.hasDependee(myObject)).to.be.false
+      expect(firstMapping.hasDependent(myObject)).to.be.false
+      expect(secondMapping.hasDependent(myObject)).to.be.false
 
     it 'tells the dependent object when a dependency changed', ->
       dependentObject = {

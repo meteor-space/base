@@ -67,9 +67,9 @@ class Space.Injector
 
   getMappingFor: (id) -> @_mappings[id]
 
-  release: (dependee) ->
+  release: (dependent) ->
     for id, mapping of @_mappings
-      mapping.release(dependee) if mapping.hasDependee(dependee)
+      mapping.release(dependent) if mapping.hasDependent(dependent)
 
   _mapDependencies: (value, deps={}) ->
     Class = value.constructor ? null
@@ -100,19 +100,19 @@ class Mapping
 
   toString: -> 'Instance <Mapping>'
 
-  provide: (dependee) ->
+  provide: (dependent) ->
     # Register depented objects for this mapping so that their
     # dependencies can overwritten later on.
-    @_dependents.push(dependee)if dependee? and not @hasDependee(dependee)
+    @_dependents.push(dependent)if dependent? and not @hasDependent(dependent)
     @_provider.provide()
 
   markForOverride: -> @_overrideInDependents = true
 
-  hasDependee: (dependee) -> @getIndexOfDependee(dependee) > -1
+  hasDependent: (dependent) -> @getIndexOfDependee(dependent) > -1
 
-  getIndexOfDependee: (dependee) -> @_dependents.indexOf(dependee)
+  getIndexOfDependee: (dependent) -> @_dependents.indexOf(dependent)
 
-  release: (dependee) -> @_dependents.splice(@getIndexOfDependee(dependee), 1)
+  release: (dependent) -> @_dependents.splice(@getIndexOfDependee(dependent), 1)
 
   _setup: (provider) ->
     return (value) => # We are inside an API call like injector.map('this').to('that')
@@ -122,15 +122,15 @@ class Mapping
       if @_overrideInDependents
         # Get the value from the provider
         value = @_provider.provide()
-        # Loop over the dependees
-        for dependee in @_dependents
+        # Loop over the dependents
+        for dependent in @_dependents
           # Loop over their Dependencies and override the one this mapping
           # is managing if it exists (it should)
-          dependencies = dependee.Dependencies ? {}
+          dependencies = dependent.Dependencies ? {}
           for key, id of dependencies
             if id is @_id
-              dependee[key] = value
-              dependee.onDependencyChanged?(key, value)
+              dependent[key] = value
+              dependent.onDependencyChanged?(key, value)
 
       # Reset the flag to override dependencies
       @_overrideInDependents = false
