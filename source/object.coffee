@@ -126,7 +126,13 @@ class Space.Object
 
   # Mixin properties and methods to the class prototype and merge
   # properties that are plain objects to support the mixin of configs etc.
-  @mixin: (mixin) ->
+  @mixin: (mixins) ->
+    if _.isArray(mixins)
+      @_addMixin(mixin) for mixin in mixins
+    else
+      @_addMixin(mixins)
+
+  @_addMixin: (mixin) ->
 
     # Create a clone so that we can remove properties without affecting the global mixin
     mixin = _.clone mixin
