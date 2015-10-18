@@ -130,4 +130,4 @@ class Space.Object
       if isPlainObject(value) and isPlainObject(@prototype[key])
         _.deepExtend @prototype[key], value
       else
-        @prototype[key] = value
+        @prototype[key] ?= value
