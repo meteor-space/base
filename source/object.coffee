@@ -128,6 +128,6 @@ class Space.Object
     # Copy over the mixin to the prototype and merge objects
     for key, value of mixin
       if isPlainObject(value) and isPlainObject(@prototype[key])
-        _.extend @prototype[key], value
+        _.deepExtend @prototype[key], value
       else
         @prototype[key] = value
