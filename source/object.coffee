@@ -1,8 +1,15 @@
 
 class Space.Object
 
+  @_mixinCallbacks: null
+
   # Assign given properties to the instance
   constructor: (properties) -> @[key] = value for key, value of properties
+
+  onDependenciesReady: ->
+    if @constructor._mixinCallbacks?
+      # Let mixins initialize themselves when dependencies are ready
+      callback.call(this) for callback in @constructor._mixinCallbacks
 
   # Extends this class and return a child class with inherited prototype
   # and static properties.
@@ -120,6 +127,16 @@ class Space.Object
   # Mixin properties and methods to the class prototype and merge
   # properties that are plain objects to support the mixin of configs etc.
   @mixin: (mixin) ->
+
+    # Create a clone so that we can remove properties without affecting the global mixin
+    mixin = _.clone mixin
+
+    # Register the onDependenciesReady method of mixins as a initialization callback
+    mixinCallback = mixin.onDependenciesReady
+    if mixinCallback?
+      @_mixinCallbacks ?= []
+      @_mixinCallbacks.push mixinCallback
+      delete mixin.onDependenciesReady
 
     # Helper function to check for object literals only
     isPlainObject = (value) ->
