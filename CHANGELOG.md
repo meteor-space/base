@@ -1,6 +1,22 @@
 Changelog
 =========
 
+### 3.0.0
+Several breaking changes and API improvements have been made:
+- `ReactiveVar` is now mapped statically instead of `instancesOf`, so you
+can use it like the "normal"
+- The module/app lifecycle has been harmonized into a simple system:
+There are 4 lifecycle phases: `initialize`, `start`, `reset` and `stop`.
+For each phase there are `before`, `on`, and `after` hooks that are called
+in the logical order -> deepest nested module first. The `initialize` method
+is the only one that should not be called from outside but is automatically
+called when constructing a module/app.
+- The configuration API slightly changed again: The `configure` method is
+only defined on `Space.Application` and allows to override the default config of
+the app / modules.
+- The previous `configure` hooks does not exist anymore. You should use `onInitialize`
+instead.
+
 ### 2.5.1
 - Thanks @sanjo for a patch that fixes dependency injection if two components
   depend on each other.
