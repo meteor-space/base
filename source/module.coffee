@@ -36,7 +36,6 @@ class Space.Module extends Space.Object
 
       # Initialize required module
       module = @app.modules[moduleId]
-      module.beforeInitialize?()
       module.initialize(@app, @injector, mergedConfig) if !module.isInitialized
     @beforeInitialize?()
     # After the required modules have been configured, merge in the own
@@ -97,21 +96,16 @@ class Space.Module extends Space.Object
     if this[hookRan] then return
     # Capitalize the first char of the hook name
     capitalizedHook = hookName.charAt(0).toUpperCase() + hookName.slice(1)
-    # Give the chance to act before the hook is invoked
-    @_invokeHook "before#{capitalizedHook}", hookRan
-    # Run the main hook on all required modules but not itself
-    @_invokeHook hookName, hookRan, false
+    # Run the main hook on all required modules
+    @_invokeMethodOnRequiredModules hookName
+    # Give the chance to act before the action is invoked
+    this["before#{capitalizedHook}"]?()
     # Run the hook action that was provided for this hook
     hookAction?()
-    # Give the chance to act when this module's hook is invoked in module-order
-    @_invokeHook "on#{capitalizedHook}", hookRan
-    # Flag this hook as invoked
+    # Give the chance to act
+    this["on#{capitalizedHook}"]?()
     this[hookRan] = true
-    @_invokeHook "after#{capitalizedHook}"
+    this["after#{capitalizedHook}"]?()
 
-  _invokeHook: (hookName, hookRan, runOnItself=true) ->
-    for moduleId in @RequiredModules
-      module = @app.modules[moduleId]
-      shouldRun = if hookRan? then !module[hookRan] else true
-      module[hookName]?() if shouldRun
-    this[hookName]?() if runOnItself
+  _invokeMethodOnRequiredModules: (method) ->
+    @app.modules[moduleId][method]?() for moduleId in @RequiredModules

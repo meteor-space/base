@@ -55,12 +55,16 @@ describe("Space.base - Application lifecycle hooks", function () {
   }
 
   function testOrderOfLifecycleHook(context, before, on, after) {
-    expect(context.firstHooks[before]).to.have.been.calledBefore(context.secondHooks[before]);
-    expect(context.secondHooks[before]).to.have.been.calledBefore(context.appHooks[before]);
-    expect(context.firstHooks[on]).to.have.been.calledBefore(context.secondHooks[on]);
-    expect(context.secondHooks[on]).to.have.been.calledBefore(context.appHooks[on]);
-    expect(context.firstHooks[after]).to.have.been.calledBefore(context.secondHooks[after]);
-    expect(context.secondHooks[after]).to.have.been.calledBefore(context.appHooks[after]);
+    modules = ['firstHooks', 'secondHooks', 'appHooks'];
+    hooks = [before, on, after];
+    for(var i=0; i < 3; i++) {
+      for(var j=0; j < 3; j++) {
+        expect(context[modules[i]][hooks[j]]).to.have.been.calledOnce;
+        if(i < 2) {
+          expect(context[modules[i]][hooks[j]]).to.have.been.calledBefore(context[modules[i+1]][hooks[j]]);
+        }
+      }
+    }
   }
 
   function expectHooksNotCalledYet(context, before, on, after) {
