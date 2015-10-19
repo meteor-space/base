@@ -147,6 +147,11 @@ class Space.Object
     # Mixin static properties into the host class
     _.extend(this, mixin.Static) if mixin.Static?
     delete mixin.Static
+
+    # Give mixins the chance to do static setup when applied to the host class
+    mixin.onMixinApplied?.call this
+    delete mixin.onMixinApplied
+
     # Helper function to check for object literals only
     isPlainObject = (value) ->
       _.isObject(value) and !_.isArray(value) and !_.isFunction(value)
