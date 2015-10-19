@@ -1,6 +1,14 @@
 Changelog
 =========
 
+### 3.1.0
+- Fixed bug with module lifecycle hooks
+- Improved `Space.Object` mixin api to make it possible to mixin static class
+properties via the special `Static` property and to do static setup when the
+mixin is applied by providing a `onMixinApplied` method in the mixin definition.
+Both properties are not added to the prototype of course. The `onMixinApplied`
+method is called with the host class as `this` context.
+
 ### 3.0.0
 Several breaking changes and API improvements have been made:
 - `ReactiveVar` is now mapped statically instead of `instancesOf`, so you
