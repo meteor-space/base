@@ -144,6 +144,9 @@ class Space.Object
       @_mixinCallbacks.push mixinCallback
       delete mixin.onDependenciesReady
 
+    # Mixin static properties into the host class
+    _.extend(this, mixin.Static) if mixin.Static?
+    delete mixin.Static
     # Helper function to check for object literals only
     isPlainObject = (value) ->
       _.isObject(value) and !_.isArray(value) and !_.isFunction(value)
