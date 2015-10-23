@@ -67,6 +67,10 @@ class Space.Injector
 
   getMappingFor: (id) -> @_mappings[id]
 
+  getIdForValue: (value) ->
+    for mapping in @_mappings
+      return mapping.getId() if mapping.getProvider().getValue() is value
+
   release: (dependent) ->
     for id, mapping of @_mappings
       mapping.release(dependent) if mapping.hasDependent(dependent)
@@ -114,6 +118,10 @@ class Mapping
 
   release: (dependent) -> @_dependents.splice(@getIndexOfDependee(dependent), 1)
 
+  getId: -> @_id
+
+  getProvider: -> @_provider
+
   _setup: (provider) ->
     return (value) => # We are inside an API call like injector.map('this').to('that')
       # Set the provider of this mapping to what the API user chose
@@ -137,34 +145,48 @@ class Mapping
 
 # ========= DEFAULT PROVIDERS ======== #
 
-class ValueProvider
+class Provider
 
-  constructor: (id, @value) ->
-    if not @value?
-      @value = if (typeof id is 'string') then Space.resolvePath(id) else id
+  _id: null
+  _value: null
+
+  constructor: (@_id, @_value) ->
+
+  getValue: -> @_value
+
+class ValueProvider extends Provider
+
+  constructor: ->
+    super
+    if not @_value?
+      if (typeof id is 'string')
+        @_value = Space.resolvePath(@_id)
+      else
+        @_value = @_id
 
   toString: -> 'Instance <ValueProvider>'
 
-  provide: -> @value
+  provide: -> @_value
 
 class InstanceProvider
 
-  constructor: (id, @Class) ->
-
   toString: -> 'Instance <InstanceProvider>'
 
-  provide: -> new @Class()
+  provide: -> new @_value()
 
 class SingletonProvider
 
-  constructor: (id, @Class) ->
-    if not @Class? then @Class = id
-    if typeof(@Class) is 'string' then @Class = Space.resolvePath(@Class)
+  _singleton: null
+
+  constructor: ->
+    super
+    if not @_value? then @_value = @_id
+    if typeof(@_value) is 'string' then @_value = Space.resolvePath(@_value)
 
   toString: -> 'Instance <SingletonProvider>'
 
   provide: ->
-    if not @_singleton? then @_singleton = new @Class()
+    if not @_singleton? then @_singleton = new @_value()
     return @_singleton
 
 Space.Injector.DEFAULT_PROVIDERS =
