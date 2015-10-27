@@ -1,6 +1,9 @@
 Changelog
 =========
 
+### 3.1.1
+- Fixes bug with recently updated injector code
+
 ### 3.1.0
 - Fixed bug with module lifecycle hooks
 - Improved `Space.Object` mixin api to make it possible to mixin static class

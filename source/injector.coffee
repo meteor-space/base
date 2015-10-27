@@ -159,7 +159,7 @@ class ValueProvider extends Provider
   constructor: ->
     super
     if not @_value?
-      if (typeof id is 'string')
+      if (typeof @_id is 'string')
         @_value = Space.resolvePath(@_id)
       else
         @_value = @_id
@@ -168,13 +168,13 @@ class ValueProvider extends Provider
 
   provide: -> @_value
 
-class InstanceProvider
+class InstanceProvider extends Provider
 
   toString: -> 'Instance <InstanceProvider>'
 
   provide: -> new @_value()
 
-class SingletonProvider
+class SingletonProvider extends Provider
 
   _singleton: null
 
