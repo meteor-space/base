@@ -116,7 +116,6 @@ class Space.Module extends Space.Object
   # Invokes the lifecycle action on all required modules, then on itself,
   # calling the instance hooks before, on, and after
   _runLifeCycleAction: (action, func) ->
-    console.log(func.toString())
 
     @_invokeActionOnRequiredModules action
     this["before#{@_capitalize(action)}"]?()
