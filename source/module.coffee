@@ -14,9 +14,11 @@ class Space.Module extends Space.Object
   injector: null
   isInitialized: false
   isConfigured: false
+  state: 'stopped'
+  # Depreciated: use state instead
   isRunning: false
-  isReset: false
-  isStopped: false
+  isStopped: true
+  # --
 
   constructor: ->
     super
@@ -53,15 +55,36 @@ class Space.Module extends Space.Object
     @isInitialized = true
     @afterInitialize?()
 
-  start: -> @_runLifeCycleHook 'start', 'isRunning', =>
-    # Create the singleton instances that are declared
-    @injector.create(singleton) for singleton in @Singletons
+  start: ->
 
-  reset: -> @_runLifeCycleHook 'reset', 'isReset'
+    if @state is 'running' then return
+    @_runLifeCycleAction 'start', => @injector.create(singleton) for singleton in @Singletons
+    @state = 'running'
 
-  stop: -> @_runLifeCycleHook 'stop', 'isStopped'
+    # Backwards compatibility
+    @isStopped = false
+    @isRunning = true
+    # --
 
-  # ========== STATIC MODULE MANAGAMENT ============ #
+  reset: ->
+
+    restartRequired = true if @state is 'running'
+    if restartRequired then @stop()
+    @_runLifeCycleAction 'reset'
+    if restartRequired then @start()
+
+  stop: ->
+
+    if @state is 'stopped' then return
+    @_runLifeCycleAction 'stop', =>
+    @state = 'stopped'
+
+    # Backwards compatibility
+    @isStopped = true
+    @isRunning = false
+    # --
+
+  # ========== STATIC MODULE MANAGEMENT ============ #
 
   @define: (moduleName, prototype) ->
     prototype.toString = -> moduleName # For better debugging
@@ -79,7 +102,7 @@ class Space.Module extends Space.Object
     else
       Space.Module.published[identifier] = module
 
-  # Retrieve a module by indentifier
+  # Retrieve a module by identifier
   @require: (requiredModule, requestingModule) ->
 
     module = Space.Module.published[requiredModule]
@@ -90,22 +113,19 @@ class Space.Module extends Space.Object
     else
       return module
 
-  # Invokes the given lifecycle hook on all required modules and then on itself
-  _runLifeCycleHook: (hookName, hookRan, hookAction) ->
-    # Don't invoke hooks when the given boolean (e.g: isRunning) is true!
-    if this[hookRan] then return
-    # Capitalize the first char of the hook name
-    capitalizedHook = hookName.charAt(0).toUpperCase() + hookName.slice(1)
-    # Run the main hook on all required modules
-    @_invokeMethodOnRequiredModules hookName
-    # Give the chance to act before the action is invoked
-    this["before#{capitalizedHook}"]?()
-    # Run the hook action that was provided for this hook
-    hookAction?()
-    # Give the chance to act
-    this["on#{capitalizedHook}"]?()
-    this[hookRan] = true
-    this["after#{capitalizedHook}"]?()
+  # Invokes the lifecycle action on all required modules, then on itself,
+  # calling the instance hooks before, on, and after
+  _runLifeCycleAction: (action, func) ->
+    console.log(func.toString())
 
-  _invokeMethodOnRequiredModules: (method) ->
-    @app.modules[moduleId][method]?() for moduleId in @RequiredModules
+    @_invokeActionOnRequiredModules action
+    this["before#{@_capitalize(action)}"]?()
+    func?()
+    this["on#{@_capitalize(action)}"]?()
+    this["after#{@_capitalize(action)}"]?()
+
+  _capitalize: (string) ->
+    string.charAt(0).toUpperCase() + string.slice(1)
+
+  _invokeActionOnRequiredModules: (action) ->
+    @app.modules[moduleId][action]?() for moduleId in @RequiredModules

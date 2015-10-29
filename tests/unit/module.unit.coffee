@@ -46,6 +46,13 @@ describe 'Space.Module', ->
       module = Space.Module.create RequiredModules: testArray
       expect(module.RequiredModules).to.equal testArray
 
+    it 'sets the correct state', ->
+      module = new Space.Module()
+      expect(module.isInitialized).to.be.false
+      expect(module.isConfigured).to.be.false
+      expect(module.state).to.equal 'stopped'
+
+
 describe 'Space.Module - #initialize', ->
 
   beforeEach ->
@@ -123,3 +130,42 @@ describe 'Space.Module - #initialize', ->
 
     expect(@fakeModule1.initialize).not.to.have.been.called
     expect(@fakeModule2.initialize).not.to.have.been.called
+
+describe 'Space.Module - #start', ->
+
+  beforeEach ->
+    @module = new Space.Module()
+    @module.start()
+    @module._runLifeCycleAction = sinon.spy()
+
+  it 'sets the state to running', ->
+    expect(@module.state).to.equal('running')
+
+    # Backwards compatibility
+    expect(@module.isRunning).to.be.true
+    expect(@module.isStopped).to.be.false
+    # --
+
+  it 'ignores start calls on a running module', ->
+    @module.start()
+    expect(@module._runLifeCycleAction).not.to.have.been.called
+
+describe 'Space.Module - #stop', ->
+
+  beforeEach ->
+    @module = new Space.Module()
+    @module.start()
+    @module.stop()
+    @module._runLifeCycleAction = sinon.spy()
+
+
+  it 'sets the state to stopped', ->
+    expect(@module.state).to.equal('stopped')
+    # Backwards compatibility
+    expect(@module.isRunning).to.be.false
+    expect(@module.isStopped).to.be.true
+    # --
+
+  it 'ignores stop calls on a stopped module', ->
+    @module.stop()
+    expect(@module._runLifeCycleAction).not.to.have.been.called
