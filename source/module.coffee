@@ -20,33 +20,26 @@ class Space.Module extends Space.Object
     @RequiredModules ?= []
 
   initialize: (@app, @injector, mergedConfig={}) ->
-
     if not @injector? then throw new Error Space.Module.ERRORS.injectorMissing
-
     # merge any supplied config into this Module's Configuration
     _.deepExtend(@Configuration, mergedConfig)
-
     # Setup required modules
     for moduleId in @RequiredModules
-
       # Create a new module instance if not already registered with the app
       unless @app.modules[moduleId]?
         moduleClass = Space.Module.require(moduleId, this.constructor.name)
         @app.modules[moduleId] = new moduleClass()
-
       # Initialize required module
       module = @app.modules[moduleId]
       module.initialize(@app, @injector, @Configuration) if !module.isInitialized
 
     @beforeInitialize?()
-
     # After the required modules have been configured, merge in the own
     # configuration to give the chance for overwriting.
-    @Configuration = _.deepExtend(mergedConfig, @constructor::Configuration )
-
+    @Configuration = _.deepExtend(mergedConfig, @constructor::Configuration)
     # Give every module access Npm
     if Meteor.isServer then @npm = Npm
-
+    # Inject required dependencies into this module
     @injector.injectInto this
     # Map classes that are declared as singletons
     @injector.map(singleton).asSingleton() for singleton in @Singletons
@@ -55,20 +48,17 @@ class Space.Module extends Space.Object
     @afterInitialize?()
 
   start: ->
-
     if @state is 'running' then return
     @_runLifeCycleAction 'start', => @injector.create(singleton) for singleton in @Singletons
     @state = 'running'
 
   reset: ->
-
     restartRequired = true if @state is 'running'
     if restartRequired then @stop()
     @_runLifeCycleAction 'reset'
     if restartRequired then @start()
 
   stop: ->
-
     if @state is 'stopped' then return
     @_runLifeCycleAction 'stop', =>
     @state = 'stopped'
@@ -93,9 +83,7 @@ class Space.Module extends Space.Object
 
   # Retrieve a module by identifier
   @require: (requiredModule, requestingModule) ->
-
     module = Space.Module.published[requiredModule]
-
     if not module?
       throw new Error "Could not find module <#{requiredModule}>
                       required by <#{requestingModule}>"
@@ -105,7 +93,6 @@ class Space.Module extends Space.Object
   # Invokes the lifecycle action on all required modules, then on itself,
   # calling the instance hooks before, on, and after
   _runLifeCycleAction: (action, func) ->
-
     @_invokeActionOnRequiredModules action
     this["before#{@_capitalize(action)}"]?()
     func?()
