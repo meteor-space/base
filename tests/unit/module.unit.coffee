@@ -15,11 +15,9 @@ describe 'Space.Module', ->
       expect(Space.Module.published[fakeModule.identifier]).to.equal fakeModule
 
     it 'throws an error if two modules try to publish under same name', ->
-      subModule1 = identifier: 'test'
-      subModule2 = identifier: 'test'
       publishTwoModulesWithSameName = ->
-        Space.Module.publish subModule1, subModule1.identifier
-        Space.Module.publish subModule2, subModule2.identifier
+        Space.Module.publish {}, 'test'
+        Space.Module.publish {}, 'test'
       expect(publishTwoModulesWithSameName).to.throw Error
 
   describe '@require', ->
