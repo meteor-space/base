@@ -19,10 +19,11 @@ class Space.Module extends Space.Object
     @RequiredModules ?= []
 
   initialize: (@app, @injector, mergedConfig={}, isSubModule=false) ->
-    if @isInitialized then return
+    if @is('initialized') then return
     if not @injector? then throw new Error Module.ERRORS.injectorMissing
     # merge any supplied config into this Module's Configuration
     _.deepExtend(@Configuration, mergedConfig)
+
     # Setup required modules
     for moduleId in @RequiredModules
       # Create a new module instance if not already registered with the app
@@ -31,7 +32,8 @@ class Space.Module extends Space.Object
         @app.modules[moduleId] = new moduleClass()
       # Initialize required module
       module = @app.modules[moduleId]
-      module.initialize(@app, @injector, @Configuration, true) if !module.isInitialized
+      module.initialize(@app, @injector, @Configuration, true) if module.is('constructed')
+
     # Provide lifecycle hook before any initialization has been done
     @beforeInitialize?()
     # After the required modules have been initialized, merge in the own
@@ -57,18 +59,18 @@ class Space.Module extends Space.Object
     @_runAfterInitializeHook() unless isSubModule
 
   start: ->
-    if @_state is 'running' then return
+    if @is('running') then return
     @_runLifeCycleAction 'start', => @injector.create(singleton) for singleton in @Singletons
     @_state = 'running'
 
   reset: ->
-    restartRequired = true if @_state is 'running'
+    restartRequired = true if @is('running')
     if restartRequired then @stop()
     @_runLifeCycleAction 'reset'
     if restartRequired then @start()
 
   stop: ->
-    if @_state is 'stopped' then return
+    if @is('stopped') then return
     @_runLifeCycleAction 'stop', =>
     @_state = 'stopped'
 
@@ -76,7 +78,7 @@ class Space.Module extends Space.Object
 
   # ========== STATIC MODULE MANAGEMENT ============ #
 
-  @define: (moduleName, prototype) ->
+  @define: (moduleName, prototype={}) ->
     prototype.toString = -> moduleName # For better debugging
     @publish Space.Module.extend(moduleName, prototype), moduleName
 
@@ -86,7 +88,7 @@ class Space.Module extends Space.Object
   # Publishes a module into the space environment to make it
   # visible and requireable for other modules and the application
   @publish: (module, identifier) ->
-    module.publishedAs = identifier
+    module.publishedAs = module.name = identifier
     if Space.Module.published[identifier]?
       throw new Error "Two modules tried to be published as <#{identifier}>"
     else
