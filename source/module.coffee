@@ -13,12 +13,7 @@ class Space.Module extends Space.Object
 
   injector: null
   isInitialized: false
-  isConfigured: false
   state: 'stopped'
-  # Depreciated: use state instead
-  isRunning: false
-  isStopped: true
-  # --
 
   constructor: ->
     super
@@ -65,11 +60,6 @@ class Space.Module extends Space.Object
     @_runLifeCycleAction 'start', => @injector.create(singleton) for singleton in @Singletons
     @state = 'running'
 
-    # Backwards compatibility
-    @isStopped = false
-    @isRunning = true
-    # --
-
   reset: ->
 
     restartRequired = true if @state is 'running'
@@ -82,11 +72,6 @@ class Space.Module extends Space.Object
     if @state is 'stopped' then return
     @_runLifeCycleAction 'stop', =>
     @state = 'stopped'
-
-    # Backwards compatibility
-    @isStopped = true
-    @isRunning = false
-    # --
 
   # ========== STATIC MODULE MANAGEMENT ============ #
 
