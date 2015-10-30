@@ -10,23 +10,21 @@ describe 'Space.Module', ->
   describe '@publish', ->
 
     it 'adds given module to the static collection of published modules', ->
-      fakeModule = identifier = 'test'
-      Space.Module.publish fakeModule, fakeModule.identifier
-      expect(Space.Module.published[fakeModule.identifier]).to.equal fakeModule
+      module = Space.Module.define 'test'
+      expect(Space.Module.published['test']).to.equal module
 
     it 'throws an error if two modules try to publish under same name', ->
       publishTwoModulesWithSameName = ->
-        Space.Module.publish {}, 'test'
-        Space.Module.publish {}, 'test'
+        Space.Module.define 'test'
+        Space.Module.define 'test'
       expect(publishTwoModulesWithSameName).to.throw Error
 
   describe '@require', ->
 
     it 'returns published module for given identifier', ->
-      fakeModule = identifier = 'test'
-      Space.Module.publish fakeModule, fakeModule.identifier
-      requiredModule = Space.Module.require fakeModule.identifier
-      expect(requiredModule).to.equal fakeModule
+      module = Space.Module.define 'test'
+      requiredModule = Space.Module.require 'test'
+      expect(requiredModule).to.equal module
 
     it 'throws and error if no module was registered for given identifier', ->
       requireUnkownModule = -> Space.Module.require 'unknown module'
