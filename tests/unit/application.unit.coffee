@@ -53,7 +53,7 @@ describe 'Space.Application', ->
             toKeep: 'grandchildKeepMe'
           }
         }
-        onInitialize: ->
+        afterInitialize: ->
           expect(@Configuration).to.deep.equal {
             toChange: 'appChangeMe'
             toKeep: 'appKeepMe'
@@ -104,5 +104,3 @@ describe 'Space.Application', ->
           toKeep: 'grandchildKeepMe'
         }
       }
-
-

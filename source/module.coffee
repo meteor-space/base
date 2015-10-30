@@ -1,8 +1,10 @@
 
 class Space.Module extends Space.Object
 
-  @ERRORS:
+  @ERRORS: {
     injectorMissing: 'Instance of Space.Injector needed to initialize module.'
+    alreadyInitialized: 'Module was already initialized.'
+  }
 
   Configuration: {}
   RequiredModules: null
@@ -10,17 +12,16 @@ class Space.Module extends Space.Object
   # singletons in your application e.g: ['Space.messaging.EventBus']
   # these are automatically mapped and created on `app.run()`
   Singletons: []
-
   injector: null
-  isInitialized: false
-  state: 'stopped'
+  _state: 'constructed'
 
   constructor: ->
     super
     @RequiredModules ?= []
 
-  initialize: (@app, @injector, mergedConfig={}) ->
-    if not @injector? then throw new Error Space.Module.ERRORS.injectorMissing
+  initialize: (@app, @injector, mergedConfig={}, isSubModule=false) ->
+    if @isInitialized then return
+    if not @injector? then throw new Error Module.ERRORS.injectorMissing
     # merge any supplied config into this Module's Configuration
     _.deepExtend(@Configuration, mergedConfig)
     # Setup required modules
@@ -31,37 +32,48 @@ class Space.Module extends Space.Object
         @app.modules[moduleId] = new moduleClass()
       # Initialize required module
       module = @app.modules[moduleId]
-      module.initialize(@app, @injector, @Configuration) if !module.isInitialized
-
+      module.initialize(@app, @injector, @Configuration, true) if !module.isInitialized
+    # Provide lifecycle hook before any initialization has been done
     @beforeInitialize?()
-    # After the required modules have been configured, merge in the own
+    # After the required modules have been initialized, merge in the own
     # configuration to give the chance for overwriting.
     @Configuration = _.deepExtend(mergedConfig, @constructor::Configuration)
     # Give every module access Npm
     if Meteor.isServer then @npm = Npm
+
+    # Setup basic mappings required by all modules if this the top-level module
+    unless isSubModule
+      @injector.map('Configuration').to @Configuration
+      @injector.map('Injector').to @injector
+      @_mapMeteorApis()
+
     # Inject required dependencies into this module
     @injector.injectInto this
+    # Provide lifecycle hook after this module was configured and injected
+    @onInitialize?()
     # Map classes that are declared as singletons
     @injector.map(singleton).asSingleton() for singleton in @Singletons
-    @onInitialize?()
-    @isInitialized = true
-    @afterInitialize?()
+    @_state = 'initialized'
+    # After all modules in the tree have been configured etc. invoke last hook
+    @_runAfterInitializeHook() unless isSubModule
 
   start: ->
-    if @state is 'running' then return
+    if @_state is 'running' then return
     @_runLifeCycleAction 'start', => @injector.create(singleton) for singleton in @Singletons
-    @state = 'running'
+    @_state = 'running'
 
   reset: ->
-    restartRequired = true if @state is 'running'
+    restartRequired = true if @_state is 'running'
     if restartRequired then @stop()
     @_runLifeCycleAction 'reset'
     if restartRequired then @start()
 
   stop: ->
-    if @state is 'stopped' then return
+    if @_state is 'stopped' then return
     @_runLifeCycleAction 'stop', =>
-    @state = 'stopped'
+    @_state = 'stopped'
+
+  is: (expectedState) -> expectedState is @_state
 
   # ========== STATIC MODULE MANAGEMENT ============ #
 
@@ -99,8 +111,50 @@ class Space.Module extends Space.Object
     this["on#{@_capitalize(action)}"]?()
     this["after#{@_capitalize(action)}"]?()
 
+  _runAfterInitializeHook: ->
+    @_invokeActionOnRequiredModules '_runAfterInitializeHook'
+    @afterInitialize?()
+
   _capitalize: (string) ->
     string.charAt(0).toUpperCase() + string.slice(1)
 
   _invokeActionOnRequiredModules: (action) ->
     @app.modules[moduleId][action]?() for moduleId in @RequiredModules
+
+  _mapMeteorApis: ->
+    # Map Meteor standard packages
+    @injector.map('Meteor').to Meteor
+    if Package.ejson?
+      @injector.map('EJSON').to Package.ejson.EJSON
+    if Package.ddp?
+      @injector.map('DDP').to Package.ddp.DDP
+    if Package.random?
+      @injector.map('Random').to Package.random.Random
+    @injector.map('underscore').to Package.underscore._
+    if Package.mongo?
+      @injector.map('Mongo').to Package.mongo.Mongo
+
+    if Meteor.isClient
+      if Package.tracker?
+        @injector.map('Tracker').to Package.tracker.Tracker
+      if Package.templating?
+        @injector.map('Template').to Package.templating.Template
+      if Package.session?
+        @injector.map('Session').to Package.session.Session
+      if Package.blaze?
+        @injector.map('Blaze').to Package.blaze.Blaze
+
+    if Meteor.isServer
+      @injector.map('check').to check
+      @injector.map('Match').to Match
+      @injector.map('process').to process
+      @injector.map('Future').to Npm.require 'fibers/future'
+
+      if Package.email?
+        @injector.map('Email').to Package.email.Email
+
+    if Package['accounts-base']?
+      @injector.map('Accounts').to Package['accounts-base'].Accounts
+
+    if Package['reactive-var']?
+      @injector.map('ReactiveVar').to Package['reactive-var'].ReactiveVar

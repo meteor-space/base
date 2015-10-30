@@ -48,15 +48,15 @@ describe 'Space.Module', ->
 
     it 'sets the correct state', ->
       module = new Space.Module()
-      expect(module.isInitialized).to.be.false
-      expect(module.state).to.equal 'stopped'
+      expect(module.is 'constructed').to.be.true
 
 
 describe 'Space.Module - #initialize', ->
 
   beforeEach ->
     @app = modules: {}
-    @injector = injectInto: sinon.spy()
+    @injector = new Space.Injector()
+    sinon.spy @injector, 'injectInto'
     @requireStub = sinon.stub Space.Module, 'require'
     @module = new Space.Module()
 
@@ -90,7 +90,7 @@ describe 'Space.Module - #initialize', ->
 
   it 'sets the initialized flag correctly', ->
     @module.initialize @app, @injector
-    expect(@module.isInitialized).to.be.true
+    expect(@module.is 'initialized').to.be.true
 
   it.server 'adds Npm as property to the module', ->
     @module.initialize @app, @injector
@@ -138,7 +138,7 @@ describe 'Space.Module - #start', ->
     @module._runLifeCycleAction = sinon.spy()
 
   it 'sets the state to running', ->
-    expect(@module.state).to.equal('running')
+    expect(@module.is 'running').to.be.true
 
   it 'ignores start calls on a running module', ->
     @module.start()
@@ -153,7 +153,7 @@ describe 'Space.Module - #stop', ->
     @module._runLifeCycleAction = sinon.spy()
 
   it 'sets the state to stopped', ->
-    expect(@module.state).to.equal('stopped')
+    expect(@module.is 'stopped').to.be.true
 
   it 'ignores stop calls on a stopped module', ->
     @module.stop()
