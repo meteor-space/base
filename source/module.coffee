@@ -28,22 +28,26 @@ class Space.Module extends Space.Object
 
     if not @injector? then throw new Error Space.Module.ERRORS.injectorMissing
 
+    # merge any supplied config into this Module's Configuration
+    _.deepExtend(@Configuration, mergedConfig)
+
     # Setup required modules
     for moduleId in @RequiredModules
 
-      # Create a new module instance if non exist in the app
+      # Create a new module instance if not already registered with the app
       unless @app.modules[moduleId]?
         moduleClass = Space.Module.require(moduleId, this.constructor.name)
         @app.modules[moduleId] = new moduleClass()
 
       # Initialize required module
       module = @app.modules[moduleId]
-      module.initialize(@app, @injector, mergedConfig) if !module.isInitialized
+      module.initialize(@app, @injector, @Configuration) if !module.isInitialized
+
     @beforeInitialize?()
+
     # After the required modules have been configured, merge in the own
     # configuration to give the chance for overwriting.
-    _.deepExtend(mergedConfig, @constructor::Configuration)
-    @Configuration = mergedConfig
+    @Configuration = _.deepExtend(mergedConfig, @constructor::Configuration )
 
     # Give every module access Npm
     if Meteor.isServer then @npm = Npm
