@@ -3,7 +3,6 @@ class Space.Module extends Space.Object
 
   @ERRORS: {
     injectorMissing: 'Instance of Space.Injector needed to initialize module.'
-    alreadyInitialized: 'Module was already initialized.'
   }
 
   Configuration: {}
