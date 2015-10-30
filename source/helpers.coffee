@@ -6,9 +6,13 @@ global = this
   namespaces: {}
 }
 
+class Space.CouldNotResolvePathError extends Error
+  constructor: (path) -> @message = "Could not resolve <#{path}>"
+
 # Resolves a (possibly nested) path to an global object
 # Returns the object or null (if not found)
 Space.resolvePath = (path) ->
+  if !path? then throw new Space.CouldNotResolvePathError(path)
   if path == '' then return global
   parts = path.split '.'
   result = global # Start with global namespace
@@ -18,7 +22,7 @@ Space.resolvePath = (path) ->
     # to solve the Meteor package scoping problem
     if !result? then result = Space.namespaces[key]
     if !result? then result = Space.Module.published[key]
-    if !result? then throw new Error "Could not resolve <#{path}>"
+    if !result? then throw new Space.CouldNotResolvePathError(path)
   return result
 
 Space.namespace = (id) -> Space.namespaces[id] = {}
