@@ -54,7 +54,7 @@ describe 'Space.Application', ->
           }
         }
         afterInitialize: ->
-          expect(@Configuration).to.deep.equal {
+          expect(@Configuration).toMatch {
             toChange: 'appChangeMe'
             toKeep: 'appKeepMe'
             child: {
@@ -92,7 +92,7 @@ describe 'Space.Application', ->
           toChange: 'grandchildNewValue'
         }
       }
-      expect(app.injector.get 'Configuration').to.deep.equal {
+      expect(app.injector.get 'Configuration').toMatch {
         toChange: 'appNewValue'
         toKeep: 'appKeepMe'
         child: {

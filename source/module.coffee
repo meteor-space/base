@@ -21,8 +21,14 @@ class Space.Module extends Space.Object
   initialize: (@app, @injector, mergedConfig={}, isSubModule=false) ->
     if @is('initialized') then return
     if not @injector? then throw new Error Module.ERRORS.injectorMissing
+
     # merge any supplied config into this Module's Configuration
     _.deepExtend(@Configuration, mergedConfig)
+
+    # Setup basic mappings required by all modules if this the top-level module
+    unless isSubModule
+      @injector.map('Injector').to @injector
+      @_mapMeteorApis()
 
     # Setup required modules
     for moduleId in @RequiredModules
@@ -39,15 +45,9 @@ class Space.Module extends Space.Object
     # After the required modules have been initialized, merge in the own
     # configuration to give the chance for overwriting.
     @Configuration = _.deepExtend(mergedConfig, @constructor::Configuration)
+    @injector.map('Configuration').to(@Configuration) unless isSubModule
     # Give every module access Npm
     if Meteor.isServer then @npm = Npm
-
-    # Setup basic mappings required by all modules if this the top-level module
-    unless isSubModule
-      @injector.map('Configuration').to @Configuration
-      @injector.map('Injector').to @injector
-      @_mapMeteorApis()
-
     # Inject required dependencies into this module
     @injector.injectInto this
     # Provide lifecycle hook after this module was configured and injected
