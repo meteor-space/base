@@ -134,6 +134,8 @@ class Space.Module extends Space.Object
     @injector.map('underscore').to Package.underscore._
     if Package.mongo?
       @injector.map('Mongo').to Package.mongo.Mongo
+      if Meteor.isServer
+        @injector.map('MongoInternals').to Package.mongo.MongoInternals
 
     if Meteor.isClient
       if Package.tracker?
