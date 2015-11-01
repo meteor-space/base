@@ -22,3 +22,6 @@ Space.resolvePath = (path) ->
   return result
 
 Space.namespace = (id) -> Space.namespaces[id] = {}
+
+Space.capitalizeString = (string) ->
+  string.charAt(0).toUpperCase() + string.slice(1)

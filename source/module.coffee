@@ -107,17 +107,14 @@ class Space.Module extends Space.Object
   # calling the instance hooks before, on, and after
   _runLifeCycleAction: (action, func) ->
     @_invokeActionOnRequiredModules action
-    this["before#{@_capitalize(action)}"]?()
+    this["before#{Space.capitalizeString(action)}"]?()
     func?()
-    this["on#{@_capitalize(action)}"]?()
-    this["after#{@_capitalize(action)}"]?()
+    this["on#{Space.capitalizeString(action)}"]?()
+    this["after#{Space.capitalizeString(action)}"]?()
 
   _runAfterInitializeHook: ->
     @_invokeActionOnRequiredModules '_runAfterInitializeHook'
     @afterInitialize?()
-
-  _capitalize: (string) ->
-    string.charAt(0).toUpperCase() + string.slice(1)
 
   _invokeActionOnRequiredModules: (action) ->
     @app.modules[moduleId][action]?() for moduleId in @RequiredModules
