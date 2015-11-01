@@ -1,10 +1,4 @@
-
 global = this
-
-# Define global namespace for the space framework
-@Space = {
-  namespaces: {}
-}
 
 # Resolves a (possibly nested) path to an global object
 # Returns the object or null (if not found)
