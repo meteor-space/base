@@ -45,48 +45,62 @@ describe 'Space.Application', ->
       initializeSpy.restore()
 
     it 'merges configurations of all modules and user options', ->
-      class FirstModule extends Space.Module
-        @publish this, 'FirstModule'
+      class GrandchildModule extends Space.Module
+        @publish this, 'GrandchildModule'
         Configuration: {
-          first: {
-            toChange: 'first'
-            toKeep: 'first'
+          grandchild: {
+            toChange: 'grandchildChangeMe'
+            toKeep: 'grandchildKeepMe'
           }
         }
-      class SecondModule extends Space.Module
-        @publish this, 'SecondModule'
-        RequiredModules: ['FirstModule']
+        afterInitialize: ->
+          expect(@Configuration).toMatch {
+            toChange: 'appChangeMe'
+            toKeep: 'appKeepMe'
+            child: {
+              toChange: 'childChangeMe'
+              toKeep: 'childKeepMe'
+            }
+            grandchild: {
+              toChange: 'grandchildChangeMe'
+              toKeep: 'grandchildKeepMe'
+            }
+          }
+
+      class ChildModule extends Space.Module
+        @publish this, 'ChildModule'
+        RequiredModules: ['GrandchildModule']
         Configuration: {
-          second: {
-            toChange: 'second'
-            toKeep: 'second'
+          child: {
+            toChange: 'childChangeMe'
+            toKeep: 'childKeepMe'
           }
         }
       class TestApp extends Space.Application
-        RequiredModules: ['SecondModule']
+        RequiredModules: ['ChildModule']
         Configuration: {
-          toChange: 'app'
-          toKeep: 'app'
+          toChange: 'appChangeMe'
+          toKeep: 'appKeepMe'
         }
       app = new TestApp()
       app.configure {
-        toChange: 'appPropChanged'
-        first: {
-          toChange: 'firstChanged'
+        toChange: 'appNewValue'
+        child: {
+          toChange: 'childNewValue'
         }
-        second: {
-          toChange: 'secondChanged'
+        grandchild: {
+          toChange: 'grandchildNewValue'
         }
       }
-      expect(app.injector.get 'Configuration').to.deep.equal {
-        toChange: 'appPropChanged'
-        toKeep: 'app'
-        first: {
-          toChange: 'firstChanged'
-          toKeep: 'first'
+      expect(app.injector.get 'Configuration').toMatch {
+        toChange: 'appNewValue'
+        toKeep: 'appKeepMe'
+        child: {
+          toChange: 'childNewValue'
+          toKeep: 'childKeepMe'
         }
-        second: {
-          toChange: 'secondChanged'
-          toKeep: 'second'
+        grandchild: {
+          toChange: 'grandchildNewValue'
+          toKeep: 'grandchildKeepMe'
         }
       }

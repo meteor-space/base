@@ -26,3 +26,15 @@ Space.resolvePath = (path) ->
   return result
 
 Space.namespace = (id) -> Space.namespaces[id] = {}
+
+Space.capitalizeString = (string) ->
+  string.charAt(0).toUpperCase() + string.slice(1)
+
+Space.stringToBoolean = (string) ->
+  switch string.toLowerCase().trim()
+    when 'true', 'yes', '1'
+      return true
+    when 'false', 'no', '0', null
+      return false
+    else
+      return Boolean(string)

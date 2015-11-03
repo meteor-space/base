@@ -67,7 +67,6 @@ describe 'Meteor integration in applications', ->
           expect(@blaze).to.be.defined
           expect(@blaze).to.equal Blaze
 
-
       new ClientApp()
 
     # SERVER ONLY
@@ -80,6 +79,7 @@ describe 'Meteor integration in applications', ->
           email: 'Email'
           process: 'process'
           Future: 'Future'
+          mongoInternals: 'MongoInternals'
 
         onInitialize: ->
           expect(@email).to.be.defined
@@ -88,4 +88,7 @@ describe 'Meteor integration in applications', ->
           expect(@process).to.equal process
           expect(@Future).to.be.defined
           expect(@Future).to.equal Npm.require 'fibers/future'
+          expect(@mongoInternals).to.be.defined
+          expect(@mongoInternals).to.equal MongoInternals
+
       new ServerApp()

@@ -18,21 +18,29 @@ describe("Space.base - Application lifecycle hooks", function () {
   });
 
   it("runs the start hooks in correct order", function () {
-    expectHooksNotCalledYet(this, 'beforeStart', 'onStart', 'afterStart');
+    expectHooksNotToBeCalledYet(this, 'beforeStart', 'onStart', 'afterStart');
     this.app.start();
     testOrderOfLifecycleHook(this, 'beforeStart', 'onStart', 'afterStart');
   });
 
-  it("runs the reset hooks in correct order", function () {
-    expectHooksNotCalledYet(this, 'beforeReset', 'onReset', 'afterReset');
-    this.app.reset();
-    testOrderOfLifecycleHook(this, 'beforeReset', 'onReset', 'afterReset');
-  });
-
   it("runs the stop hooks in correct order", function () {
-    expectHooksNotCalledYet(this, 'beforeStop', 'onStop', 'afterStop');
+    expectHooksNotToBeCalledYet(this, 'beforeStop', 'onStop', 'afterStop');
+    this.app.start();
     this.app.stop();
     testOrderOfLifecycleHook(this, 'beforeStop', 'onStop', 'afterStop');
+  });
+
+  it("runs the reset hooks in correct order when app is running", function () {
+    expectHooksNotToBeCalledYet(this, 'beforeReset', 'onReset', 'afterReset');
+    this.app.start();
+    this.app.reset();
+    testOrderOfLifecycleHook(this, 'beforeStop', 'onStop', 'afterStop','beforeReset', 'onReset', 'afterReset','beforeStart', 'onStart', 'afterStart');
+  });
+
+  it("runs the reset hooks in correct order when app is stopped", function () {
+    expectHooksNotToBeCalledYet(this, 'beforeReset', 'onReset', 'afterReset');
+    this.app.reset();
+    testOrderOfLifecycleHook(this, 'beforeReset', 'onReset', 'afterReset');
   });
 
   // TEST HELPERS
@@ -67,7 +75,7 @@ describe("Space.base - Application lifecycle hooks", function () {
     }
   }
 
-  function expectHooksNotCalledYet(context, before, on, after) {
+  function expectHooksNotToBeCalledYet(context, before, on, after) {
     modules = ['firstHooks', 'secondHooks', 'appHooks'];
     hooks = [before, on, after];
     for(var i=0; i < 3; i++) {
