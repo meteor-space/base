@@ -1,6 +1,7 @@
 ![Space Brand Mood](docs/images/space-brand-mood.jpg?raw=true)
 
-# SPACE [![Build Status](https://travis-ci.org/meteor-space/base.svg?branch=master)](https://travis-ci.org/meteor-space/base)
+# SPACE [![Circle CI](https://circleci.com/gh/meteor-space/base.svg?style=svg)](https://circleci.com/gh/meteor-space/base) [![Join the chat at https://gitter.im/meteor-space/general](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/meteor-space/general?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 
 Modular application architecture for Meteor, with following goals:
 
