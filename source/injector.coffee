@@ -5,6 +5,7 @@ class Space.Injector
     cannotMapUndefinedId: -> new Error 'Cannot map undefined value.'
     mappingExists: (id) -> new Error "A mapping for <#{id}> already exists."
     valueNotResolved: (path) -> new Error "Could not resolve <#{path}>."
+    cannotGetValueForUndefined: -> new Error "Cannot get value for undefined."
 
   constructor: (providers) ->
     @_mappings = {}
@@ -37,6 +38,7 @@ class Space.Injector
   remove: (id) -> delete @_mappings[id]
 
   get: (id, dependentObject=null) ->
+    if !id? then throw Injector.ERRORS.cannotGetValueForUndefined()
     if not @_mappings[id]? then @autoMap id
     dependency = @_mappings[id].provide(dependentObject)
     @injectInto dependency
@@ -68,8 +70,8 @@ class Space.Injector
   getMappingFor: (id) -> @_mappings[id]
 
   getIdForValue: (value) ->
-    for mapping in @_mappings
-      return mapping.getId() if mapping.getProvider().getValue() is value
+    for id, mapping of @_mappings
+      return id if mapping.getProvider().getValue() is value
 
   release: (dependent) ->
     for id, mapping of @_mappings
