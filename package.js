@@ -9,6 +9,10 @@ Package.onUse(function(api) {
 
   api.versionsFrom("METEOR@1.0");
 
+  Npm.depends({
+    "getenv": "0.5.0"
+  });
+
   api.use([
     'coffeescript',
     'check',
@@ -31,7 +35,15 @@ Package.onUse(function(api) {
 
   api.addFiles([
     'source/lib/underscore_deep_extend_mixin.js',
-    'source/helpers.coffee',
+    'source/namespace.coffee',
+    'source/helpers.coffee'
+  ]);
+
+  api.addFiles([
+    'source/server_configuration.coffee'
+  ], 'server');
+
+  api.addFiles([
     'source/object.coffee',
     'source/struct.coffee',
     'source/injector.coffee',

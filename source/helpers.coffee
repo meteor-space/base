@@ -1,15 +1,10 @@
 
 global = this
 
-# Define global namespace for the space framework
-@Space = {
-  namespaces: {}
-}
-
 class Space.CouldNotResolvePathError extends Error
   constructor: (path) -> @message = "Could not resolve <#{path}>"
 
-# Resolves a (possibly nested) path to an global object
+# Resolves a (possibly nested) path to a global object
 # Returns the object or null (if not found)
 Space.resolvePath = (path) ->
   if !path? then throw new Space.CouldNotResolvePathError(path)
@@ -29,12 +24,3 @@ Space.namespace = (id) -> Space.namespaces[id] = {}
 
 Space.capitalizeString = (string) ->
   string.charAt(0).toUpperCase() + string.slice(1)
-
-Space.stringToBoolean = (string) ->
-  switch string.toLowerCase().trim()
-    when 'true', 'yes', '1'
-      return true
-    when 'false', 'no', '0', null
-      return false
-    else
-      return Boolean(string)
