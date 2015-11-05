@@ -10,25 +10,21 @@ describe 'Space.Module', ->
   describe '@publish', ->
 
     it 'adds given module to the static collection of published modules', ->
-      fakeModule = identifier = 'test'
-      Space.Module.publish fakeModule, fakeModule.identifier
-      expect(Space.Module.published[fakeModule.identifier]).to.equal fakeModule
+      module = Space.Module.define 'test'
+      expect(Space.Module.published['test']).to.equal module
 
     it 'throws an error if two modules try to publish under same name', ->
-      fakeModule1 = identifier: 'test'
-      fakeModule2 = identifier: 'test'
       publishTwoModulesWithSameName = ->
-        Space.Module.publish fakeModule1, fakeModule1.identifier
-        Space.Module.publish fakeModule2, fakeModule2.identifier
+        Space.Module.define 'test'
+        Space.Module.define 'test'
       expect(publishTwoModulesWithSameName).to.throw Error
 
   describe '@require', ->
 
     it 'returns published module for given identifier', ->
-      fakeModule = identifier = 'test'
-      Space.Module.publish fakeModule, fakeModule.identifier
-      requiredModule = Space.Module.require fakeModule.identifier
-      expect(requiredModule).to.equal fakeModule
+      module = Space.Module.define 'test'
+      requiredModule = Space.Module.require 'test'
+      expect(requiredModule).to.equal module
 
     it 'throws and error if no module was registered for given identifier', ->
       requireUnkownModule = -> Space.Module.require 'unknown module'
@@ -46,33 +42,28 @@ describe 'Space.Module', ->
       module = Space.Module.create RequiredModules: testArray
       expect(module.RequiredModules).to.equal testArray
 
+    it 'sets the correct state', ->
+      module = new Space.Module()
+      expect(module.is 'constructed').to.be.true
+
+
 describe 'Space.Module - #initialize', ->
 
   beforeEach ->
-    @app = modules: {}
-    @injector = injectInto: sinon.spy()
-    @requireStub = sinon.stub Space.Module, 'require'
+    # Reset published space modules
+    Space.Module.published = {}
+    @injector = new Space.Injector()
+    sinon.spy @injector, 'injectInto'
     @module = new Space.Module()
-
     # faked required modules to spy on
-    @fakeModule1 =
-      name: 'module1'
-      constructor: sinon.stub()
-      initialize: sinon.spy()
-
-    @fakeModule2 =
-      name: 'module2'
-      constructor: sinon.stub()
-      initialize: sinon.spy()
-
-    @fakeModule1.constructor.returns @fakeModule1
-    @fakeModule2.constructor.returns @fakeModule2
-
-    # stubbed version of Space.Module.require that returns our fake modules
-    @requireStub.withArgs(@fakeModule1.name).returns @fakeModule1.constructor
-    @requireStub.withArgs(@fakeModule2.name).returns @fakeModule2.constructor
-
-  afterEach -> @requireStub.restore()
+    @SubModule1 = Space.Module.define 'SubModule1'
+    @subModule1 = new @SubModule1()
+    @SubModule2 = Space.Module.define 'SubModule2'
+    @subModule2 = new @SubModule2()
+    @app = modules: {
+      'SubModule1': @subModule1
+      'SubModule2': @subModule2
+    }
 
   it 'asks the injector to inject dependencies into the module', ->
     @module.initialize @app, @injector
@@ -84,7 +75,7 @@ describe 'Space.Module - #initialize', ->
 
   it 'sets the initialized flag correctly', ->
     @module.initialize @app, @injector
-    expect(@module.isInitialized).to.be.true
+    expect(@module.is 'initialized').to.be.true
 
   it.server 'adds Npm as property to the module', ->
     @module.initialize @app, @injector
@@ -97,29 +88,70 @@ describe 'Space.Module - #initialize', ->
 
   it 'looks up required modules and adds them to the modules object', ->
     # make our SUT module require our fake modules
-    @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
+    @module.RequiredModules = [@SubModule1.name, @SubModule2.name]
     @module.initialize @app, @injector
-    expect(@app.modules["#{@fakeModule1.name}"]).to.equal @fakeModule1
-    expect(@app.modules["#{@fakeModule2.name}"]).to.equal @fakeModule2
-
-  it 'creates the required modules by calling the constructor with new', ->
-    @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
-    @module.initialize @app, @injector
-    expect(@fakeModule1.constructor).to.have.been.calledWithNew
-    expect(@fakeModule2.constructor).to.have.been.calledWithNew
+    expect(@app.modules[@SubModule1.name]).to.equal @subModule1
+    expect(@app.modules[@SubModule2.name]).to.equal @subModule2
 
   it 'initializes required modules when they are not yet initialized', ->
-    @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
+    sinon.spy @subModule1, 'initialize'
+    sinon.spy @subModule2, 'initialize'
+    @module.RequiredModules = [@SubModule1.name, @SubModule2.name]
     @module.initialize @app, @injector
-    expect(@fakeModule1.initialize).to.have.been.called
-    expect(@fakeModule2.initialize).to.have.been.called
+    expect(@subModule1.initialize).to.have.been.called
+    expect(@subModule2.initialize).to.have.been.called
 
   it 'doesnt initialize required modules if they are already initialized', ->
-    @fakeModule1.isInitialized = true
-    @fakeModule2.isInitialized = true
-
-    @module.RequiredModules = [@fakeModule1.name, @fakeModule2.name]
+    @subModule1._state = 'initialized'
+    sinon.spy @subModule1, 'initialize'
+    @module.RequiredModules = [@SubModule1.name]
     @module.initialize @app, @injector
+    expect(@subModule1.initialize).not.to.have.been.called
 
-    expect(@fakeModule1.initialize).not.to.have.been.called
-    expect(@fakeModule2.initialize).not.to.have.been.called
+  it 'can only be initialized once', ->
+    @module.onInitialize = sinon.spy()
+    @module.initialize @app, @injector
+    @module.initialize @app, @injector
+    expect(@module.onInitialize).to.have.been.calledOnce
+
+describe 'Space.Module - #start', ->
+
+  beforeEach ->
+    @module = new Space.Module()
+    @module.start()
+    @module._runLifeCycleAction = sinon.spy()
+
+  it 'sets the state to running', ->
+    expect(@module.is 'running').to.be.true
+
+  it 'ignores start calls on a running module', ->
+    @module.start()
+    expect(@module._runLifeCycleAction).not.to.have.been.called
+
+describe 'Space.Module - #stop', ->
+
+  beforeEach ->
+    @module = new Space.Module()
+    @module.start()
+    @module.stop()
+    @module._runLifeCycleAction = sinon.spy()
+
+  it 'sets the state to stopped', ->
+    expect(@module.is 'stopped').to.be.true
+
+  it 'ignores stop calls on a stopped module', ->
+    @module.stop()
+    expect(@module._runLifeCycleAction).not.to.have.been.called
+
+describe 'Space.Module - #reset', ->
+
+  beforeEach ->
+    @module = new Space.Module()
+    @module._runLifeCycleAction = sinon.spy()
+
+  it.server 'rejects attempts to reset when in production', ->
+    nodeEnvBackup = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+    @module.reset()
+    process.env.NODE_ENV = nodeEnvBackup
+    expect(@module._runLifeCycleAction).not.to.have.been.called

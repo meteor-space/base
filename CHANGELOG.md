@@ -1,6 +1,24 @@
 Changelog
 =========
 
+## 3.2.0
+**Module/Application state and lifecycle improvements**
+- Formalizes state to better manage module lifecycle
+- States include: Constructed -> Initialized -> Stopped -> Running 
+- Accessor method `app.is(expectedState) // eg 'running'`
+- Calling .reset() on a running Application or Module now calls .stop()
+on it first, then start() again after it's been reset.
+
+**Configuration API Support**
+- `Space.getenv` helper wraps [getenv](https://www.npmjs.com/package/getenv) to provide support for ENV typecasting, particularly for merging with runtime config
+
+**Other Changes**
+- Default Meteor mappings have been moved down to Module from Application 
+- `MongoInternals` is now mapped on the server
+
+**Bugfixes**
+- Minor injector fixes, with better error handling.
+
 ### 3.1.1
 - Fixes bug with recently updated injector code
 
