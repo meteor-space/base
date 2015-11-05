@@ -64,10 +64,13 @@ class Space.Module extends Space.Object
     @_state = 'running'
 
   reset: ->
-    restartRequired = true if @is('running')
-    if restartRequired then @stop()
-    @_runLifeCycleAction 'reset'
-    if restartRequired then @start()
+    if Meteor.isServer and process.env.NODE_ENV is 'production'
+      console.log('Reset not permitted on a production application')
+    else
+      restartRequired = true if @is('running')
+      if restartRequired then @stop()
+      @_runLifeCycleAction 'reset'
+      if restartRequired then @start()
 
   stop: ->
     if @is('stopped') then return
