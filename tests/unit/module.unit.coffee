@@ -142,3 +142,16 @@ describe 'Space.Module - #stop', ->
   it 'ignores stop calls on a stopped module', ->
     @module.stop()
     expect(@module._runLifeCycleAction).not.to.have.been.called
+
+describe 'Space.Module - #reset', ->
+
+  beforeEach ->
+    @module = new Space.Module()
+    @module._runLifeCycleAction = sinon.spy()
+
+  it.server 'rejects attempts to reset when in production', ->
+    nodeEnvBackup = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+    @module.reset()
+    process.env.NODE_ENV = nodeEnvBackup
+    expect(@module._runLifeCycleAction).not.to.have.been.called

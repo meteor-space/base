@@ -1,17 +1,17 @@
 Package.describe({
   summary: 'Modular Application Architecture for Meteor.',
   name: 'space:base',
-  version: '3.1.1',
+  version: '3.2.1',
   git: 'https://github.com/meteor-space/base.git'
+});
+
+Npm.depends({
+  "getenv": "0.5.0"
 });
 
 Package.onUse(function(api) {
 
   api.versionsFrom("METEOR@1.0");
-
-  Npm.depends({
-    "getenv": "0.5.0"
-  });
 
   api.use([
     'coffeescript',
