@@ -1,5 +1,7 @@
 Changelog
 =========
+## 3.2.1
+- Bug fixes relating to package configuration
 
 ## 3.2.0
 **Module/Application state and lifecycle improvements**
