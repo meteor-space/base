@@ -45,6 +45,7 @@ Package.onUse(function(api) {
 
   api.addFiles([
     'source/object.coffee',
+    'source/error.js',
     'source/struct.coffee',
     'source/injector.coffee',
     'source/injector_annotations.coffee',
