@@ -88,10 +88,32 @@ describe 'Space.Object', ->
       new TestClass().onDependenciesReady()
       expect(myMixin.onDependenciesReady).to.have.been.calledOnce
 
-    it "inherits the onDependenciesReady hook to sub classes", ->
+    it "inherits the onDependenciesReady hooks to sub classes", ->
+      firstMixin = onDependenciesReady: sinon.spy()
+      secondMixin = onDependenciesReady: sinon.spy()
+      SuperClass = Space.Object.extend()
+      SuperClass.mixin firstMixin
+      SubClass = SuperClass.extend()
+      SubClass.mixin secondMixin
+      new SubClass().onDependenciesReady()
+      expect(firstMixin.onDependenciesReady).to.have.been.calledOnce
+      expect(secondMixin.onDependenciesReady).to.have.been.calledOnce
+
+    it "calls inherited mixin hooks only once per chain", ->
       myMixin = onDependenciesReady: sinon.spy()
       SuperClass = Space.Object.extend()
-      SubClass = SuperClass.extend()
       SuperClass.mixin myMixin
+      SubClass = SuperClass.extend()
       new SubClass().onDependenciesReady()
       expect(myMixin.onDependenciesReady).to.have.been.calledOnce
+
+    it "does not apply mixins to super classes", ->
+      firstMixin = onDependenciesReady: sinon.spy()
+      secondMixin = onDependenciesReady: sinon.spy()
+      SuperClass = Space.Object.extend()
+      SuperClass.mixin firstMixin
+      SubClass = SuperClass.extend()
+      SubClass.mixin secondMixin
+      new SuperClass().onDependenciesReady()
+      expect(firstMixin.onDependenciesReady).to.have.been.calledOnce
+      expect(secondMixin.onDependenciesReady).not.to.have.been.called
