@@ -121,6 +121,10 @@ class Space.Module extends Space.Object
   _invokeActionOnRequiredModules: (action) ->
     @app.modules[moduleId][action]?() for moduleId in @RequiredModules
 
+  _wrapLifecycleHook: (hook, wrapper) ->
+    this[hook] ?= ->
+    this[hook] = _.wrap(this[hook], wrapper)
+
   _mapMeteorApis: ->
     # Map Meteor standard packages
     @injector.map('Meteor').to Meteor
