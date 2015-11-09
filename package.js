@@ -91,6 +91,7 @@ Package.onTest(function(api) {
     'tests/unit/injector.unit.coffee',
     'tests/unit/injector_annotations.unit.es6',
     'tests/unit/helpers.unit.coffee',
+    'tests/unit/error.tests.js',
 
     // integration tests
     'tests/integration/application_with_modules.spec.js',
