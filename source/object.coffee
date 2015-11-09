@@ -6,10 +6,14 @@ class Space.Object
   # Assign given properties to the instance
   constructor: (properties) -> @[key] = value for key, value of properties
 
-  onDependenciesReady: ->
-    if @constructor._mixinCallbacks?
+  onDependenciesReady: -> @_invokeMixinCallbacks @constructor
+
+  _invokeMixinCallbacks: (Class) ->
+    # Recursively walk up the inheritance chain
+    if Class.__super__? then @_invokeMixinCallbacks(Class.__super__.constructor)
+    if Class._mixinCallbacks?
       # Let mixins initialize themselves when dependencies are ready
-      callback.call(this) for callback in @constructor._mixinCallbacks
+      callback.call(this) for callback in Class._mixinCallbacks
 
   # Extends this class and return a child class with inherited prototype
   # and static properties.

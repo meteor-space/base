@@ -74,3 +74,24 @@ describe 'Space.Object', ->
       TestClass.mixin testMixin
       expect(TestClass::Dependencies.first).to.equal 'first'
       expect(TestClass::Dependencies.second).to.equal 'second'
+
+    it "can provide a hook that is called when the mixin is applied", ->
+      myMixin = onMixinApplied: sinon.spy()
+      TestClass = Space.Object.extend()
+      TestClass.mixin myMixin
+      expect(myMixin.onMixinApplied).to.have.been.calledOnce
+
+    it "can provide a hook that is called when dependencies of host class are ready", ->
+      myMixin = onDependenciesReady: sinon.spy()
+      TestClass = Space.Object.extend()
+      TestClass.mixin myMixin
+      new TestClass().onDependenciesReady()
+      expect(myMixin.onDependenciesReady).to.have.been.calledOnce
+
+    it "inherits the onDependenciesReady hook to sub classes", ->
+      myMixin = onDependenciesReady: sinon.spy()
+      SuperClass = Space.Object.extend()
+      SubClass = SuperClass.extend()
+      SuperClass.mixin myMixin
+      new SubClass().onDependenciesReady()
+      expect(myMixin.onDependenciesReady).to.have.been.calledOnce
