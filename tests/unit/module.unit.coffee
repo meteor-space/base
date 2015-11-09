@@ -155,3 +155,24 @@ describe 'Space.Module - #reset', ->
     @module.reset()
     process.env.NODE_ENV = nodeEnvBackup
     expect(@module._runLifeCycleAction).not.to.have.been.called
+
+describe "Space.Module - wrappable lifecycle hooks", ->
+
+  it "allows mixins to hook into the module lifecycle", ->
+    moduleOnInitializeSpy = sinon.spy()
+    mixinOnInitializeSpy = sinon.spy()
+    MyModule = Space.Module.extend {
+      onInitialize: moduleOnInitializeSpy
+    }
+    MyModule.mixin {
+      onDependenciesReady: ->
+        @_wrapLifecycleHook 'onInitialize', (onInitialize) ->
+          onInitialize.call(this)
+          mixinOnInitializeSpy.call(this)
+    }
+    module = new MyModule()
+    module.initialize(module, new Space.Injector())
+
+    expect(moduleOnInitializeSpy).to.have.been.calledOnce
+    expect(mixinOnInitializeSpy).to.have.been.calledOnce
+    expect(moduleOnInitializeSpy).to.have.been.calledBefore(mixinOnInitializeSpy)
