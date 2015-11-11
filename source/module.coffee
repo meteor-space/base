@@ -13,6 +13,7 @@ class Space.Module extends Space.Object
   Singletons: []
   injector: null
   _state: 'constructed'
+  _hasRunAfterInitializeHook: false
 
   constructor: ->
     super
@@ -38,7 +39,8 @@ class Space.Module extends Space.Object
         @app.modules[moduleId] = new moduleClass()
       # Initialize required module
       module = @app.modules[moduleId]
-      module.initialize(@app, @injector, @Configuration, true) if module.is('constructed')
+      if module.is('constructed')
+        module.initialize(@app, @injector, @Configuration, true)
 
     # Provide lifecycle hook before any initialization has been done
     @beforeInitialize?()
@@ -56,7 +58,7 @@ class Space.Module extends Space.Object
     @injector.map(singleton).asSingleton() for singleton in @Singletons
     @_state = 'initialized'
     # After all modules in the tree have been configured etc. invoke last hook
-    @_runAfterInitializeHook() unless isSubModule
+    if not isSubModule then @_runAfterInitializeHooks()
 
   start: ->
     if @is('running') then return
@@ -114,9 +116,12 @@ class Space.Module extends Space.Object
     this["on#{Space.capitalizeString(action)}"]?()
     this["after#{Space.capitalizeString(action)}"]?()
 
-  _runAfterInitializeHook: ->
-    @_invokeActionOnRequiredModules '_runAfterInitializeHook'
-    @afterInitialize?()
+  _runAfterInitializeHooks: ->
+    @_invokeActionOnRequiredModules '_runAfterInitializeHooks'
+    # Never run this hook twice
+    if not @_hasRunAfterInitializeHook
+      @afterInitialize?()
+      @_hasRunAfterInitializeHook = true
 
   _invokeActionOnRequiredModules: (action) ->
     @app.modules[moduleId][action]?() for moduleId in @RequiredModules

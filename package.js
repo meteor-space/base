@@ -97,6 +97,7 @@ Package.onTest(function(api) {
     'tests/integration/application_with_modules.spec.js',
     'tests/integration/standalone_application.integration.coffee',
     'tests/integration/lifecycle_hooks.tests.js',
+    'tests/integration/requiring-modules.tests.js',
   ]);
 
 });
