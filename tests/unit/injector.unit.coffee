@@ -19,7 +19,7 @@ describe 'Space.Injector', ->
       expect(@injector.get('myObject').test).to.equal testValue
 
     it 'throws error if mapping doesnt exist', ->
-      expect(=> @injector.get('blablub')).to.throw Error
+      expect(=> @injector.get('blablub')).to.throw new Space.CouldNotResolvePathError()
 
     it 'auto-maps singletons', ->
       first = @injector.get 'Space.Injector'
@@ -31,7 +31,7 @@ describe 'Space.Injector', ->
       expect(@injector.get('Space')).to.equal Space
 
     it 'throws if the auto-map value is undefined', ->
-      expect(=> @injector.get('NotExistingValue')).to.throw Error
+      expect(=> @injector.get('NotExistingValue')).to.throw
 
     it 'throws error if mapping would be overriden', ->
       @injector.map('test').to 'test'
@@ -41,7 +41,7 @@ describe 'Space.Injector', ->
     it 'can remove existing mappings', ->
       @injector.map('test').to 'test'
       @injector.remove 'test'
-      expect(=> @injector.get 'test').to.throw Error
+      expect(=> @injector.get 'test').to.throw
 
     it 'provides an alias for getting values', ->
       @injector.map('test').to 'test'

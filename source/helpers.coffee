@@ -1,8 +1,10 @@
 
 global = this
 
-class Space.CouldNotResolvePathError extends Error
-  constructor: (path) -> @message = "Could not resolve <#{path}>"
+class Space.CouldNotResolvePathError extends Space.Error
+  constructor: (path) ->
+    super
+    @message = "Could not resolve <#{path}>"
 
 # Resolves a (possibly nested) path to a global object
 # Returns the object or null (if not found)

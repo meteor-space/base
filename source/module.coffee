@@ -13,7 +13,6 @@ class Space.Module extends Space.Object
   Singletons: []
   injector: null
   _state: 'constructed'
-  _hasRunAfterInitializeHook: false
 
   constructor: ->
     super
@@ -44,25 +43,21 @@ class Space.Module extends Space.Object
 
     # Provide lifecycle hook before any initialization has been done
     @beforeInitialize?()
-    # After the required modules have been initialized, merge in the own
-    # configuration to give the chance for overwriting.
-    @Configuration = _.deepExtend(mergedConfig, @constructor::Configuration)
-    @injector.map('Configuration').to(@Configuration) unless isSubModule
     # Give every module access Npm
     if Meteor.isServer then @npm = Npm
-    # Inject required dependencies into this module
-    @injector.injectInto this
-    # Provide lifecycle hook after this module was configured and injected
-    @onInitialize?()
-    # Map classes that are declared as singletons
-    @injector.map(singleton).asSingleton() for singleton in @Singletons
-    @_state = 'initialized'
-    # After all modules in the tree have been configured etc. invoke last hook
-    if not isSubModule then @_runAfterInitializeHooks()
+    # Merge in own configuration to give the chance for overwriting.
+    @Configuration = _.deepExtend(mergedConfig, @constructor::Configuration)
+    # Top-level module
+    if not isSubModule
+      @injector.map('Configuration').to(@Configuration)
+      # Provide lifecycle hook after this module was configured and injected
+      @_runOnInitializeHooks()
+      # After all modules in the tree have been configured etc. invoke last hook
+      @_runAfterInitializeHooks()
 
   start: ->
     if @is('running') then return
-    @_runLifeCycleAction 'start', => @injector.create(singleton) for singleton in @Singletons
+    @_runLifeCycleAction 'start'
     @_state = 'running'
 
   reset: ->
@@ -116,12 +111,27 @@ class Space.Module extends Space.Object
     this["on#{Space.capitalizeString(action)}"]?()
     this["after#{Space.capitalizeString(action)}"]?()
 
+  _runOnInitializeHooks: ->
+    @_invokeActionOnRequiredModules '_runOnInitializeHooks'
+    # Never run this hook twice
+    if @is('constructed')
+      @_state = 'initializing'
+      # Inject required dependencies into this module
+      @injector.injectInto this
+      # Map classes that are declared as singletons
+      @injector.map(singleton).asSingleton() for singleton in @Singletons
+      # Call custom lifecycle hook if existant
+      @onInitialize?()
+
   _runAfterInitializeHooks: ->
     @_invokeActionOnRequiredModules '_runAfterInitializeHooks'
     # Never run this hook twice
-    if not @_hasRunAfterInitializeHook
+    if @is('initializing')
+      @_state = 'initialized'
+      # Create singleton classes
+      @injector.create(singleton) for singleton in @Singletons
+      # Call custom lifecycle hook if existant
       @afterInitialize?()
-      @_hasRunAfterInitializeHook = true
 
   _invokeActionOnRequiredModules: (action) ->
     @app.modules[moduleId][action]?() for moduleId in @RequiredModules

@@ -16,7 +16,8 @@ Package.onUse(function(api) {
   api.use([
     'coffeescript',
     'check',
-    'underscore'
+    'underscore',
+    'ecmascript'
   ]);
 
   api.use([
@@ -34,9 +35,7 @@ Package.onUse(function(api) {
   ], {weak: true});
 
   api.addFiles([
-    'source/lib/underscore_deep_extend_mixin.js',
-    'source/namespace.coffee',
-    'source/helpers.coffee'
+    'source/namespace.coffee'
   ]);
 
   api.addFiles([
@@ -44,8 +43,10 @@ Package.onUse(function(api) {
   ], 'server');
 
   api.addFiles([
+    'source/lib/underscore_deep_extend_mixin.js',
     'source/object.coffee',
     'source/error.js',
+    'source/helpers.coffee',
     'source/struct.coffee',
     'source/injector.coffee',
     'source/injector_annotations.coffee',
@@ -61,6 +62,7 @@ Package.onTest(function(api) {
     'meteor',
     'coffeescript',
     'check',
+    'ecmascript',
     'space:base',
 
     // weak-dependencies

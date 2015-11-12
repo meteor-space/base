@@ -1,6 +1,50 @@
-describe("Space.base - Application lifecycle hooks", function () {
+describe("Space.base - Application lifecycle hooks", function() {
 
-  beforeEach(function () {
+  // TEST HELPERS
+
+  let addHookSpy = function(hooks, hookName) {
+    hooks[hookName] = function() {};
+    sinon.spy(hooks, hookName);
+  };
+
+  let createLifeCycleHookSpies = function() {
+    hooks = {};
+    hookNames = [
+      'beforeInitialize', 'onInitialize', 'afterInitialize', 'beforeStart', 'onStart',
+      'afterStart', 'beforeReset', 'onReset', 'afterReset', 'beforeStop', 'onStop', 'afterStop'
+    ];
+    for (let i = 0; i < hookNames.length; i++) {
+      addHookSpy(hooks, hookNames[i]);
+    }
+    return hooks;
+  };
+
+  let testOrderOfLifecycleHook = function(context, before, on, after) {
+    modules = ['firstHooks', 'secondHooks', 'appHooks'];
+    hooks = [before, on, after];
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        expect(context[modules[i]][hooks[j]]).to.have.been.calledOnce;
+        if (i < 2) {
+          expect(context[modules[i]][hooks[j]]).to.have.been.calledBefore(
+            context[modules[i + 1]][hooks[j]]
+          );
+        }
+      }
+    }
+  };
+
+  let expectHooksNotToBeCalledYet = function(context, before, on, after) {
+    modules = ['firstHooks', 'secondHooks', 'appHooks'];
+    hooks = [before, on, after];
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        expect(context[modules[i]][hooks[j]]).not.to.have.been.called;
+      }
+    }
+  };
+
+  beforeEach(function() {
     // reset published space modules
     Space.Module.published = {};
     // Setup lifecycle hooks with sinon spys
@@ -13,75 +57,35 @@ describe("Space.base - Application lifecycle hooks", function () {
     this.app = Space.Application.create(_.extend(this.appHooks, { RequiredModules: ['Second'] }));
   });
 
-  it("runs the initialize hooks in correct order", function () {
+  it("runs the initialize hooks in correct order", function() {
     testOrderOfLifecycleHook(this, 'beforeInitialize', 'onInitialize', 'afterInitialize');
   });
 
-  it("runs the start hooks in correct order", function () {
+  it("runs the start hooks in correct order", function() {
     expectHooksNotToBeCalledYet(this, 'beforeStart', 'onStart', 'afterStart');
     this.app.start();
     testOrderOfLifecycleHook(this, 'beforeStart', 'onStart', 'afterStart');
   });
 
-  it("runs the stop hooks in correct order", function () {
+  it("runs the stop hooks in correct order", function() {
     expectHooksNotToBeCalledYet(this, 'beforeStop', 'onStop', 'afterStop');
     this.app.start();
     this.app.stop();
     testOrderOfLifecycleHook(this, 'beforeStop', 'onStop', 'afterStop');
   });
 
-  it("runs the reset hooks in correct order when app is running", function () {
+  it("runs the reset hooks in correct order when app is running", function() {
     expectHooksNotToBeCalledYet(this, 'beforeReset', 'onReset', 'afterReset');
     this.app.start();
     this.app.reset();
-    testOrderOfLifecycleHook(this, 'beforeStop', 'onStop', 'afterStop','beforeReset', 'onReset', 'afterReset','beforeStart', 'onStart', 'afterStart');
+    testOrderOfLifecycleHook(this, 'beforeStop', 'onStop', 'afterStop',
+                             'beforeReset', 'onReset', 'afterReset', 'beforeStart',
+                             'onStart', 'afterStart');
   });
 
-  it("runs the reset hooks in correct order when app is stopped", function () {
+  it("runs the reset hooks in correct order when app is stopped", function() {
     expectHooksNotToBeCalledYet(this, 'beforeReset', 'onReset', 'afterReset');
     this.app.reset();
     testOrderOfLifecycleHook(this, 'beforeReset', 'onReset', 'afterReset');
   });
-
-  // TEST HELPERS
-
-  function addHookSpy(hooks, hookName) {
-    hooks[hookName] = function() {};
-    sinon.spy(hooks, hookName);
-  }
-
-  function createLifeCycleHookSpies() {
-    hooks = {};
-    hookNames = [
-      'beforeInitialize', 'onInitialize', 'afterInitialize', 'beforeStart', 'onStart',
-      'afterStart', 'beforeReset', 'onReset', 'afterReset', 'beforeStop', 'onStop', 'afterStop'
-    ];
-    for(var i=0; i<hookNames.length; i++) {
-      addHookSpy(hooks, hookNames[i]);
-    }
-    return hooks;
-  }
-
-  function testOrderOfLifecycleHook(context, before, on, after) {
-    modules = ['firstHooks', 'secondHooks', 'appHooks'];
-    hooks = [before, on, after];
-    for(var i=0; i < 3; i++) {
-      for(var j=0; j < 3; j++) {
-        expect(context[modules[i]][hooks[j]]).to.have.been.calledOnce;
-        if(i < 2) {
-          expect(context[modules[i]][hooks[j]]).to.have.been.calledBefore(context[modules[i+1]][hooks[j]]);
-        }
-      }
-    }
-  }
-
-  function expectHooksNotToBeCalledYet(context, before, on, after) {
-    modules = ['firstHooks', 'secondHooks', 'appHooks'];
-    hooks = [before, on, after];
-    for(var i=0; i < 3; i++) {
-      for(var j=0; j < 3; j++) {
-        expect(context[modules[i]][hooks[j]]).not.to.have.been.called;
-      }
-    }
-  }
 });
