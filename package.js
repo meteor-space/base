@@ -6,7 +6,8 @@ Package.describe({
 });
 
 Npm.depends({
-  "getenv": "0.5.0"
+  "getenv": "0.5.0",
+  "winston": "2.1.0"
 });
 
 Package.onUse(function(api) {
@@ -39,7 +40,8 @@ Package.onUse(function(api) {
   ]);
 
   api.addFiles([
-    'source/server_configuration.coffee'
+    'source/server/configuration.js',
+    'source/server/logger.js'
   ], 'server');
 
   api.addFiles([
