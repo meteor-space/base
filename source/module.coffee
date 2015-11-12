@@ -1,3 +1,4 @@
+{ log } = Space.Configuration if Meteor.isServer
 
 class Space.Module extends Space.Object
 
@@ -17,6 +18,8 @@ class Space.Module extends Space.Object
   constructor: ->
     super
     @RequiredModules ?= []
+    if Meteor.isServer and log.enabled
+      Space.logger.info('Module constructed')
 
   initialize: (@app, @injector, mergedConfig={}, isSubModule=false) ->
     if @is('initialized') then return
@@ -106,6 +109,8 @@ class Space.Module extends Space.Object
   # calling the instance hooks before, on, and after
   _runLifeCycleAction: (action, func) ->
     @_invokeActionOnRequiredModules action
+    if Meteor.isServer and log.enabled
+      Space.logger.info('Module ' + action)
     this["before#{Space.capitalizeString(action)}"]?()
     func?()
     this["on#{Space.capitalizeString(action)}"]?()
@@ -130,6 +135,8 @@ class Space.Module extends Space.Object
       @_state = 'initialized'
       # Create singleton classes
       @injector.create(singleton) for singleton in @Singletons
+      if Meteor.isServer and log.enabled
+        Space.logger.info('Module initialized')
       # Call custom lifecycle hook if existant
       @afterInitialize?()
 
