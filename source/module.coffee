@@ -120,15 +120,18 @@ class Space.Module extends Space.Object
       @injector.injectInto this
       # Map classes that are declared as singletons
       @injector.map(singleton).asSingleton() for singleton in @Singletons
+      # Call custom lifecycle hook if existant
       @onInitialize?()
 
   _runAfterInitializeHooks: ->
     @_invokeActionOnRequiredModules '_runAfterInitializeHooks'
     # Never run this hook twice
     if @is('initializing')
-      @injector.create(singleton) for singleton in @Singletons
-      @afterInitialize?()
       @_state = 'initialized'
+      # Create singleton classes
+      @injector.create(singleton) for singleton in @Singletons
+      # Call custom lifecycle hook if existant
+      @afterInitialize?()
 
   _invokeActionOnRequiredModules: (action) ->
     @app.modules[moduleId][action]?() for moduleId in @RequiredModules
