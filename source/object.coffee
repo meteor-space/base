@@ -87,7 +87,6 @@ class Space.Object
     # Assign the optional custom constructor for this class
     Parent = this
     Constructor = extension.Constructor ? -> Parent.apply(this, arguments)
-
     className = className.substr className.lastIndexOf('.') + 1
 
     # Create a named constructor for this class so that debugging

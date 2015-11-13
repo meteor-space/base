@@ -1,7 +1,7 @@
 
 class Space.Injector
 
-  @ERRORS:
+  ERRORS:
     cannotMapUndefinedId: -> new Error 'Cannot map undefined value.'
     mappingExists: (id) -> new Error "A mapping for <#{id}> already exists."
     valueNotResolved: (path) -> new Error "Could not resolve <#{path}>."
@@ -14,11 +14,11 @@ class Space.Injector
   toString: -> 'Instance <Space.Injector>'
 
   map: (id, override) ->
-    if not id? then throw Injector.ERRORS.cannotMapUndefinedId()
+    if not id? then throw @ERRORS.cannotMapUndefinedId()
     mapping = @_mappings[id]
     # Avoid accidential override of existing mapping
     if mapping? and !override
-      throw Injector.ERRORS.mappingExists(id)
+      throw @ERRORS.mappingExists(id)
     else if mapping? and override
       mapping.markForOverride()
       return mapping
@@ -38,7 +38,7 @@ class Space.Injector
   remove: (id) -> delete @_mappings[id]
 
   get: (id, dependentObject=null) ->
-    if !id? then throw Injector.ERRORS.cannotGetValueForUndefined()
+    if !id? then throw @ERRORS.cannotGetValueForUndefined()
     if not @_mappings[id]? then @autoMap id
     dependency = @_mappings[id].provide(dependentObject)
     @injectInto dependency
@@ -88,7 +88,7 @@ class Space.Injector
 
   _resolveValue: (path) ->
     value = Space.resolvePath path
-    if not value? then throw Injector.ERRORS.valueNotResolved(path)
+    if not value? then throw @ERRORS.valueNotResolved(path)
     return value
 
 # ========= PRIVATE CLASSES ========== #

@@ -53,8 +53,8 @@ describe("Space.base - Application lifecycle hooks", function() {
     this.appHooks = createLifeCycleHookSpies();
     // Create a app setup with two modules and use the spied apon hooks
     Space.Module.define('First', this.firstHooks);
-    Space.Module.define('Second', _.extend(this.secondHooks, { RequiredModules: ['First'] }));
-    this.app = Space.Application.create(_.extend(this.appHooks, { RequiredModules: ['Second'] }));
+    Space.Module.define('Second', _.extend(this.secondHooks, { requiredModules: ['First'] }));
+    this.app = Space.Application.create(_.extend(this.appHooks, { requiredModules: ['Second'] }));
   });
 
   it("runs the initialize hooks in correct order", function() {
