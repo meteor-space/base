@@ -13,7 +13,7 @@ describe("Space.Module - regressions", function() {
     });
 
     Test.MyModule = Space.Module.extend(Test, 'MyModule', {
-      Singletons: ['Test.MySingleton'],
+      singletons: ['Test.MySingleton'],
       onInitialize() { this.injector.map('SomeLib').to(SomeLib); }
     });
 

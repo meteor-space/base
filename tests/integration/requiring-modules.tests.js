@@ -1,7 +1,7 @@
 
-describe("Space.base - Requiring modules in other modules and apps", function(){
+describe("Space.base - Requiring modules in other modules and apps", function() {
 
-  it("multiple modules should be able to require the same base module", function(){
+  it("multiple modules should be able to require the same base module", function() {
 
     Space.Module.define('BaseModule', {
       // Regression test -> this was invoked twice at some point
@@ -10,14 +10,14 @@ describe("Space.base - Requiring modules in other modules and apps", function(){
       }
     });
 
-    Space.Module.define('DependentModule1', { RequiredModules: ['BaseModule'] });
-    Space.Module.define('DependentModule2', { RequiredModules: ['BaseModule'] });
+    Space.Module.define('DependentModule1', { requiredModules: ['BaseModule'] });
+    Space.Module.define('DependentModule2', { requiredModules: ['BaseModule'] });
 
-    var MyApp = Space.Application.define('MyApp', {
-      RequiredModules: ['DependentModule1', 'DependentModule2']
+    const MyApp = Space.Application.define('MyApp', {
+      requiredModules: ['DependentModule1', 'DependentModule2']
     });
 
-    function appInit() { new MyApp(); }
+    let appInit = function() { return new MyApp(); };
     expect(appInit).to.not.throw(Error);
   });
 

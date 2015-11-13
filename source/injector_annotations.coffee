@@ -1,11 +1,11 @@
 @Space.Dependency = (propertyName, dependencyId) ->
   (target) ->
-    target.prototype.Dependencies ?= {}
-    target.prototype.Dependencies[propertyName] = dependencyId
+    target.prototype.dependencies ?= {}
+    target.prototype.dependencies[propertyName] = dependencyId
     return target
 
 @Space.RequireModule = (moduleId) ->
   (target) ->
-    target.prototype.RequiredModules ?= []
-    target.prototype.RequiredModules.push moduleId
+    target.prototype.requiredModules ?= []
+    target.prototype.requiredModules.push moduleId
     return target

@@ -1,7 +1,7 @@
 
 class Space.Application extends Space.Module
 
-  Configuration: {
+  configuration: {
     appId: null
   }
 
@@ -15,4 +15,4 @@ class Space.Application extends Space.Module
     @initialize this, options.injector ? new Space.Injector(), {}
 
   # Make it possible to override configuration (at any nested level)
-  configure: (options) -> _.deepExtend @Configuration, options
+  configure: (options) -> _.deepExtend @configuration, options
