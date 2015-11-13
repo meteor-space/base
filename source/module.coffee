@@ -19,7 +19,7 @@ class Space.Module extends Space.Object
     @RequiredModules ?= []
 
   initialize: (@app, @injector, mergedConfig={}, isSubModule=false) ->
-    if @is('initialized') then return
+    return if not @is('constructed') # only initialize once
     if not @injector? then throw new Error Module.ERRORS.injectorMissing
 
     # merge any supplied config into this Module's Configuration
@@ -50,8 +50,8 @@ class Space.Module extends Space.Object
     # Top-level module
     if not isSubModule
       @injector.map('Configuration').to(@Configuration)
-      @_autoMapSingletons()
       @_runOnInitializeHooks()
+      @_autoMapSingletons()
       @_autoCreateSingletons()
       @_runAfterInitializeHooks()
 
@@ -111,12 +111,6 @@ class Space.Module extends Space.Object
     this["on#{Space.capitalizeString(action)}"]?()
     this["after#{Space.capitalizeString(action)}"]?()
 
-  _autoMapSingletons: ->
-    @_invokeActionOnRequiredModules '_autoMapSingletons'
-    if @is('constructed')
-      # Map classes that are declared as singletons
-      @injector.map(singleton).asSingleton() for singleton in @Singletons
-
   # Provide lifecycle hook after this module was configured and injected
   _runOnInitializeHooks: ->
     @_invokeActionOnRequiredModules '_runOnInitializeHooks'
@@ -128,9 +122,17 @@ class Space.Module extends Space.Object
       # Call custom lifecycle hook if existant
       @onInitialize?()
 
+  _autoMapSingletons: ->
+    @_invokeActionOnRequiredModules '_autoMapSingletons'
+    if @is('initializing')
+      @_state = 'auto-mapping-singletons'
+      # Map classes that are declared as singletons
+      @injector.map(singleton).asSingleton() for singleton in @Singletons
+
   _autoCreateSingletons: ->
     @_invokeActionOnRequiredModules '_autoCreateSingletons'
-    if @is('initializing')
+    if @is('auto-mapping-singletons')
+      @_state = 'auto-creating-singletons'
       # Create singleton classes
       @injector.create(singleton) for singleton in @Singletons
 
@@ -138,7 +140,7 @@ class Space.Module extends Space.Object
   _runAfterInitializeHooks: ->
     @_invokeActionOnRequiredModules '_runAfterInitializeHooks'
     # Never run this hook twice
-    if @is('initializing')
+    if @is('auto-creating-singletons')
       @_state = 'initialized'
       # Call custom lifecycle hook if existant
       @afterInitialize?()
