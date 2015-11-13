@@ -22,7 +22,7 @@ class Space.Module extends Space.Object
       Space.log.info('Module constructed')
 
   initialize: (@app, @injector, mergedConfig={}, isSubModule=false) ->
-    if @is('initialized') then return
+    return if not @is('constructed') # only initialize once
     if not @injector? then throw new Error Module.ERRORS.injectorMissing
 
     # merge any supplied config into this Module's Configuration
@@ -53,9 +53,9 @@ class Space.Module extends Space.Object
     # Top-level module
     if not isSubModule
       @injector.map('Configuration').to(@Configuration)
-      # Provide lifecycle hook after this module was configured and injected
       @_runOnInitializeHooks()
-      # After all modules in the tree have been configured etc. invoke last hook
+      @_autoMapSingletons()
+      @_autoCreateSingletons()
       @_runAfterInitializeHooks()
 
   start: ->
@@ -116,6 +116,7 @@ class Space.Module extends Space.Object
     this["on#{Space.capitalizeString(action)}"]?()
     this["after#{Space.capitalizeString(action)}"]?()
 
+  # Provide lifecycle hook after this module was configured and injected
   _runOnInitializeHooks: ->
     @_invokeActionOnRequiredModules '_runOnInitializeHooks'
     # Never run this hook twice
@@ -123,20 +124,31 @@ class Space.Module extends Space.Object
       @_state = 'initializing'
       # Inject required dependencies into this module
       @injector.injectInto this
-      # Map classes that are declared as singletons
-      @injector.map(singleton).asSingleton() for singleton in @Singletons
       # Call custom lifecycle hook if existant
       @onInitialize?()
 
-  _runAfterInitializeHooks: ->
-    @_invokeActionOnRequiredModules '_runAfterInitializeHooks'
-    # Never run this hook twice
+  _autoMapSingletons: ->
+    @_invokeActionOnRequiredModules '_autoMapSingletons'
     if @is('initializing')
-      @_state = 'initialized'
+      @_state = 'auto-mapping-singletons'
+      # Map classes that are declared as singletons
+      @injector.map(singleton).asSingleton() for singleton in @Singletons
+
+  _autoCreateSingletons: ->
+    @_invokeActionOnRequiredModules '_autoCreateSingletons'
+    if @is('auto-mapping-singletons')
+      @_state = 'auto-creating-singletons'
       # Create singleton classes
       @injector.create(singleton) for singleton in @Singletons
       if Meteor.isServer and log.enabled
         Space.log.info('Module initialized')
+
+  # After all modules in the tree have been configured etc. invoke last hook
+  _runAfterInitializeHooks: ->
+    @_invokeActionOnRequiredModules '_runAfterInitializeHooks'
+    # Never run this hook twice
+    if @is('auto-creating-singletons')
+      @_state = 'initialized'
       # Call custom lifecycle hook if existant
       @afterInitialize?()
 
