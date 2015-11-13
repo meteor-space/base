@@ -50,9 +50,9 @@ class Space.Module extends Space.Object
     # Top-level module
     if not isSubModule
       @injector.map('Configuration').to(@Configuration)
-      # Provide lifecycle hook after this module was configured and injected
+      @_autoMapSingletons()
       @_runOnInitializeHooks()
-      # After all modules in the tree have been configured etc. invoke last hook
+      @_autoCreateSingletons()
       @_runAfterInitializeHooks()
 
   start: ->
@@ -111,6 +111,13 @@ class Space.Module extends Space.Object
     this["on#{Space.capitalizeString(action)}"]?()
     this["after#{Space.capitalizeString(action)}"]?()
 
+  _autoMapSingletons: ->
+    @_invokeActionOnRequiredModules '_autoMapSingletons'
+    if @is('constructed')
+      # Map classes that are declared as singletons
+      @injector.map(singleton).asSingleton() for singleton in @Singletons
+
+  # Provide lifecycle hook after this module was configured and injected
   _runOnInitializeHooks: ->
     @_invokeActionOnRequiredModules '_runOnInitializeHooks'
     # Never run this hook twice
@@ -118,18 +125,21 @@ class Space.Module extends Space.Object
       @_state = 'initializing'
       # Inject required dependencies into this module
       @injector.injectInto this
-      # Map classes that are declared as singletons
-      @injector.map(singleton).asSingleton() for singleton in @Singletons
       # Call custom lifecycle hook if existant
       @onInitialize?()
 
+  _autoCreateSingletons: ->
+    @_invokeActionOnRequiredModules '_autoCreateSingletons'
+    if @is('initializing')
+      # Create singleton classes
+      @injector.create(singleton) for singleton in @Singletons
+
+  # After all modules in the tree have been configured etc. invoke last hook
   _runAfterInitializeHooks: ->
     @_invokeActionOnRequiredModules '_runAfterInitializeHooks'
     # Never run this hook twice
     if @is('initializing')
       @_state = 'initialized'
-      # Create singleton classes
-      @injector.create(singleton) for singleton in @Singletons
       # Call custom lifecycle hook if existant
       @afterInitialize?()
 
