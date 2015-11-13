@@ -1,29 +1,29 @@
 
 class Space.Module extends Space.Object
 
-  @ERRORS: {
+  ERRORS: {
     injectorMissing: 'Instance of Space.Injector needed to initialize module.'
   }
 
-  Configuration: {}
-  RequiredModules: null
+  configuration: {}
+  requiredModules: null
   # An array of paths to classes that you want to become
   # singletons in your application e.g: ['Space.messaging.EventBus']
   # these are automatically mapped and created on `app.run()`
-  Singletons: []
+  singletons: []
   injector: null
   _state: 'constructed'
 
   constructor: ->
     super
-    @RequiredModules ?= []
+    @requiredModules ?= []
 
   initialize: (@app, @injector, mergedConfig={}, isSubModule=false) ->
     return if not @is('constructed') # only initialize once
-    if not @injector? then throw new Error Module.ERRORS.injectorMissing
+    if not @injector? then throw new Error @ERRORS.injectorMissing
 
     # merge any supplied config into this Module's Configuration
-    _.deepExtend(@Configuration, mergedConfig)
+    _.deepExtend(@configuration, mergedConfig)
 
     # Setup basic mappings required by all modules if this the top-level module
     unless isSubModule
@@ -31,7 +31,7 @@ class Space.Module extends Space.Object
       @_mapMeteorApis()
 
     # Setup required modules
-    for moduleId in @RequiredModules
+    for moduleId in @requiredModules
       # Create a new module instance if not already registered with the app
       unless @app.modules[moduleId]?
         moduleClass = Space.Module.require(moduleId, this.constructor.name)
@@ -39,17 +39,17 @@ class Space.Module extends Space.Object
       # Initialize required module
       module = @app.modules[moduleId]
       if module.is('constructed')
-        module.initialize(@app, @injector, @Configuration, true)
+        module.initialize(@app, @injector, @configuration, true)
 
     # Provide lifecycle hook before any initialization has been done
     @beforeInitialize?()
     # Give every module access Npm
     if Meteor.isServer then @npm = Npm
     # Merge in own configuration to give the chance for overwriting.
-    @Configuration = _.deepExtend(mergedConfig, @constructor::Configuration)
+    @configuration = _.deepExtend(mergedConfig, @constructor::configuration)
     # Top-level module
     if not isSubModule
-      @injector.map('Configuration').to(@Configuration)
+      @injector.map('configuration').to(@configuration)
       @_runOnInitializeHooks()
       @_autoMapSingletons()
       @_autoCreateSingletons()
@@ -127,14 +127,14 @@ class Space.Module extends Space.Object
     if @is('initializing')
       @_state = 'auto-mapping-singletons'
       # Map classes that are declared as singletons
-      @injector.map(singleton).asSingleton() for singleton in @Singletons
+      @injector.map(singleton).asSingleton() for singleton in @singletons
 
   _autoCreateSingletons: ->
     @_invokeActionOnRequiredModules '_autoCreateSingletons'
     if @is('auto-mapping-singletons')
       @_state = 'auto-creating-singletons'
       # Create singleton classes
-      @injector.create(singleton) for singleton in @Singletons
+      @injector.create(singleton) for singleton in @singletons
 
   # After all modules in the tree have been configured etc. invoke last hook
   _runAfterInitializeHooks: ->
@@ -146,7 +146,7 @@ class Space.Module extends Space.Object
       @afterInitialize?()
 
   _invokeActionOnRequiredModules: (action) ->
-    @app.modules[moduleId][action]?() for moduleId in @RequiredModules
+    @app.modules[moduleId][action]?() for moduleId in @requiredModules
 
   _wrapLifecycleHook: (hook, wrapper) ->
     this[hook] ?= ->

@@ -47,14 +47,14 @@ describe 'Space.Application', ->
     it 'merges configurations of all modules and user options', ->
       class GrandchildModule extends Space.Module
         @publish this, 'GrandchildModule'
-        Configuration: {
+        configuration: {
           grandchild: {
             toChange: 'grandchildChangeMe'
             toKeep: 'grandchildKeepMe'
           }
         }
         afterInitialize: ->
-          expect(@Configuration).toMatch {
+          expect(@configuration).toMatch {
             toChange: 'appChangeMe'
             toKeep: 'appKeepMe'
             child: {
@@ -69,16 +69,16 @@ describe 'Space.Application', ->
 
       class ChildModule extends Space.Module
         @publish this, 'ChildModule'
-        RequiredModules: ['GrandchildModule']
-        Configuration: {
+        requiredModules: ['GrandchildModule']
+        configuration: {
           child: {
             toChange: 'childChangeMe'
             toKeep: 'childKeepMe'
           }
         }
       class TestApp extends Space.Application
-        RequiredModules: ['ChildModule']
-        Configuration: {
+        requiredModules: ['ChildModule']
+        configuration: {
           toChange: 'appChangeMe'
           toKeep: 'appKeepMe'
         }
@@ -92,7 +92,7 @@ describe 'Space.Application', ->
           toChange: 'grandchildNewValue'
         }
       }
-      expect(app.injector.get 'Configuration').toMatch {
+      expect(app.injector.get 'configuration').toMatch {
         toChange: 'appNewValue'
         toKeep: 'appKeepMe'
         child: {

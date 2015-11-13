@@ -34,13 +34,13 @@ describe 'Space.Module', ->
 
     it 'sets required modules to empty array if none defined', ->
       module = new Space.Module()
-      expect(module.RequiredModules).to.be.instanceof Array
-      expect(module.RequiredModules).to.be.empty
+      expect(module.requiredModules).to.be.instanceof Array
+      expect(module.requiredModules).to.be.empty
 
     it 'leaves the defined required modules intact', ->
       testArray = []
-      module = Space.Module.create RequiredModules: testArray
-      expect(module.RequiredModules).to.equal testArray
+      module = Space.Module.create requiredModules: testArray
+      expect(module.requiredModules).to.equal testArray
 
     it 'sets the correct state', ->
       module = new Space.Module()
@@ -88,7 +88,7 @@ describe 'Space.Module - #initialize', ->
 
   it 'looks up required modules and adds them to the modules object', ->
     # make our SUT module require our fake modules
-    @module.RequiredModules = [@SubModule1.name, @SubModule2.name]
+    @module.requiredModules = [@SubModule1.name, @SubModule2.name]
     @module.initialize @app, @injector
     expect(@app.modules[@SubModule1.name]).to.equal @subModule1
     expect(@app.modules[@SubModule2.name]).to.equal @subModule2
@@ -96,7 +96,7 @@ describe 'Space.Module - #initialize', ->
   it 'initializes required modules when they are not yet initialized', ->
     sinon.spy @subModule1, 'initialize'
     sinon.spy @subModule2, 'initialize'
-    @module.RequiredModules = [@SubModule1.name, @SubModule2.name]
+    @module.requiredModules = [@SubModule1.name, @SubModule2.name]
     @module.initialize @app, @injector
     expect(@subModule1.initialize).to.have.been.called
     expect(@subModule2.initialize).to.have.been.called
@@ -104,7 +104,7 @@ describe 'Space.Module - #initialize', ->
   it 'doesnt initialize required modules if they are already initialized', ->
     @subModule1._state = 'initialized'
     sinon.spy @subModule1, 'initialize'
-    @module.RequiredModules = [@SubModule1.name]
+    @module.requiredModules = [@SubModule1.name]
     @module.initialize @app, @injector
     expect(@subModule1.initialize).not.to.have.been.called
 
