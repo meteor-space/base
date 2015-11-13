@@ -1,6 +1,6 @@
 winston = Npm.require('winston');
 
-Space.logger = new (winston.Logger)({
+Space.log = new (winston.Logger)({
   transports: [
     new (winston.transports.Console)()
   ]

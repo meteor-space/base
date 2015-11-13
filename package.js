@@ -41,7 +41,7 @@ Package.onUse(function(api) {
 
   api.addFiles([
     'source/server/configuration.js',
-    'source/server/logger.js'
+    'source/server/log.js'
   ], 'server');
 
   api.addFiles([
