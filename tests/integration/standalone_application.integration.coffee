@@ -5,7 +5,7 @@ describe 'Meteor integration in applications', ->
 
     class SharedApp extends Space.Application
 
-      Dependencies:
+      dependencies:
         meteor: 'Meteor'
         ejson: 'EJSON'
         ddp: 'DDP'
@@ -47,7 +47,7 @@ describe 'Meteor integration in applications', ->
 
       class ClientApp extends Space.Application
 
-        Dependencies:
+        dependencies:
           tracker: 'Tracker'
           templates: 'Template'
           session: 'Session'
@@ -75,7 +75,7 @@ describe 'Meteor integration in applications', ->
 
       class ServerApp extends Space.Application
 
-        Dependencies:
+        dependencies:
           email: 'Email'
           process: 'process'
           Future: 'Future'

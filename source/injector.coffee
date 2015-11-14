@@ -134,7 +134,7 @@ class Mapping
         value = @_provider.provide()
         # Loop over the dependents
         for dependent in @_dependents
-          # Loop over their Dependencies and override the one this mapping
+          # Loop over their dependencies and override the one this mapping
           # is managing if it exists (it should)
           dependencies = dependent.dependencies ? {}
           for key, id of dependencies

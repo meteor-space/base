@@ -8,7 +8,7 @@ describe("Space.Module - regressions", function() {
     let myInjector = new Space.Injector();
 
     Space.Object.extend(Test, 'MySingleton', {
-      Dependencies: { someLib: 'SomeLib' },
+      dependencies: { someLib: 'SomeLib' },
       onDependenciesReady: singletonReadySpy
     });
 

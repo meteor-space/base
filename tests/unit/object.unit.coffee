@@ -69,11 +69,11 @@ describe 'Space.Object', ->
       expect(TestClass::test).to.equal testMixin.test
 
     it 'merges object properties', ->
-      testMixin = Dependencies: second: 'second'
-      TestClass = Space.Object.extend Dependencies: first: 'first'
+      testMixin = dependencies: second: 'second'
+      TestClass = Space.Object.extend dependencies: first: 'first'
       TestClass.mixin testMixin
-      expect(TestClass::Dependencies.first).to.equal 'first'
-      expect(TestClass::Dependencies.second).to.equal 'second'
+      expect(TestClass::dependencies.first).to.equal 'first'
+      expect(TestClass::dependencies.second).to.equal 'second'
 
     it "can provide a hook that is called when the mixin is applied", ->
       myMixin = onMixinApplied: sinon.spy()
