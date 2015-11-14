@@ -8,6 +8,9 @@ if(Meteor.isServer) {
   Space.configuration = Space.getenv.multi({
     sysLog: {
       enabled: ['SPACE_SYSLOG_ENABLED', false, 'bool']
+    },
+    appLog: {
+      enabled: ['SPACE_APPLOG_ENABLED', false, 'bool']
     }
   });
 
@@ -16,6 +19,9 @@ if(Meteor.isServer) {
     "public": {
       sysLog: {
         enabled: Space.configuration.sysLog.enabled
+      },
+      appLog: {
+        enabled: Space.configuration.appLog.enabled
       }
     }
   };
@@ -29,6 +35,9 @@ if(Meteor.isClient){
   Space.configuration = {
     sysLog: {
       enabled: Meteor.settings.public.sysLog.enabled
+    },
+    appLog: {
+      enabled: Meteor.settings.public.appLog.enabled
     }
   }
 

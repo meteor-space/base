@@ -159,8 +159,10 @@ class Space.Module extends Space.Object
     this[hook] = _.wrap(this[hook], wrapper)
 
   _bootSpaceServices: ->
-    # Application level log
-     @injector.map('log').to new Space.Logger()
+    appLog = new Space.Logger()
+    @injector.map('log').to appLog
+    if Space.configuration.appLog?.enabled
+      appLog.start()
 
   _mapMeteorApis: ->
     Space.log.info("Mapping Meteor APIs in Module")
