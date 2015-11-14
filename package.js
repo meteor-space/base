@@ -36,15 +36,9 @@ Package.onUse(function(api) {
   ], {weak: true});
 
   api.addFiles([
-    'source/namespace.coffee'
-  ]);
-
-  api.addFiles([
-    'source/server/configuration.js',
-  ], 'server');
-
-  api.addFiles([
     'source/lib/underscore_deep_extend_mixin.js',
+    'source/namespace.coffee',
+    'source/configuration.js',
     'source/object.coffee',
     'source/logger.js',
     'source/error.js',

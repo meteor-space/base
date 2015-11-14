@@ -4,8 +4,10 @@ if(Meteor.isServer)
 Space.Logger = Space.Object.extend(Space, 'Logger', {
 
   _logger: null,
+  _state: 'stopped',
 
   Constructor: function(){
+
     if(Meteor.isServer) {
       this._logger = new (winston.Logger)({
         transports: [
@@ -18,19 +20,41 @@ Space.Logger = Space.Object.extend(Space, 'Logger', {
     }
   },
 
+  start: function(){
+    if(this._state == 'stopped') {
+      this._state = 'running'
+    }
+  },
+
+  stop: function(){
+    if(this._state == 'running') {
+      this._state = 'stopped'
+    }
+  },
+
   info: function(message){
-    this._logger.info(message)
+    if(this.shouldLog())
+      this._logger.info(message)
   },
 
   warn: function(message){
-    this._logger.warn(message)
+    if(this.shouldLog())
+      this._logger.warn(message)
   },
 
   error: function(message){
-    this._logger.error(message)
+    if(this.shouldLog())
+      this._logger.error(message)
+  },
+
+  shouldLog: function () {
+    if(this._state == 'running') return true
   }
 
 });
 
-// Core logging (independent from Application logging)
+// System log
 Space.log = new Space.Logger();
+
+if(Space.configuration.sysLog.enabled)
+  Space.log.start()
