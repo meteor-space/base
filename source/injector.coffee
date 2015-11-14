@@ -83,7 +83,7 @@ class Space.Injector
     # Recurse down the prototype chain
     if SuperClass? then @_mapDependencies SuperClass.constructor::, deps
     # Add dependencies of current value
-    deps[key] = id for key, id of value.Dependencies
+    deps[key] = id for key, id of value.dependencies
     return deps
 
   _resolveValue: (path) ->
@@ -136,7 +136,7 @@ class Mapping
         for dependent in @_dependents
           # Loop over their Dependencies and override the one this mapping
           # is managing if it exists (it should)
-          dependencies = dependent.Dependencies ? {}
+          dependencies = dependent.dependencies ? {}
           for key, id of dependencies
             if id is @_id
               dependent[key] = value
