@@ -41,12 +41,12 @@ Package.onUse(function(api) {
 
   api.addFiles([
     'source/server/configuration.js',
-    'source/server/log.js'
   ], 'server');
 
   api.addFiles([
     'source/lib/underscore_deep_extend_mixin.js',
     'source/object.coffee',
+    'source/logger.js',
     'source/error.js',
     'source/helpers.coffee',
     'source/struct.coffee',
@@ -96,6 +96,7 @@ Package.onTest(function(api) {
     'tests/unit/injector_annotations.unit.es6',
     'tests/unit/helpers.unit.coffee',
     'tests/unit/error.tests.js',
+    'tests/unit/logger.tests.js',
 
     // integration tests
     'tests/integration/application_with_modules.spec.js',
