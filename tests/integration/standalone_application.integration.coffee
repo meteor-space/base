@@ -97,7 +97,7 @@ describe 'Meteor integration in applications', ->
 
     class SharedApp extends Space.Application
 
-      Dependencies:
+      dependencies:
         log: 'log'
 
       onInitialize: ->
