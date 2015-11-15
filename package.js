@@ -6,7 +6,8 @@ Package.describe({
 });
 
 Npm.depends({
-  "getenv": "0.5.0"
+  "getenv": "0.5.0",
+  "winston": "2.1.0"
 });
 
 Package.onUse(function(api) {
@@ -35,16 +36,11 @@ Package.onUse(function(api) {
   ], {weak: true});
 
   api.addFiles([
-    'source/namespace.coffee'
-  ]);
-
-  api.addFiles([
-    'source/server_configuration.coffee'
-  ], 'server');
-
-  api.addFiles([
     'source/lib/underscore_deep_extend_mixin.js',
+    'source/namespace.coffee',
+    'source/configuration.js',
     'source/object.coffee',
+    'source/logger.js',
     'source/error.js',
     'source/helpers.coffee',
     'source/struct.coffee',
@@ -94,6 +90,7 @@ Package.onTest(function(api) {
     'tests/unit/injector_annotations.unit.es6',
     'tests/unit/helpers.unit.coffee',
     'tests/unit/error.tests.js',
+    'tests/unit/logger.tests.js',
 
     // integration tests
     'tests/integration/application_with_modules.spec.js',
