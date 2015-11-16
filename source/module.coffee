@@ -28,6 +28,7 @@ class Space.Module extends Space.Object
     # Setup basic mappings required by all modules if this the top-level module
     unless isSubModule
       @injector.map('Injector').to @injector
+      @_bootSpaceServices()
       @_mapMeteorApis()
 
     # Setup required modules
@@ -106,6 +107,7 @@ class Space.Module extends Space.Object
   # calling the instance hooks before, on, and after
   _runLifeCycleAction: (action, func) ->
     @_invokeActionOnRequiredModules action
+    Space.log.info('Module ' + action)
     this["before#{Space.capitalizeString(action)}"]?()
     func?()
     this["on#{Space.capitalizeString(action)}"]?()
@@ -116,6 +118,7 @@ class Space.Module extends Space.Object
     @_invokeActionOnRequiredModules '_runOnInitializeHooks'
     # Never run this hook twice
     if @is('constructed')
+      Space.log.info("Initializing Module")
       @_state = 'initializing'
       # Inject required dependencies into this module
       @injector.injectInto this
@@ -125,6 +128,7 @@ class Space.Module extends Space.Object
   _autoMapSingletons: ->
     @_invokeActionOnRequiredModules '_autoMapSingletons'
     if @is('initializing')
+      Space.log.info("Mapping Module's autoSingletons")
       @_state = 'auto-mapping-singletons'
       # Map classes that are declared as singletons
       @injector.map(singleton).asSingleton() for singleton in @singletons
@@ -132,6 +136,7 @@ class Space.Module extends Space.Object
   _autoCreateSingletons: ->
     @_invokeActionOnRequiredModules '_autoCreateSingletons'
     if @is('auto-mapping-singletons')
+      Space.log.info("Creating Module's autoSingletons")
       @_state = 'auto-creating-singletons'
       # Create singleton classes
       @injector.create(singleton) for singleton in @singletons
@@ -141,6 +146,7 @@ class Space.Module extends Space.Object
     @_invokeActionOnRequiredModules '_runAfterInitializeHooks'
     # Never run this hook twice
     if @is('auto-creating-singletons')
+      Space.log.info("Module Initialized")
       @_state = 'initialized'
       # Call custom lifecycle hook if existant
       @afterInitialize?()
@@ -152,8 +158,15 @@ class Space.Module extends Space.Object
     this[hook] ?= ->
     this[hook] = _.wrap(this[hook], wrapper)
 
+  _bootSpaceServices: ->
+    appLog = new Space.Logger()
+    @injector.map('log').to appLog
+    if Space.configuration.appLog?.enabled
+      appLog.start()
+
   _mapMeteorApis: ->
-    # Map Meteor standard packages
+    Space.log.info("Mapping Meteor APIs in Module")
+   # Map Meteor standard packages
     @injector.map('Meteor').to Meteor
     if Package.ejson?
       @injector.map('EJSON').to Package.ejson.EJSON

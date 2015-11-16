@@ -92,3 +92,16 @@ describe 'Meteor integration in applications', ->
           expect(@mongoInternals).to.equal MongoInternals
 
       new ServerApp()
+
+  it 'boots core Space Services', ->
+
+    class SharedApp extends Space.Application
+
+      dependencies:
+        log: 'log'
+
+      onInitialize: ->
+        expect(@log).to.be.defined
+        expect(@log).to.be.instanceOf Space.Logger
+
+      new SharedApp()
