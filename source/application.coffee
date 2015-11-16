@@ -12,6 +12,7 @@ class Space.Application extends Space.Module
   constructor: (options={}) ->
     super
     @modules = {}
+    @constructor.publishedAs = @constructor.name
     @initialize this, options.injector ? new Space.Injector()
 
   # Make it possible to override configuration (at any nested level)
