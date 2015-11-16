@@ -1,7 +1,7 @@
 
-if(Meteor.isServer) {
+if (Meteor.isServer) {
 
-  var getenv = Npm.require('getenv');
+  let getenv = Npm.require('getenv');
   // Wrapper
   Space.getenv = getenv;
 
@@ -26,11 +26,11 @@ if(Meteor.isServer) {
     }
   };
 
-  __meteor_runtime_config__.PUBLIC_SETTINGS = Meteor.settings["public"];
+  __meteor_runtime_config__.PUBLIC_SETTINGS = Meteor.settings.public;
 
 }
 
-if(Meteor.isClient){
+if (Meteor.isClient) {
 
   Space.configuration = {
     sysLog: {
@@ -39,6 +39,5 @@ if(Meteor.isClient){
     appLog: {
       enabled: Meteor.settings.public.appLog.enabled
     }
-  }
-
+  };
 }
