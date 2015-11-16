@@ -23,7 +23,7 @@ class Space.Module extends Space.Object
     if not @injector? then throw new Error @ERRORS.injectorMissing
 
     # merge any supplied config into this Module's Configuration
-    _.deepExtend(@configuration, mergedConfig)
+    @configuration = _.deepExtend(@configuration, mergedConfig)
 
     # Setup basic mappings required by all modules if this the top-level module
     unless isSubModule
