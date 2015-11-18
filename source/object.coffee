@@ -98,9 +98,18 @@ class Space.Object
     # Copy the static properties of this class over to the extended
     Child[key] = this[key] for key of this
 
+    # Copy over static class properties defined on the extension
+    if extension.statics?
+      _.extend Child, extension.statics
+      delete extension.statics
+
     # Extract mixins before they get added to prototype
     mixins = extension.mixin
     delete extension.mixin
+
+    # Extract onExtending callback and avoid adding it to prototype
+    onExtendingCallback = extension.onExtending
+    delete extension.onExtending
 
     # Javascript prototypal inheritance "magic"
     Ctor = ->
@@ -115,6 +124,9 @@ class Space.Object
 
     # Apply mixins
     if mixins? then Child.mixin(mixins)
+
+    # Invoke the onExtending callback after everything has been setup
+    onExtendingCallback?.call(Child)
 
     # Add the class to the namespace
     namespace?[className] = Child
@@ -161,8 +173,8 @@ class Space.Object
       delete mixin.onDependenciesReady
 
     # Mixin static properties into the host class
-    _.extend(this, mixin.static) if mixin.static?
-    delete mixin.static
+    _.extend(this, mixin.statics) if mixin.statics?
+    delete mixin.statics
 
     # Give mixins the chance to do static setup when applied to the host class
     mixin.onMixinApplied?.call this
