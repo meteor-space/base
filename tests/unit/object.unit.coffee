@@ -122,3 +122,9 @@ describe 'Space.Object', ->
       myMixin = { onMixinApplied: sinon.spy() }
       MyClass = Space.Object.extend mixin: [myMixin]
       expect(myMixin.onMixinApplied).to.have.been.calledOn(MyClass)
+
+    it 'can be used to mixin static properties on to the class', ->
+      myMixin = statics: { myMethod: sinon.spy() }
+      MyClass = Space.Object.extend mixin: [myMixin]
+      MyClass.myMethod()
+      expect(myMixin.statics.myMethod).to.have.been.calledOn(MyClass)
