@@ -98,6 +98,11 @@ class Space.Object
     # Copy the static properties of this class over to the extended
     Child[key] = this[key] for key of this
 
+    # Copy over static class properties defined on the extension
+    if extension.statics?
+      _.extend Child, extension.statics
+      delete extension.statics
+
     # Extract mixins before they get added to prototype
     mixins = extension.mixin
     delete extension.mixin
