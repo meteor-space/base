@@ -107,6 +107,10 @@ class Space.Object
     mixins = extension.mixin
     delete extension.mixin
 
+    # Extract onExtending callback and avoid adding it to prototype
+    onExtendingCallback = extension.onExtending
+    delete extension.onExtending
+
     # Javascript prototypal inheritance "magic"
     Ctor = ->
       @constructor = Child
@@ -120,6 +124,9 @@ class Space.Object
 
     # Apply mixins
     if mixins? then Child.mixin(mixins)
+
+    # Invoke the onExtending callback after everything has been setup
+    onExtendingCallback?.call(Child)
 
     # Add the class to the namespace
     namespace?[className] = Child

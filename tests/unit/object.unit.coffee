@@ -29,10 +29,17 @@ describe 'Space.Object', ->
       expect(instance.get('first')).to.equal 1
       expect(instance.get('second')).to.equal 2
 
-    it 'allows you to define static class properties', ->
-      myStatics = {}
-      MyClass = Space.Object.extend statics: { myStatics: myStatics }
-      expect(MyClass.myStatics).to.equal(myStatics)
+    describe "working with static class properties", ->
+
+      it 'allows you to define static class properties', ->
+        myStatics = {}
+        MyClass = Space.Object.extend statics: { myStatics: myStatics }
+        expect(MyClass.myStatics).to.equal(myStatics)
+
+      it 'provides an api for defining a callback while extending', ->
+        onExtendingSpy = sinon.spy()
+        MyClass = Space.Object.extend onExtending: onExtendingSpy
+        expect(onExtendingSpy).to.have.been.calledOn(MyClass)
 
   describe 'creating instances', ->
 
