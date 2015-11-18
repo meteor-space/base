@@ -18,7 +18,7 @@ describe('Building applications based on modules', function() {
 
     Space.Application.create({
       requiredModules: ['FirstModule'],
-      Dependencies: { testValue: 'testValue' },
+      dependencies: { testValue: 'testValue' },
       onInitialize: function() { testResult = this.testValue; }
     });
 
@@ -42,7 +42,7 @@ describe('Building applications based on modules', function() {
 
     let app = Space.Application.create({
       requiredModules: ['FirstModule'],
-      Dependencies: { moduleValue: 'moduleValue' },
+      dependencies: { moduleValue: 'moduleValue' },
       onInitialize: function() {
         this.injector.override('moduleValue').toStaticValue(appValue);
       }

@@ -154,8 +154,8 @@ class Space.Object
       delete mixin.onDependenciesReady
 
     # Mixin static properties into the host class
-    _.extend(this, mixin.Static) if mixin.Static?
-    delete mixin.Static
+    _.extend(this, mixin.static) if mixin.static?
+    delete mixin.static
 
     # Give mixins the chance to do static setup when applied to the host class
     mixin.onMixinApplied?.call this
