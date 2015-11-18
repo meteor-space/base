@@ -6,39 +6,25 @@ describe 'Space.Object', ->
   describe 'extending', ->
 
     it 'creates and returns a subclass', ->
-
       Space.Object.extend(@namespace, 'MyClass')
       expect(@namespace.MyClass).to.extend Space.Object
 
     it 'applies the arguments to the super constructor', ->
-
       [first, second, third] = ['first', 2, {}]
       spy = sinon.spy()
-
       Space.Object.extend @namespace, 'Base', {
         Constructor: -> spy.apply this, arguments
       }
       @namespace.Base.extend(@namespace, 'Extended')
       instance = new @namespace.Extended first, second, third
-
       expect(spy).to.have.been.calledWithExactly first, second, third
       expect(spy).to.have.been.calledOn instance
 
     it 'allows to extend the prototype', ->
-
-      First = Space.Object.extend {
-        first: 1,
-        get: (property) -> @[property]
-      }
-
-      Second = First.extend {
-        second: 2,
-        get: -> First::get.apply this, arguments
-      }
-
+      First = Space.Object.extend first: 1, get: (property) -> @[property]
+      Second = First.extend second: 2, get: -> First::get.apply this, arguments
       class Third extends Second
         get: (property) -> super property
-
       instance = new Third()
       expect(instance.get('first')).to.equal 1
       expect(instance.get('second')).to.equal 2
@@ -54,9 +40,7 @@ describe 'Space.Object', ->
 
     it 'forwards any number of arguments to the constructor', ->
       Base = Space.Object.extend Constructor: (@first, @second) ->
-
       instance = Base.create 1, 2
-
       expect(instance.first).to.equal 1
       expect(instance.second).to.equal 2
 
