@@ -117,3 +117,8 @@ describe 'Space.Object', ->
       new SuperClass().onDependenciesReady()
       expect(firstMixin.onDependenciesReady).to.have.been.calledOnce
       expect(secondMixin.onDependenciesReady).not.to.have.been.called
+
+    it 'can be defined as prototype property when extending classes', ->
+      myMixin = { onMixinApplied: sinon.spy() }
+      MyClass = Space.Object.extend mixin: [myMixin]
+      expect(myMixin.onMixinApplied).to.have.been.calledOn(MyClass)

@@ -98,6 +98,10 @@ class Space.Object
     # Copy the static properties of this class over to the extended
     Child[key] = this[key] for key of this
 
+    # Extract mixins before they get added to prototype
+    mixins = extension.mixin
+    delete extension.mixin
+
     # Javascript prototypal inheritance "magic"
     Ctor = ->
       @constructor = Child
@@ -108,6 +112,9 @@ class Space.Object
 
     # Copy the extension over to the class prototype
     Child.prototype[key] = extension[key] for key of extension
+
+    # Apply mixins
+    if mixins? then Child.mixin(mixins)
 
     # Add the class to the namespace
     namespace?[className] = Child
@@ -131,11 +138,11 @@ class Space.Object
   # properties that are plain objects to support the mixin of configs etc.
   @mixin: (mixins) ->
     if _.isArray(mixins)
-      @_addMixin(mixin) for mixin in mixins
+      @_applyMixin(mixin) for mixin in mixins
     else
-      @_addMixin(mixins)
+      @_applyMixin(mixins)
 
-  @_addMixin: (mixin) ->
+  @_applyMixin: (mixin) ->
 
     # Create a clone so that we can remove properties without affecting the global mixin
     mixin = _.clone mixin
