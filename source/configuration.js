@@ -12,7 +12,7 @@ if (Meteor.isServer) {
     }
   });
 
-  // Pass down the
+  // Pass down to the client
   Meteor.settings = {
     "public": {
       log: {
