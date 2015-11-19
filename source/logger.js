@@ -4,7 +4,7 @@ if (Meteor.isServer) {
   winston = Npm.require('winston');
 }
 
-Space.Logger = Space.Object.extend(Space, 'Logger', {
+Space.Object.extend(Space, 'Logger', {
 
   _logger: null,
   _minLevel: 6,
@@ -12,7 +12,7 @@ Space.Logger = Space.Object.extend(Space, 'Logger', {
 
   Constructor() {
     if (Meteor.isServer) {
-      this._logger = new (winston.Logger)({
+      this._logger = new winston.Logger({
         transports: [
           new (winston.transports.Console)({
             colorize: true,
@@ -28,11 +28,11 @@ Space.Logger = Space.Object.extend(Space, 'Logger', {
   },
 
   setMinLevel(name) {
-    let newCode = this._levelCode(name)
+    let newCode = this._levelCode(name);
     if (this._minLevel !== newCode) {
       this._minLevel = newCode;
       if (Meteor.isServer) {
-        this._logger.transports.Console.level = name;
+        this._logger.transports.console.level = name;
       }
     }
   },
@@ -49,42 +49,42 @@ Space.Logger = Space.Object.extend(Space, 'Logger', {
     }
   },
 
-  debug(message, meta) {
+  debug(message) {
     check(message, String);
     if (this._isRunning()) this._logger.debug.apply(this, arguments);
   },
 
-  info(message, meta) {
+  info(message) {
     check(message, String);
     if (this._isRunning()) this._logger.info.apply(this, arguments);
   },
 
-  notice(message, meta) {
+  notice(message) {
     check(message, String);
     if (this._isRunning()) this._logger.notice.apply(this, arguments);
   },
 
-  warning(message, meta) {
+  warning(message) {
     check(message, String);
     if (this._isRunning()) this._logger.warning.apply(this, arguments);
   },
 
-  error(message, meta) {
+  error(message) {
     check(message, String);
     if (this._isRunning()) this._logger.error.apply(this, arguments);
   },
 
-  crit(message, meta) {
+  crit(message) {
     check(message, String);
     if (this._isRunning()) this._logger.crit.apply(this, arguments);
   },
 
-  alert(message, meta) {
+  alert(message) {
     check(message, String);
     if (this._isRunning()) this._logger.alert.apply(this, arguments);
   },
 
-  emerg(message, meta) {
+  emerg(message) {
     check(message, String);
     if (this._isRunning()) this._logger.emerg.apply(this, arguments);
   },
@@ -97,9 +97,9 @@ Space.Logger = Space.Object.extend(Space, 'Logger', {
       'error': 3,
       'warning': 4,
       'notice': 5,
-      'info':6,
+      'info': 6,
       'debug': 7
-    }
+    };
     return code[name];
   },
 
