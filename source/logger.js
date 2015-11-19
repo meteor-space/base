@@ -14,7 +14,7 @@ Space.Object.extend(Space, 'Logger', {
     if (Meteor.isServer) {
       this._logger = new winston.Logger({
         transports: [
-          new (winston.transports.Console)({
+          new winston.transports.Console({
             colorize: true,
             prettyPrint: true
           })
