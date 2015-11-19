@@ -33,16 +33,16 @@ Space.Logger = Space.Object.extend(Space, 'Logger', {
     }
   },
 
-  info(message) {
-    if (this.shouldLog()) this._logger.info(message);
+  info(message, meta) {
+    if (this.shouldLog()) this._logger.info(message, meta);
   },
 
-  warn(message) {
-    if (this.shouldLog()) this._logger.warn(message);
+  warn(message, meta) {
+    if (this.shouldLog()) this._logger.warn(message, meta);
   },
 
-  error(message) {
-    if (this.shouldLog()) this._logger.error(message);
+  error(message, meta) {
+    if (this.shouldLog()) this._logger.error(message, meta);
   },
 
   shouldLog() {
