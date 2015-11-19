@@ -1,4 +1,4 @@
-if(Meteor.isServer) {
+if (Meteor.isServer) {
   winston = Npm.require('winston');
 }
 
@@ -9,47 +9,76 @@ Space.Logger = Space.Object.extend(Space, 'Logger', {
 
   Constructor() {
 
-    if(Meteor.isServer) {
+    if (Meteor.isServer) {
       this._logger = new (winston.Logger)({
         transports: [
-          new (winston.transports.Console)()
+          new (winston.transports.Console)({
+            colorize: true,
+            prettyPrint: true
+          })
         ]
       });
+      this._logger.setLevels(winston.config.syslog.levels);
     }
-    if(Meteor.isClient) {
+    if (Meteor.isClient) {
       this._logger = console;
     }
   },
 
   start() {
-    if(this._state === 'stopped') {
+    if (this._state === 'stopped') {
       this._state = 'running';
     }
   },
 
   stop() {
-    if(this._state === 'running') {
+    if (this._state === 'running') {
       this._state = 'stopped';
     }
   },
 
-  info(message, meta) {
-    check(message, String)
-    if(this.shouldLog()) this._logger.info.apply(this, arguments);
+  debug(message, meta) {
+    check(message, String);
+    if (this._shouldLog()) this._logger.debug.apply(this, arguments);
   },
 
-  warn(message, meta) {
-    check(message, String)
-    if(this.shouldLog()) this._logger.warn.apply(this, arguments);
+  info(message, meta) {
+    check(message, String);
+    if (this._shouldLog()) this._logger.info.apply(this, arguments);
+  },
+
+  notice(message, meta) {
+    check(message, String);
+    if (this._shouldLog()) this._logger.notice.apply(this, arguments);
+  },
+
+  warning(message, meta) {
+    check(message, String);
+    if (this._shouldLog()) this._logger.warning.apply(this, arguments);
   },
 
   error(message, meta) {
-    check(message, String)
-    if(this.shouldLog()) this._logger.error.apply(this, arguments);
+    check(message, String);
+    if (this._shouldLog()) this._logger.error.apply(this, arguments);
   },
 
-  shouldLog() {
-    if(this._state === 'running') return true;
+  crit(message, meta) {
+    check(message, String);
+    if (this._shouldLog()) this._logger.crit.apply(this, arguments);
+  },
+
+  alert(message, meta) {
+    check(message, String);
+    if (this._shouldLog()) this._logger.alert.apply(this, arguments);
+  },
+
+  emerg(message, meta) {
+    check(message, String);
+    if (this._shouldLog()) this._logger.emerg.apply(this, arguments);
+  },
+
+  _shouldLog() {
+    if (this._state === 'running') return true;
   }
 
 });
@@ -57,6 +86,6 @@ Space.Logger = Space.Object.extend(Space, 'Logger', {
 // System log
 Space.log = new Space.Logger();
 
-if(Space.configuration.sysLog.enabled) {
+if (Space.configuration.sysLog.enabled) {
   Space.log.start();
 }

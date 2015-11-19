@@ -21,14 +21,14 @@ class Space.Module extends Space.Object
   initialize: (@app, @injector, mergedConfig={}, isSubModule=false) ->
     return if not @is('constructed') # only initialize once
     if not @injector? then throw new Error @ERRORS.injectorMissing
-    Space.log.info("#{@constructor.publishedAs}: initialize")
+    Space.log.debug("#{@constructor.publishedAs}: initialize")
     # merge any supplied config into this Module's Configuration
     @configuration = _.deepExtend(@configuration, mergedConfig)
 
     # Setup basic mappings required by all modules if this the top-level module
     unless isSubModule
       @injector.map('Injector').to @injector
-      @_bootSpaceServices()
+      @_mapSpaceServices()
       @_mapMeteorApis()
 
     # Setup required modules
@@ -107,7 +107,7 @@ class Space.Module extends Space.Object
   # calling the instance hooks before, on, and after
   _runLifeCycleAction: (action, func) ->
     @_invokeActionOnRequiredModules action
-    Space.log.info("#{@constructor.publishedAs}: #{action}")
+    Space.log.debug("#{@constructor.publishedAs}: #{action}")
     this["before#{Space.capitalizeString(action)}"]?()
     func?()
     this["on#{Space.capitalizeString(action)}"]?()
@@ -118,7 +118,7 @@ class Space.Module extends Space.Object
     @_invokeActionOnRequiredModules '_runOnInitializeHooks'
     # Never run this hook twice
     if @is('constructed')
-      Space.log.info("#{@constructor.publishedAs}: onInitialize")
+      Space.log.debug("#{@constructor.publishedAs}: onInitialize")
       @_state = 'initializing'
       # Inject required dependencies into this module
       @injector.injectInto this
@@ -128,7 +128,7 @@ class Space.Module extends Space.Object
   _autoMapSingletons: ->
     @_invokeActionOnRequiredModules '_autoMapSingletons'
     if @is('initializing')
-      Space.log.info("#{@constructor.publishedAs}: _autoMapSingletons")
+      Space.log.debug("#{@constructor.publishedAs}: _autoMapSingletons")
       @_state = 'auto-mapping-singletons'
       # Map classes that are declared as singletons
       @injector.map(singleton).asSingleton() for singleton in @singletons
@@ -136,7 +136,7 @@ class Space.Module extends Space.Object
   _autoCreateSingletons: ->
     @_invokeActionOnRequiredModules '_autoCreateSingletons'
     if @is('auto-mapping-singletons')
-      Space.log.info("#{@constructor.publishedAs}: _autoCreateSingletons")
+      Space.log.debug("#{@constructor.publishedAs}: _autoCreateSingletons")
       @_state = 'auto-creating-singletons'
       # Create singleton classes
       @injector.create(singleton) for singleton in @singletons
@@ -146,7 +146,7 @@ class Space.Module extends Space.Object
     @_invokeActionOnRequiredModules '_runAfterInitializeHooks'
     # Never run this hook twice
     if @is('auto-creating-singletons')
-      Space.log.info("#{@constructor.publishedAs}: afterInitialize")
+      Space.log.debug("#{@constructor.publishedAs}: afterInitialize")
       @_state = 'initialized'
       # Call custom lifecycle hook if existant
       @afterInitialize?()
@@ -158,14 +158,11 @@ class Space.Module extends Space.Object
     this[hook] ?= ->
     this[hook] = _.wrap(this[hook], wrapper)
 
-  _bootSpaceServices: ->
-    appLog = new Space.Logger()
-    @injector.map('log').to appLog
-    if Space.configuration.appLog?.enabled
-      appLog.start()
+  _mapSpaceServices: ->
+    @injector.map('log').to Space.log
 
   _mapMeteorApis: ->
-    Space.log.info("#{@constructor.publishedAs}: _mapMeteorApis")
+    Space.log.debug("#{@constructor.publishedAs}: _mapMeteorApis")
    # Map Meteor standard packages
     @injector.map('Meteor').to Meteor
     if Package.ejson?
