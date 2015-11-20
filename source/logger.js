@@ -10,6 +10,14 @@ Space.Object.extend(Space, 'Logger', {
   _minLevel: 6,
   _state: 'stopped',
 
+  _levels: {
+    'error': 3,
+    'warning': 4,
+    'warn': 4,
+    'info': 6,
+    'debug': 7
+  },
+
   Constructor() {
     if (Meteor.isServer) {
       this._logger = new winston.Logger({
@@ -38,78 +46,56 @@ Space.Object.extend(Space, 'Logger', {
   },
 
   start() {
-    if (this._state === 'stopped') {
+    if (this._is('stopped')) {
       this._state = 'running';
     }
   },
 
   stop() {
-    if (this._state === 'running') {
+    if (this._is('running')) {
       this._state = 'stopped';
     }
   },
 
   debug(message) {
     check(message, String);
-    if (this._isRunning()) this._logger.debug.apply(this, arguments);
+    this._log('debug', arguments);
   },
 
   info(message) {
     check(message, String);
-    if (this._isRunning()) this._logger.info.apply(this, arguments);
-  },
-
-  notice(message) {
-    check(message, String);
-    if (this._isRunning()) this._logger.notice.apply(this, arguments);
+    this._log('info', arguments);
   },
 
   warning(message) {
     check(message, String);
-    if (this._isRunning()) this._logger.warning.apply(this, arguments);
+    if (Meteor.isClient)
+      this._log('warn', arguments);
+    if (Meteor.isServer)
+      this._log('warning', arguments);
   },
 
   error(message) {
     check(message, String);
-    if (this._isRunning()) this._logger.error.apply(this, arguments);
-  },
-
-  crit(message) {
-    check(message, String);
-    if (this._isRunning()) this._logger.crit.apply(this, arguments);
-  },
-
-  alert(message) {
-    check(message, String);
-    if (this._isRunning()) this._logger.alert.apply(this, arguments);
-  },
-
-  emerg(message) {
-    check(message, String);
-    if (this._isRunning()) this._logger.emerg.apply(this, arguments);
+    this._log('error', arguments);
   },
 
   _levelCode(name) {
-    let code = {
-      'emerg': 0,
-      'alert': 1,
-      'crit': 2,
-      'error': 3,
-      'warning': 4,
-      'notice': 5,
-      'info': 6,
-      'debug': 7
-    };
-    return code[name];
+    return this._levels[name];
   },
 
-  _isRunning() {
-    if (this._state === 'running') return true;
+  _is(expectedState) {
+    if (this._state === expectedState) return true;
+  },
+
+  _log(level, message) {
+    if(this._is('running') && this._levelCode(level) <= this._minLevel) {
+      this._logger[level].apply(this._logger, message);
+    }
   }
 
 });
 
-// System log
 Space.log = new Space.Logger();
 
 if (config.log.enabled) {
