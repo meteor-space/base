@@ -190,3 +190,8 @@ class Space.Object
         _.deepExtend @prototype[key], value
       else
         @prototype[key] ?= value
+
+  @isSubclassOf = (sup) ->
+    isSubclass = this.prototype instanceof sup
+    isSameClass = this is sup
+    return isSubclass || isSameClass
