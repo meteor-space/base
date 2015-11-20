@@ -6,22 +6,18 @@ if (Meteor.isServer) {
   Space.getenv = getenv;
 
   Space.configuration = Space.getenv.multi({
-    sysLog: {
-      enabled: ['SPACE_SYSLOG_ENABLED', false, 'bool']
-    },
-    appLog: {
-      enabled: ['SPACE_APPLOG_ENABLED', false, 'bool']
+    log: {
+      enabled: ['SPACE_LOG_ENABLED', false, 'bool'],
+      minLevel: ['SPACE_LOG_MIN_LEVEL', 'info', 'string']
     }
   });
 
-  // Pass down the
+  // Pass down to the client
   Meteor.settings = {
     "public": {
-      sysLog: {
-        enabled: Space.configuration.sysLog.enabled
-      },
-      appLog: {
-        enabled: Space.configuration.appLog.enabled
+      log: {
+        enabled: Space.configuration.log.enabled,
+        minLevel: Space.configuration.log.minLevel
       }
     }
   };
@@ -33,11 +29,9 @@ if (Meteor.isServer) {
 if (Meteor.isClient) {
 
   Space.configuration = {
-    sysLog: {
-      enabled: Meteor.settings.public.sysLog.enabled
-    },
-    appLog: {
-      enabled: Meteor.settings.public.appLog.enabled
+    log: {
+      enabled: Meteor.settings.public.log.enabled,
+      minLevel: Meteor.settings.public.log.minLevel
     }
   };
 }
