@@ -119,6 +119,10 @@ class Space.Object
     Child.prototype = new Ctor()
     Child.__super__ = Parent.prototype
 
+    # Return the class name with #toString by default
+    unless Parent.__keepToStringMethod__
+      Child.prototype.toString = -> className
+
     # Copy the extension over to the class prototype
     Child.prototype[key] = extension[key] for key of extension
 
