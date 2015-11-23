@@ -15,5 +15,5 @@ class Space.Struct extends Space.Object
 
   toPlainObject: ->
     copy = {}
-    copy[key] = @[key] for key of @fields() when @[key]?
+    copy[key] = @[key] for key of @fields() when @[key]? != undefined
     return copy
