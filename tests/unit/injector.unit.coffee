@@ -19,19 +19,10 @@ describe 'Space.Injector', ->
       expect(@injector.get('myObject').test).to.equal testValue
 
     it 'throws error if mapping doesnt exist', ->
-      expect(=> @injector.get('blablub')).to.throw new Space.CouldNotResolvePathError()
-
-    it 'auto-maps singletons', ->
-      first = @injector.get 'Space.Injector'
-      second = @injector.get 'Space.Injector'
-      expect(first).to.be.instanceof Space.Injector
-      expect(first).to.equal second
-
-    it 'auto-maps static values', ->
-      expect(@injector.get('Space')).to.equal Space
-
-    it 'throws if the auto-map value is undefined', ->
-      expect(=> @injector.get('NotExistingValue')).to.throw
+      id = 'blablub'
+      expect(=> @injector.get(id)).to.throw(
+        @injector.ERRORS.noMappingFound(id).message
+      )
 
     it 'throws error if mapping would be overriden', ->
       @injector.map('test').to 'test'
@@ -55,8 +46,8 @@ describe 'Space.Injector', ->
       expect(@injector.get('TestClass')).to.be.instanceof TestClass
 
     it 'throws error if you try to map undefined', ->
-      expect(=> @injector.map(undefined)).to.throw 'Cannot map undefined value.'
-      expect(=> @injector.map(null)).to.throw 'Cannot map undefined value.'
+      expect(=> @injector.map(undefined)).to.throw @injector.ERRORS.cannotMapUndefinedId()
+      expect(=> @injector.map(null)).to.throw @injector.ERRORS.cannotMapUndefinedId()
 
   describe 'overriding mappings', ->
 
