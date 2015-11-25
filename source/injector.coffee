@@ -6,7 +6,7 @@ class Space.Injector
   ERRORS: {
     cannotMapUndefinedId: -> 'Cannot map <null> or <undefined>.'
     mappingExists: (id) -> "<#{id}> would be overwritten. Use <Injector::override> for that."
-    noMappingFound: -> "no mapping found"
+    noMappingFound: (id) -> "no mapping found for <#{id}>"
     cannotGetValueForUndefined: -> "Cannot get injection mapping for <undefined>."
   }
 
@@ -38,7 +38,7 @@ class Space.Injector
     if !id?
       throw new Space.InjectionError(@ERRORS.cannotGetValueForUndefined())
     if not @_mappings[id]?
-      throw new Space.InjectionError(@ERRORS.noMappingFound())
+      throw new Space.InjectionError(@ERRORS.noMappingFound(id))
     dependency = @_mappings[id].provide(dependentObject)
     @injectInto dependency
     return dependency
