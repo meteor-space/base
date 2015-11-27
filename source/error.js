@@ -27,7 +27,7 @@ _.extend(Space.Error.prototype, {
     let fields = Space.Struct.prototype.fields.call(this);
     _.extend(fields, {
       message: String,
-      stack: String,
+      stack: Match.Optional(String),
       code: Match.Optional(Match.Integer)
     });
     return fields;
