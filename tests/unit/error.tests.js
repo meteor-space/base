@@ -1,11 +1,29 @@
 describe("Space.Error", function() {
 
-  MyError = Space.Error.extend('MyError', {
+  let MyError = Space.Error.extend('MyError', {
     message: 'The default message for this error'
   });
 
   it("is an instance of error", function() {
-    expect(new MyError()).to.instanceof(Error);
+    expect(new MyError()).to.be.instanceof(Error);
+  });
+
+  it("has same behavior as Space.Struct", function() {
+    let data = { message: 'test', code: 123 };
+    let error = new MyError(data);
+    expect(error).to.be.instanceof(Error);
+    expect(error).to.be.instanceof(MyError);
+    expect(error.name).to.equal('MyError');
+    expect(error.message).to.equal(data.message);
+    expect(error.code).to.equal(data.code);
+  });
+
+  it("is easy to add additional fields", function() {
+    MyError.fields = { customField: String };
+    let data = { message: 'test', code: 123, customField: 'test' };
+    let error = new MyError(data);
+    expect(error.customField).to.equal('test');
+    MyError.fields = {};
   });
 
   it("throws the prototype message by default", function() {
