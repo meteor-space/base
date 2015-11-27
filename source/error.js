@@ -10,12 +10,7 @@ Space.Error = function(params) {
   } else {
     data = {};
   }
-  let message = data.message ? data.message : this.message;
-  let error = Error.call(this, message);
-  data.name = error.name = this.constructor.name;
-  data.message = error.message;
-  if (error.stack !== undefined) data.stack = error.stack;
-  Space.Struct.call(this, data);
+  Space.Struct.call(this, this.extractErrorProperties(data));
   return this;
 };
 
@@ -32,6 +27,14 @@ _.extend(Space.Error.prototype, {
       code: Match.Optional(Match.Integer)
     });
     return fields;
+  },
+  extractErrorProperties(data) {
+    let message = data.message ? data.message : this.message;
+    let error = Error.call(this, message);
+    data.name = error.name = this.constructor.name;
+    data.message = error.message;
+    if (error.stack !== undefined) data.stack = error.stack;
+    return data;
   },
   toPlainObject: Space.Struct.prototype.toPlainObject,
   _getMixinCallbacks: Space.Object.prototype._getMixinCallbacks,
