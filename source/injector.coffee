@@ -65,7 +65,7 @@ class Space.Injector
         value[key] ?= @get(id, value)
       catch error
         error.message += " for {#{key}: '#{id}'} in <#{value}>. Did you forget
-                           to map #{id} in your application?"
+                           to map it in your application?"
         throw error
     # Notify when dependencies are ready
     if value.onDependenciesReady? then value.onDependenciesReady()
