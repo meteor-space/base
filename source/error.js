@@ -14,7 +14,7 @@ Space.Error = function(params) {
   let error = Error.call(this, message);
   data.name = error.name = this.constructor.name;
   data.message = error.message;
-  data.stack = error.stack;
+  if (error.stack !== undefined) data.stack = error.stack;
   Space.Struct.call(this, data);
   return this;
 };
