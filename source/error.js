@@ -12,7 +12,7 @@ Space.Error = function(params) {
   }
   let message = data.message ? data.message : this.message;
   let error = Error.call(this, message);
-  error.name = this.name = this.constructor.name;
+  data.name = error.name = this.constructor.name;
   data.message = error.message;
   data.stack = error.stack;
   Space.Struct.call(this, data);
@@ -26,6 +26,7 @@ _.extend(Space.Error.prototype, {
   fields() {
     let fields = Space.Struct.prototype.fields.call(this);
     _.extend(fields, {
+      name: String,
       message: String,
       stack: Match.Optional(String),
       code: Match.Optional(Match.Integer)

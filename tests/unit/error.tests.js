@@ -13,6 +13,7 @@ describe("Space.Error", function() {
     let error = new MyError(data);
     expect(error).to.be.instanceof(Error);
     expect(error).to.be.instanceof(MyError);
+    expect(error.name).to.equal('MyError');
     expect(error.message).to.equal(data.message);
     expect(error.code).to.equal(data.code);
   });
