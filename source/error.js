@@ -25,11 +25,12 @@ _.extend(Space.Error.prototype, {
   message: '',
   fields() {
     let fields = Space.Struct.prototype.fields.call(this);
-    return _.extend(fields, {
+    _.extend(fields, {
       message: String,
       stack: String,
       code: Match.Optional(Match.Integer)
     });
+    return fields;
   },
   toPlainObject: Space.Struct.prototype.toPlainObject,
   _getMixinCallbacks: Space.Object.prototype._getMixinCallbacks,

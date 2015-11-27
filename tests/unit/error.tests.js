@@ -18,14 +18,11 @@ describe("Space.Error", function() {
   });
 
   it("is easy to add additional fields", function() {
-    MyError.prototype.fields = function() {
-      return {
-        customField: String
-      };
-    };
+    MyError.fields = { customField: String };
     let data = { message: 'test', code: 123, customField: 'test' };
     let error = new MyError(data);
     expect(error.customField).to.equal('test');
+    MyError.fields = {};
   });
 
   it("throws the prototype message by default", function() {
