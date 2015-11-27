@@ -1,6 +1,6 @@
 describe("Space.Error", function() {
 
-  MyError = Space.Error.extend('MyError', {
+  let MyError = Space.Error.extend('MyError', {
     message: 'The default message for this error'
   });
 
