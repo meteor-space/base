@@ -46,5 +46,6 @@ _.extend(Space.Error, {
   mixin: Space.Object.mixin,
   create: Space.Object.create,
   _applyMixin: Space.Object._applyMixin,
+  _mergeIntoPrototype: Space.Object._mergeIntoPrototype,
   __keepToStringMethod__: true // Do not override #toString method
 });

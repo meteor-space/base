@@ -64,12 +64,31 @@ describe 'Space.Object', ->
       TestClass.mixin testMixin
       expect(TestClass::test).to.equal testMixin.test
 
+    it 'overrides existing methods of the prototype', ->
+      testMixin = test: ->
+      TestClass = Space.Object.extend test: ->
+      TestClass.mixin testMixin
+      expect(TestClass::test).to.equal testMixin.test
+
     it 'merges object properties', ->
       testMixin = dependencies: second: 'second'
       TestClass = Space.Object.extend dependencies: first: 'first'
       TestClass.mixin testMixin
       expect(TestClass::dependencies.first).to.equal 'first'
       expect(TestClass::dependencies.second).to.equal 'second'
+
+    it "does not modify other mixins when merging properties", ->
+      FirstMixin = dependencies: firstMixin: 'onExtending'
+      FirstClass = Space.Object.extend {
+        mixin: [FirstMixin]
+        dependencies: first: 'first'
+      }
+      FirstClass.mixin dependencies: firstMixin: 'afterExtending'
+      expect(FirstMixin).toMatch dependencies: firstMixin: 'onExtending'
+      expect(FirstClass.prototype.dependencies).toMatch {
+        first: 'first'
+        firstMixin: 'afterExtending'
+      }
 
     it "can provide a hook that is called when the mixin is applied", ->
       myMixin = onMixinApplied: sinon.spy()

@@ -123,11 +123,11 @@ class Space.Object
     unless Parent.__keepToStringMethod__
       Child.prototype.toString = -> className
 
-    # Copy the extension over to the class prototype
-    Child.prototype[key] = extension[key] for key of extension
-
     # Apply mixins
     if mixins? then Child.mixin(mixins)
+
+    # Merge the extension into the class prototype
+    @_mergeIntoPrototype Child.prototype, extension
 
     # Invoke the onExtending callback after everything has been setup
     onExtendingCallback?.call(Child)
@@ -184,18 +184,24 @@ class Space.Object
     mixin.onMixinApplied?.call this
     delete mixin.onMixinApplied
 
-    # Helper function to check for object literals only
-    isPlainObject = (value) ->
-      _.isObject(value) and !_.isArray(value) and !_.isFunction(value)
-
     # Copy over the mixin to the prototype and merge objects
-    for key, value of mixin
-      if isPlainObject(value) and isPlainObject(@prototype[key])
-        _.deepExtend @prototype[key], value
-      else
-        @prototype[key] ?= value
+    @_mergeIntoPrototype @prototype, mixin
 
   @isSubclassOf = (sup) ->
     isSubclass = this.prototype instanceof sup
     isSameClass = this is sup
     return isSubclass || isSameClass
+
+  @_mergeIntoPrototype: (prototype, extension) ->
+    # Helper function to check for object literals only
+    isPlainObject = (value) ->
+      _.isObject(value) and !_.isArray(value) and !_.isFunction(value)
+    for key, value of extension
+      hasProperty = prototype.hasOwnProperty(key)
+      if hasProperty and isPlainObject(value) and isPlainObject(prototype[key])
+        # Deep extend plain objects
+        _.deepExtend(prototype[key], _.clone(value))
+      else
+        value = _.clone(value) if isPlainObject(value)
+        # Set non-existing props and override existing methods
+        prototype[key] = value
