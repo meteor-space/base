@@ -37,6 +37,8 @@ _.extend(Space.Error.prototype, {
     return data;
   },
   toPlainObject: Space.Struct.prototype.toPlainObject,
+  _checkFields: Space.Struct.prototype._checkFields,
+  _assignData: Space.Struct.prototype._assignData,
   _getMixinCallbacks: Space.Object.prototype._getMixinCallbacks,
   onDependenciesReady: Space.Object.prototype.onDependenciesReady
 });
