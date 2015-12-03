@@ -12,16 +12,16 @@ class Space.Module extends Space.Object
   # these are automatically mapped and created on `app.run()`
   singletons: []
   injector: null
-  _state: null
+  _state: 'constructed'
 
   constructor: ->
     super
     @requiredModules ?= []
 
   initialize: (@app, @injector, mergedConfig={}, isSubModule=false) ->
-    return if not @is(null) # only initialize once
+    return if not @is('constructed') # only initialize once
     if not @injector? then throw new Error @ERRORS.injectorMissing
-    @_state = 'constructed'
+    @_state = 'prepared'
     Space.log.debug("#{@constructor.publishedAs}: initialize")
     # merge any supplied config into this Module's Configuration
     @configuration = _.deepExtend(@configuration, mergedConfig)
@@ -117,7 +117,7 @@ class Space.Module extends Space.Object
   _runOnInitializeHooks: ->
     @_invokeActionOnRequiredModules '_runOnInitializeHooks'
     # Never run this hook twice
-    if @is('constructed')
+    if @is('prepared')
       Space.log.debug("#{@constructor.publishedAs}: onInitialize")
       @_state = 'initializing'
       # Inject required dependencies into this module
