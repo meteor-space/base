@@ -18,14 +18,11 @@ class Space.Module extends Space.Object
     super
     @requiredModules ?= []
 
-  initialize: (@app, @injector, mergedConfig={}, isSubModule=false) ->
+  initialize: (@app, @injector, isSubModule=false) ->
     return if not @is('constructed') # only initialize once
     if not @injector? then throw new Error @ERRORS.injectorMissing
-    @_state = 'prepared'
+    @_state = 'configuring'
     Space.log.debug("#{@constructor.publishedAs}: initialize")
-    # merge any supplied config into this Module's Configuration
-    @configuration = _.deepExtend(@configuration, mergedConfig)
-
     # Setup basic mappings required by all modules if this the top-level module
     unless isSubModule
       @injector.map('Injector').to @injector
@@ -38,16 +35,18 @@ class Space.Module extends Space.Object
       unless @app.modules[moduleId]?
         moduleClass = Space.Module.require(moduleId, this.constructor.name)
         @app.modules[moduleId] = new moduleClass()
-      # Initialize required module
-      module = @app.modules[moduleId]
-      module.initialize(@app, @injector, @configuration, true)
+        # Initialize required module
+        module = @app.modules[moduleId]
+        module.initialize(@app, @injector, true)
 
+    if isSubModule
+      # Merge in own configuration to give the chance for overwriting.
+      _.deepExtend(@app.configuration, @configuration)
+      @configuration = @app.configuration
     # Provide lifecycle hook before any initialization has been done
     @beforeInitialize?()
     # Give every module access Npm
     if Meteor.isServer then @npm = Npm
-    # Merge in own configuration to give the chance for overwriting.
-    @configuration = _.deepExtend(mergedConfig, @constructor::configuration)
     # Top-level module
     if not isSubModule
       @injector.map('configuration').to(@configuration)
@@ -62,12 +61,16 @@ class Space.Module extends Space.Object
     @_state = 'running'
 
   reset: ->
-    if Meteor.isServer and process.env.NODE_ENV is 'production' then return
-    else
-      restartRequired = true if @is('running')
-      if restartRequired then @stop()
-      @_runLifeCycleAction 'reset'
-      if restartRequired then @start()
+    return if Meteor.isServer and process.env.NODE_ENV is 'production'
+    return if @_isResetting
+    restartRequired = @is('running')
+    @_isResetting = true
+    if restartRequired then @stop()
+    @_runLifeCycleAction 'reset'
+    if restartRequired then @start()
+    # There is no other way to avoid reset being called multiple times
+    # if multiple modules require the same sub-module.
+    Meteor.defer => @_isResetting = false
 
   stop: ->
     if @is('stopped') then return
@@ -117,7 +120,7 @@ class Space.Module extends Space.Object
   _runOnInitializeHooks: ->
     @_invokeActionOnRequiredModules '_runOnInitializeHooks'
     # Never run this hook twice
-    if @is('prepared')
+    if @is('configuring')
       Space.log.debug("#{@constructor.publishedAs}: onInitialize")
       @_state = 'initializing'
       # Inject required dependencies into this module

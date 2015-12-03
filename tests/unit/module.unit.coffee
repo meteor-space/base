@@ -57,13 +57,8 @@ describe 'Space.Module - #initialize', ->
     @module = new Space.Module()
     # faked required modules to spy on
     @SubModule1 = Space.Module.define 'SubModule1'
-    @subModule1 = new @SubModule1()
     @SubModule2 = Space.Module.define 'SubModule2'
-    @subModule2 = new @SubModule2()
-    @app = modules: {
-      'SubModule1': @subModule1
-      'SubModule2': @subModule2
-    }
+    @app = modules: {}
 
   it 'asks the injector to inject dependencies into the module', ->
     @module.initialize @app, @injector
@@ -86,20 +81,17 @@ describe 'Space.Module - #initialize', ->
     @module.initialize @app, @injector
     expect(@module.onInitialize).to.have.been.calledOnce
 
-  it 'looks up required modules and adds them to the modules object', ->
-    # make our SUT module require our fake modules
+  it 'creates required modules and adds them to the app', ->
     @module.requiredModules = [@SubModule1.name, @SubModule2.name]
     @module.initialize @app, @injector
-    expect(@app.modules[@SubModule1.name]).to.equal @subModule1
-    expect(@app.modules[@SubModule2.name]).to.equal @subModule2
+    expect(@app.modules[@SubModule1.name]).to.be.instanceof(@SubModule1)
+    expect(@app.modules[@SubModule2.name]).to.be.instanceof(@SubModule2)
 
   it 'initializes required modules', ->
-    sinon.spy @subModule1, 'initialize'
-    sinon.spy @subModule2, 'initialize'
-    @module.requiredModules = [@SubModule1.name, @SubModule2.name]
+    sinon.stub @SubModule1.prototype, 'initialize'
+    @module.requiredModules = [@SubModule1.name]
     @module.initialize @app, @injector
-    expect(@subModule1.initialize).to.have.been.called
-    expect(@subModule2.initialize).to.have.been.called
+    expect(@SubModule1.prototype.initialize).to.have.been.calledOnce
 
   it 'can only be initialized once', ->
     @module.onInitialize = sinon.spy()
