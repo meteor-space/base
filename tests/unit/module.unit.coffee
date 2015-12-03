@@ -93,20 +93,13 @@ describe 'Space.Module - #initialize', ->
     expect(@app.modules[@SubModule1.name]).to.equal @subModule1
     expect(@app.modules[@SubModule2.name]).to.equal @subModule2
 
-  it 'initializes required modules when they are not yet initialized', ->
+  it 'initializes required modules', ->
     sinon.spy @subModule1, 'initialize'
     sinon.spy @subModule2, 'initialize'
     @module.requiredModules = [@SubModule1.name, @SubModule2.name]
     @module.initialize @app, @injector
     expect(@subModule1.initialize).to.have.been.called
     expect(@subModule2.initialize).to.have.been.called
-
-  it 'doesnt initialize required modules if they are already initialized', ->
-    @subModule1._state = 'initialized'
-    sinon.spy @subModule1, 'initialize'
-    @module.requiredModules = [@SubModule1.name]
-    @module.initialize @app, @injector
-    expect(@subModule1.initialize).not.to.have.been.called
 
   it 'can only be initialized once', ->
     @module.onInitialize = sinon.spy()

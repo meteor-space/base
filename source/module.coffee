@@ -21,6 +21,7 @@ class Space.Module extends Space.Object
   initialize: (@app, @injector, mergedConfig={}, isSubModule=false) ->
     return if not @is('constructed') # only initialize once
     if not @injector? then throw new Error @ERRORS.injectorMissing
+    @_state = 'prepared'
     Space.log.debug("#{@constructor.publishedAs}: initialize")
     # merge any supplied config into this Module's Configuration
     @configuration = _.deepExtend(@configuration, mergedConfig)
@@ -39,8 +40,7 @@ class Space.Module extends Space.Object
         @app.modules[moduleId] = new moduleClass()
       # Initialize required module
       module = @app.modules[moduleId]
-      if module.is('constructed')
-        module.initialize(@app, @injector, @configuration, true)
+      module.initialize(@app, @injector, @configuration, true)
 
     # Provide lifecycle hook before any initialization has been done
     @beforeInitialize?()
@@ -117,7 +117,7 @@ class Space.Module extends Space.Object
   _runOnInitializeHooks: ->
     @_invokeActionOnRequiredModules '_runOnInitializeHooks'
     # Never run this hook twice
-    if @is('constructed')
+    if @is('prepared')
       Space.log.debug("#{@constructor.publishedAs}: onInitialize")
       @_state = 'initializing'
       # Inject required dependencies into this module
