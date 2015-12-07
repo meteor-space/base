@@ -48,29 +48,18 @@ describe 'Space.Application', ->
       class GrandchildModule extends Space.Module
         @publish this, 'GrandchildModule'
         configuration: {
+          subModuleValue: 'grandChild'
           grandchild: {
             toChange: 'grandchildChangeMe'
             toKeep: 'grandchildKeepMe'
           }
         }
-        afterInitialize: ->
-          expect(@configuration).toMatch {
-            toChange: 'appChangeMe'
-            toKeep: 'appKeepMe'
-            child: {
-              toChange: 'childChangeMe'
-              toKeep: 'childKeepMe'
-            }
-            grandchild: {
-              toChange: 'grandchildChangeMe'
-              toKeep: 'grandchildKeepMe'
-            }
-          }
 
       class ChildModule extends Space.Module
         @publish this, 'ChildModule'
         requiredModules: ['GrandchildModule']
         configuration: {
+          subModuleValue: 'child'
           child: {
             toChange: 'childChangeMe'
             toKeep: 'childKeepMe'
@@ -80,7 +69,7 @@ describe 'Space.Application', ->
         requiredModules: ['ChildModule']
         configuration: {
           toChange: 'appChangeMe'
-          toKeep: 'appKeepMe'
+          subModuleValue: 'overriddenByApp'
         }
       app = new TestApp()
       app.configure {
@@ -94,7 +83,7 @@ describe 'Space.Application', ->
       }
       expect(app.injector.get 'configuration').toMatch {
         toChange: 'appNewValue'
-        toKeep: 'appKeepMe'
+        subModuleValue: 'overriddenByApp'
         child: {
           toChange: 'childNewValue'
           toKeep: 'childKeepMe'

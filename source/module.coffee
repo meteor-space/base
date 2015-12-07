@@ -39,10 +39,14 @@ class Space.Module extends Space.Object
         module = @app.modules[moduleId]
         module.initialize(@app, @injector, true)
 
+    # Merge in own configuration to give the chance for overwriting.
     if isSubModule
-      # Merge in own configuration to give the chance for overwriting.
       _.deepExtend(@app.configuration, @configuration)
       @configuration = @app.configuration
+    else
+      # The app can override all other modules
+      _.deepExtend(@configuration, @constructor.prototype.configuration)
+
     # Provide lifecycle hook before any initialization has been done
     @beforeInitialize?()
     # Give every module access Npm
