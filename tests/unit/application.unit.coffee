@@ -44,6 +44,15 @@ describe 'Space.Application', ->
       expect(initializeSpy).to.have.been.calledOnce
       initializeSpy.restore()
 
+    it 'can be passed a configuration', ->
+
+      @application = new Space.Application({
+        configuration: {
+          environment: 'testing'
+        }
+      })
+      expect(@application.configuration.environment).to.equal('testing')
+
     it 'merges configurations of all modules and user options', ->
       class GrandchildModule extends Space.Module
         @publish this, 'GrandchildModule'
