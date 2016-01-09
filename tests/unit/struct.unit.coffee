@@ -4,14 +4,25 @@ describe 'Space.Struct', ->
   class TestStruct extends Space.Struct
     fields: -> name: String, age: Match.Integer
 
-  class StructWithNestedStructFields extends Space.Struct
-    fields: -> sub: TestStruct
-
   class ExtendedTestStruct extends TestStruct
     fields: ->
       fields = super()
       fields.extra = Match.Integer
       return fields
+
+  class StructWithNestedStructs extends Space.Struct
+    fields: -> {
+      extended: ExtendedTestStruct
+      subs: [TestStruct]
+    }
+
+  exampleNestedStructData = {
+    extended: { $type: 'ExtendedTestStruct', name: 'Test', age: 10, extra: 1 }
+    subs: [
+      { $type: 'TestStruct', name: 'Bla', age: 2 }
+      { $type: 'TestStruct', name: 'Blub', age: 5 }
+    ]
+  }
 
   describe 'defining fields', ->
 
@@ -54,20 +65,23 @@ describe 'Space.Struct', ->
   describe "::toData", ->
 
     it "returns a hierarchy of plain data objects", ->
-      myStruct = new StructWithNestedStructFields {
-        sub: new TestStruct(name: 'Test', age: 10)
+      myStruct = new StructWithNestedStructs {
+        extended: new ExtendedTestStruct(name: 'Test', age: 10, extra: 1)
+        subs: [
+          new TestStruct(name: 'Bla', age: 2)
+          new TestStruct(name: 'Blub', age: 5)
+        ]
       }
-      expect(myStruct.toData()).to.deep.equal sub: { name: 'Test', age: 10 }
+      expect(myStruct.toData()).to.deep.equal exampleNestedStructData
 
   describe ".fromData", ->
 
     it "constructs the struct hierarchy from plain data object hierarchy", ->
 
-      myStruct = StructWithNestedStructFields.fromData {
-        sub: { name: 'Test', age: 10 }
-      }
-      expect(myStruct).to.be.instanceOf(StructWithNestedStructFields)
-      expect(myStruct.sub).to.be.instanceOf(TestStruct)
-      expect(myStruct.sub.toData()).to.deep.equal name: 'Test', age: 10
+      myStruct = StructWithNestedStructs.fromData exampleNestedStructData
+      expect(myStruct).to.be.instanceOf(StructWithNestedStructs)
+      expect(myStruct.extended).to.be.instanceOf(ExtendedTestStruct)
+      expect(myStruct.subs[0].toData()).to.deep.equal exampleNestedStructData.subs[0]
+      expect(myStruct.subs[1].toData()).to.deep.equal exampleNestedStructData.subs[1]
 
 

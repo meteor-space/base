@@ -15,10 +15,13 @@ class Space.Struct extends Space.Object
     return copy
 
   toData: ->
-    data = {}
+    data = { $type: @classPath() }
     for key, Type of @fields() when @[key] != undefined
       if Type.isSubclassOf?(Space.Struct)
         data[key] = @[key].toData()
+      else if _.isArray(Type)
+        for value in @[key]
+          data[key] = value.toData() if value instanceof Space.Struct
       else
         data[key] = @[key]
     return data
