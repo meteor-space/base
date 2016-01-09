@@ -1,19 +1,19 @@
 
 describe 'Space.Struct', ->
 
+  class TestStruct extends Space.Struct
+    fields: -> name: String, age: Match.Integer
+
+  class StructWithNestedStructFields extends Space.Struct
+    fields: -> sub: TestStruct
+
+  class ExtendedTestStruct extends TestStruct
+    fields: ->
+      fields = super()
+      fields.extra = Match.Integer
+      return fields
+
   describe 'defining fields', ->
-
-    class TestStruct extends Space.Struct
-      fields: -> name: String, age: Match.Integer
-
-    class StructWithNestedStructFields extends Space.Struct
-      fields: -> sub: TestStruct
-
-    class ExtendedTestStruct extends TestStruct
-      fields: ->
-        fields = super()
-        fields.extra = Match.Integer
-        return fields
 
     it 'assigns the properties to the instance', ->
       properties = name: 'Dominik', age: 26
@@ -50,3 +50,24 @@ describe 'Space.Struct', ->
       instance = new TestStruct properties
       expect(instance).toMatch properties
       expect(-> new TestStruct name: 5).to.throw Match.Error
+
+  describe "::toData", ->
+
+    it "returns a hierarchy of plain data objects", ->
+      myStruct = new StructWithNestedStructFields {
+        sub: new TestStruct(name: 'Test', age: 10)
+      }
+      expect(myStruct.toData()).to.deep.equal sub: { name: 'Test', age: 10 }
+
+  describe ".fromData", ->
+
+    it "constructs the struct hierarchy from plain data object hierarchy", ->
+
+      myStruct = StructWithNestedStructFields.fromData {
+        sub: { name: 'Test', age: 10 }
+      }
+      expect(myStruct).to.be.instanceOf(StructWithNestedStructFields)
+      expect(myStruct.sub).to.be.instanceOf(TestStruct)
+      expect(myStruct.sub.toData()).to.deep.equal name: 'Test', age: 10
+
+
