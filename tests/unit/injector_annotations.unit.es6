@@ -5,11 +5,13 @@ describe('Space.Injector annotations', function() {
     it('adds the dependency to the dependencies map', function() {
       @Space.Dependency('propertyName1', 'dependencyName1')
       @Space.Dependency('propertyName2', 'dependencyName2')
+      @Space.Dependency('dependencyName3')
       class FixtureClass {}
 
       expect(FixtureClass.prototype.dependencies).to.deep.equal({
         'propertyName1': 'dependencyName1',
-        'propertyName2': 'dependencyName2'
+        'propertyName2': 'dependencyName2',
+        'dependencyName3': 'dependencyName3'
       });
     });
 

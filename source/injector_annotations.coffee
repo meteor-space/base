@@ -1,4 +1,6 @@
 @Space.Dependency = (propertyName, dependencyId) ->
+  if (typeof dependencyId == 'undefined')
+    dependencyId = propertyName
   (target) ->
     if target.prototype.dependencies and not target.prototype.hasOwnProperty('Dependencies')
       target.prototype.dependencies = _.clone target.prototype.dependencies
