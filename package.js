@@ -38,12 +38,12 @@ Package.onUse(function(api) {
   api.addFiles([
     'source/lib/underscore_deep_extend_mixin.js',
     'source/namespace.coffee',
+    'source/helpers.coffee',
     'source/configuration.js',
     'source/object.coffee',
     'source/logger.js',
     'source/struct.coffee',
     'source/error.js',
-    'source/helpers.coffee',
     'source/injector.coffee',
     'source/injector_annotations.coffee',
     'source/module.coffee',

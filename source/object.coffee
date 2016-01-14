@@ -15,6 +15,8 @@ class Space.Object
     else
       return Class.__mixinCallbacks__ ? []
 
+  toString: -> @constructor.toString()
+
   # Extends this class and return a child class with inherited prototype
   # and static properties.
   #
@@ -30,24 +32,35 @@ class Space.Object
   # Creates a named child class without extra prototype properties.
   # Basically the same as `class ClassName extend Space.Object` in coffeescript
   #
-  # 3. Space.Object.extend({ prop: 'first', … })
+  # 3. Space.Object.extend(classPath)
+  # --------------------------------------------
+  # Creates a child class with fully qualified class path like "my.custom.Class"
+  # assigned and registered internally so that Space.resolvePath can find it.
+  # This also assigns the class path as type, which can be used for serialization
+  #
+  # 4. Space.Object.extend({ prop: 'first', … })
   # --------------------------------------------
   # Creates an anonymous child class with extra prototype properties.
   # Same as:
   # class extend Space.Object
   #   prop: 'first'
   #
-  # 4. Space.Object.extend(namespace, className)
+  # 5. Space.Object.extend(namespace, className)
   # --------------------------------------------
   # Creates a named class which inherits from Space.Object and assigns
   # it to the given namespace object.
   #
-  # 5. Space.Object.extend(className, prototype)
+  # 6. Space.Object.extend(className, prototype)
   # --------------------------------------------
   # Creates a named class which inherits from Space.Object and extra prototype
   # properties which are assigned to the new class
   #
-  # 6. Space.Object.extend(namespace, className, prototype)
+  # 7. Space.Object.extend(classPath, prototype)
+  # --------------------------------------------
+  # Creates a registered class which inherits from Space.Object and extra prototype
+  # properties which are assigned to the new class
+  #
+  # 8. Space.Object.extend(namespace, className, prototype)
   # --------------------------------------------
   # Creates a named class which inherits from Space.Object, has extra prototype
   # properties and is assigned to the given namespace.
@@ -55,13 +68,22 @@ class Space.Object
 
     # Defaults
     namespace = {}
+    classPath = null
     className = '_Class' # Same as coffeescript
     extension = {}
 
-    # Only one param: (extension) ->
+    # Only one param: (extension) OR (className) OR (classPath) ->
     if args.length is 1
       if _.isObject(args[0]) then extension = args[0]
-      if _.isString(args[0]) then className = args[0]
+      if _.isString(args[0])
+        # (className) OR (classPath)
+        if args[0].indexOf('.') != -1
+          # classPath
+          classPath = args[0]
+          className = classPath.substr(classPath.lastIndexOf('.') + 1)
+        else
+          # className
+          className = args[0]
 
     # Two params must be: (namespace, className) OR (className, extension) ->
     if args.length is 2
@@ -70,9 +92,16 @@ class Space.Object
         className = args[1]
         extension = {}
       else if _.isString(args[0]) and _.isObject(args[1])
+        # (className) OR (classPath)
         namespace = {}
-        className = args[0]
         extension = args[1]
+        if args[0].indexOf('.') != -1
+          # classPath
+          classPath = args[0]
+          className = classPath.substr(classPath.lastIndexOf('.') + 1)
+        else
+          # className
+          className = args[0]
 
     # All three params: (namespace, className, extension) ->
     if args.length is 3
@@ -80,14 +109,14 @@ class Space.Object
       className = args[1]
       extension = args[2]
 
-    check namespace, Match.OneOf(Match.ObjectIncluding({}), Function)
+    check namespace, Match.OneOf(Match.ObjectIncluding({}), Space.Namespace, Function)
+    check classPath, Match.OneOf(String, null)
     check className, String
     check extension, Match.ObjectIncluding({})
 
     # Assign the optional custom constructor for this class
     Parent = this
     Constructor = extension.Constructor ? -> Parent.apply(this, arguments)
-    className = className.substr className.lastIndexOf('.') + 1
 
     # Create a named constructor for this class so that debugging
     # consoles are displaying the class name nicely.
@@ -119,25 +148,37 @@ class Space.Object
     Child.prototype = new Ctor()
     Child.__super__ = Parent.prototype
 
-    # Return the class name with #toString by default
-    unless Parent.__keepToStringMethod__
-      Child.prototype.toString = -> className
-
     # Apply mixins
     if mixins? then Child.mixin(mixins)
 
     # Merge the extension into the class prototype
     @_mergeIntoPrototype Child.prototype, extension
 
+    # Add the class to the namespace
+    if namespace?
+      namespace[className] = Child
+      if namespace instanceof Space.Namespace
+        classPath = "#{namespace.getPath()}.#{className}"
+
+    # Add type information to the class
+    Child.type classPath if classPath?
+
     # Invoke the onExtending callback after everything has been setup
     onExtendingCallback?.call(Child)
 
-    # Add the class to the namespace
-    namespace?[className] = Child
-
     return Child
 
-  @type: (name) -> @toString = this::toString = -> name
+  @toString: -> @classPath
+
+  @type: (@classPath) ->
+    # Register this class with its class path
+    Space.registry[@classPath] = this
+    try
+      # Add the class to the resolved namespace
+      path = @classPath.substr 0, @classPath.lastIndexOf('.')
+      namespace = Space.resolvePath path
+      className = @classPath.substr(@classPath.lastIndexOf('.') + 1)
+      namespace[className] = this
 
   # Create and instance of the class that this method is called on
   # e.g.: Space.Object.create() would return an instance of Space.Object
