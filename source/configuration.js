@@ -28,10 +28,13 @@ if (Meteor.isServer) {
 
 if (Meteor.isClient) {
 
+  let log = Meteor.settings.public.log;
+
+  // Guard and defaults when not loaded on server
   Space.configuration = {
     log: {
-      enabled: Meteor.settings.public.log.enabled,
-      minLevel: Meteor.settings.public.log.minLevel
+      enabled: log && log.enabled || false,
+      minLevel: log && log.minLevel || 'info'
     }
   };
 }
