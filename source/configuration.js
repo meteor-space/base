@@ -13,14 +13,14 @@ if (Meteor.isServer) {
   });
 
   // Pass down to the client
-  Meteor.settings = {
-    "public": {
+  _.deepExtend(Meteor.settings, {
+    public: {
       log: {
         enabled: Space.configuration.log.enabled,
         minLevel: Space.configuration.log.minLevel
       }
     }
-  };
+  });
 
   __meteor_runtime_config__.PUBLIC_SETTINGS = Meteor.settings.public;
 
