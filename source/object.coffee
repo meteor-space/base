@@ -83,7 +83,7 @@ class Space.Object
           className = classPath.substr(classPath.lastIndexOf('.') + 1)
         else
           # className
-          className = args[0]
+          className = classPath = args[0]
 
     # Two params must be: (namespace, className) OR (className, extension) ->
     if args.length is 2
@@ -101,7 +101,7 @@ class Space.Object
           className = classPath.substr(classPath.lastIndexOf('.') + 1)
         else
           # className
-          className = args[0]
+          className = classPath = args[0]
 
     # All three params: (namespace, className, extension) ->
     if args.length is 3

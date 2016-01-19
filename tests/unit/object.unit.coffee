@@ -50,6 +50,11 @@ describe 'Space.Object', ->
         MyClass = Space.Object.extend('my.namespace.MyClass')
         expect(my.namespace.MyClass).to.equal(MyClass)
 
+      it "works correctly without nested namespaces", ->
+        MyClass = Space.Object.extend('MyClass')
+        expect(Space.resolvePath 'MyClass').to.equal(MyClass)
+
+
     describe "working with static class properties", ->
 
       it 'allows you to define static class properties', ->
