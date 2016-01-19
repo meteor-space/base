@@ -1,8 +1,9 @@
 Package.describe({
   summary: 'Modular Application Architecture for Meteor.',
   name: 'space:base',
-  version: '3.2.1',
-  git: 'https://github.com/meteor-space/base.git'
+  version: '0.7.0',
+  git: 'https://github.com/meteor-space/base.git',
+  documentation: 'README.md'
 });
 
 Npm.depends({
