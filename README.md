@@ -25,7 +25,7 @@ If an object needs other code during runtime, it simply declares its
 
 ```javascript
 var dependentObject = {
-  Dependencies: {
+  dependencies: {
     lib: 'OtherCode'
   },
   sayHello: function() {
@@ -50,13 +50,11 @@ injector.injectInto(dependentObject);
 
 dependentObject.sayHello(); // logs: 'hello!'
 ```
-*I use a very dense coding style here to keep these examples short*
-
 Of course, this also works with Javascript constructors and prototypes:
 
 ```javascript
 var MyClass = function() {};
-MyClass.prototype.Dependencies = { lib: 'OtherCode' };
+MyClass.prototype.dependencies = { lib: 'OtherCode' };
 MyClass.prototype.sayHello = function() { this.lib.sayHello() };
 
 var instance = new MyClass();
@@ -69,26 +67,28 @@ other ways to map your code and you can add your own too:
 
 **[Learn more about Space.Injector](https://github.com/CodeAdventure/meteor-space/wiki/Space.Injector)**
 
-### Sidebar: Classes and Instances
+### Sidebar: Namespaces and Classes
 
 In the examples above we used plain Javascript, but Space comes bundled
-with a simple but powerful inheritance system:
+with a simple but powerful inheritance system with namespacing and classes:
 
 ```javascript
-var BaseClass = Space.Object.extend({
-  Dependencies: { lib: 'OtherCode' },
+var myApp = Space.namespace('myApp');
+
+Space.Object.extend('myApp.MyBaseClass', {
+  dependencies: { lib: 'OtherCode' },
   sayHello: function() { this.lib.sayHello(); }
 });
 
-var MyClass = BaseClass.extend({
+MyBaseClass.extend('myApp.MySubClass', {
   name: '',
   sayHello: function() {
-    BaseClass.prototype.sayHello.call(this);
+    myApp.MyBaseClass.prototype.sayHello.call(this);
     console.log('I am ' + this.name);
   }
 });
 
-var instance = MyClass.create({ name: 'Dominik' });
+var instance = myApp.MySubClass.create({ name: 'Dominik' });
 injector.injectInto(instance);
 instance.sayHello(); // logs: 'hello!' and 'I am Dominik'
 ```
@@ -98,7 +98,7 @@ that help you build awesome classes with Space:
 
 **[Learn more about Space.Object](https://github.com/CodeAdventure/meteor-space/wiki/Space.Object)**
 
-## 2. Control over Configuration and Initialization
+## 2. Control over configuration and Initialization
 
 Ok, now you declared your dependencies and learned how to inject them.
 The next questions is: "Where should the mapping of string identifiers
@@ -133,7 +133,7 @@ to express the above:
 ```javascript
 var app = Space.Application.create({
   // Let the framework map and create the singleton instances for you
-  Singletons: ['MyDependentClass', 'MyOtherSingleton']
+  singletons: ['MyDependentClass', 'MyOtherSingleton']
 });
 app.start(); // You decide when your app starts
 ```
@@ -150,24 +150,24 @@ This way, all modules within your app share the same injector.
 
 Modules declare which other modules they require and what runtime
 dependencies they have, by putting the special properties
-`RequiredModules` and `Dependencies` on their prototypes:
+`requiredModules` and `dependencies` on their prototypes:
 
 ```javascript
 var MyModule = Space.Module.define('MyModule', {
   // Declare which other Space modules are require
-  RequiredModules: [
+  requiredModules: [
     'OtherModule',
     'YetAnotherModule'
   ],
   // Declare injected runtime dependencies
-  Dependencies: {
+  dependencies: {
     someService: 'OtherModule.SomeService',
     anotherService: 'YetAnotherModule.AnotherService'
   },
   // This method is called by the Space framework after all
   // required modules are initialized and the dependencies
   // are resolved and injected into the instance of this module.
-  configure: function() {
+  onInitialize: function() {
     // Add mappings to the shared dependency injection system
     this.injector.map('MyModule.TestValue').to('test');
     // Use required dependencies
@@ -182,13 +182,13 @@ var MyModule = Space.Module.define('MyModule', {
 ```javascript
 Space.Application.create({
   // Applications also declare which modules they need:
-  RequiredModules: ['MyModule'],
+  requiredModules: ['MyModule'],
   // And their runtime dependencies from required modules:
-  Dependencies: {
+  dependencies: {
     testValue: 'MyModule.TestValue'
   },
   // This is called when all required modules are configured.
-  configure: function() {
+  afterInitialize: function() {
     console.log(this.testValue); // logs 'test' (see module above)
   }
 })
@@ -201,37 +201,37 @@ override any part of it when creating an application instance like here:
 
 ```javascript
 Space.Module.define('FirstModule', {
-  Configuration: {
+  configuration: {
     firstToChange: 'first',
     firstToKeep: 'first'
   }
 });
 
 Space.Module.define('SecondModule', {
-  RequiredModules: ['FirstModule'],
-  Configuration: {
+  requiredModules: ['FirstModule'],
+  configuration: {
     secondToChange: 'second',
     secondToKeep: 'second'
   }
 });
 
 TestApp = Space.Application.extend({
-  RequiredModules: ['SecondModule'],
-  Configuration: {
+  requiredModules: ['SecondModule'],
+  configuration: {
     appConfigToChange: 'app',
     appConfigToKeep: 'app'
   }
 });
 
 var app = new TestApp({
-  Configuration: {
+  configuration: {
     firstToChange: 'firstChanged',
     secondToChange: 'secondChanged',
     appConfigToChange: 'appChanged'
   }
 });
 
-expect(app.injector.get('Configuration')).to.deep.equal({
+expect(app.injector.get('configuration')).to.deep.equal({
   firstToChange: 'firstChanged',
   firstToKeep: 'first',
   secondToChange: 'secondChanged',
@@ -297,7 +297,7 @@ Here is how you can write a test like this when using space:
 ```javascript
 var Customer = Space.Object.extend({
   // Annotate your dependencies
-  Dependencies: { purchases: 'Purchases' },
+  dependencies: { purchases: 'Purchases' },
   id: null,
   getPurchases: function() {
     this.purchases.find({ customerId: this.id }).fetch();
@@ -326,7 +326,7 @@ describe('Customer.getPurchases', function() {
 })
 ```
 
-Since the `Dependencies` property is just a simple prototype annotation that has
+Since the `dependencies` property is just a simple prototype annotation that has
 no meaning outside the Space framework, you can just inject the dependencies
 yourself during the tests. This pattern works great, because your code remains
 completely framework agnostic (you could replace Space by any other DI framework
@@ -343,7 +343,7 @@ features that `space:base` provides for you.
 `meteor add space:base`
 
 ## Run the tests
-`meteor test-packages ./`
+`./test.sh`
 
 ## Release History
 You find all release changes in the [changelog](https://github.com/meteor-space/base/blob/master/CHANGELOG.md)
