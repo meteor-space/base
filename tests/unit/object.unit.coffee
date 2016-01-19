@@ -29,6 +29,32 @@ describe 'Space.Object', ->
       expect(instance.get('first')).to.equal 1
       expect(instance.get('second')).to.equal 2
 
+    describe "providing fully qualified class path", ->
+
+      it "registers the class for internal lookup", ->
+        Space.namespace('My.custom')
+        FirstClass = Space.Object.extend('My.custom.FirstClass', {})
+        SecondClass = Space.Object.extend('My.custom.SecondClass', {})
+        expect(Space.resolvePath 'My.custom.FirstClass').to.equal(FirstClass)
+        expect(Space.resolvePath 'My.custom.SecondClass').to.equal(SecondClass)
+
+      it "assigns the class path", ->
+        className = 'My.custom.Class'
+        MyClass = Space.Object.extend(className)
+        expect(MyClass.toString()).to.equal(className)
+        expect(new MyClass().toString()).to.equal(className)
+
+      it "exposes the class on the global scope if possible", ->
+        my = {}
+        my.namespace = Space.namespace('my.namespace')
+        MyClass = Space.Object.extend('my.namespace.MyClass')
+        expect(my.namespace.MyClass).to.equal(MyClass)
+
+      it "works correctly without nested namespaces", ->
+        MyClass = Space.Object.extend('MyClass')
+        expect(Space.resolvePath 'MyClass').to.equal(MyClass)
+
+
     describe "working with static class properties", ->
 
       it 'allows you to define static class properties', ->

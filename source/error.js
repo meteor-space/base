@@ -47,6 +47,7 @@ _.extend(Space.Error, {
   extend: Space.Object.extend,
   mixin: Space.Object.mixin,
   create: Space.Object.create,
+  type: Space.Object.type,
   _applyMixin: Space.Object._applyMixin,
   _mergeIntoPrototype: Space.Object._mergeIntoPrototype,
   __keepToStringMethod__: true // Do not override #toString method

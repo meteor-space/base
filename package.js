@@ -1,8 +1,9 @@
 Package.describe({
   summary: 'Modular Application Architecture for Meteor.',
   name: 'space:base',
-  version: '3.2.1',
-  git: 'https://github.com/meteor-space/base.git'
+  version: '0.7.0',
+  git: 'https://github.com/meteor-space/base.git',
+  documentation: 'README.md'
 });
 
 Npm.depends({
@@ -38,12 +39,12 @@ Package.onUse(function(api) {
   api.addFiles([
     'source/lib/underscore_deep_extend_mixin.js',
     'source/namespace.coffee',
+    'source/helpers.coffee',
     'source/configuration.js',
     'source/object.coffee',
     'source/logger.js',
     'source/struct.coffee',
     'source/error.js',
-    'source/helpers.coffee',
     'source/injector.coffee',
     'source/injector_annotations.coffee',
     'source/module.coffee',
