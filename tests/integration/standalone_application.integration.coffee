@@ -5,7 +5,7 @@ describe 'Meteor integration in applications', ->
 
     class SharedApp extends Space.Application
 
-      Dependencies:
+      dependencies:
         meteor: 'Meteor'
         ejson: 'EJSON'
         ddp: 'DDP'
@@ -47,7 +47,7 @@ describe 'Meteor integration in applications', ->
 
       class ClientApp extends Space.Application
 
-        Dependencies:
+        dependencies:
           tracker: 'Tracker'
           templates: 'Template'
           session: 'Session'
@@ -75,7 +75,7 @@ describe 'Meteor integration in applications', ->
 
       class ServerApp extends Space.Application
 
-        Dependencies:
+        dependencies:
           email: 'Email'
           process: 'process'
           Future: 'Future'
@@ -92,3 +92,16 @@ describe 'Meteor integration in applications', ->
           expect(@mongoInternals).to.equal MongoInternals
 
       new ServerApp()
+
+  it 'boots core Space Services', ->
+
+    class SharedApp extends Space.Application
+
+      dependencies:
+        log: 'log'
+
+      onInitialize: ->
+        expect(@log).to.be.defined
+        expect(@log).to.be.instanceOf Space.Logger
+
+      new SharedApp()

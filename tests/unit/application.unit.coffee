@@ -44,43 +44,41 @@ describe 'Space.Application', ->
       expect(initializeSpy).to.have.been.calledOnce
       initializeSpy.restore()
 
+    it 'can be passed a configuration', ->
+
+      @application = new Space.Application({
+        configuration: {
+          environment: 'testing'
+        }
+      })
+      expect(@application.configuration.environment).to.equal('testing')
+
     it 'merges configurations of all modules and user options', ->
       class GrandchildModule extends Space.Module
         @publish this, 'GrandchildModule'
-        Configuration: {
+        configuration: {
+          subModuleValue: 'grandChild'
           grandchild: {
             toChange: 'grandchildChangeMe'
             toKeep: 'grandchildKeepMe'
           }
         }
-        afterInitialize: ->
-          expect(@Configuration).toMatch {
-            toChange: 'appChangeMe'
-            toKeep: 'appKeepMe'
-            child: {
-              toChange: 'childChangeMe'
-              toKeep: 'childKeepMe'
-            }
-            grandchild: {
-              toChange: 'grandchildChangeMe'
-              toKeep: 'grandchildKeepMe'
-            }
-          }
 
       class ChildModule extends Space.Module
         @publish this, 'ChildModule'
-        RequiredModules: ['GrandchildModule']
-        Configuration: {
+        requiredModules: ['GrandchildModule']
+        configuration: {
+          subModuleValue: 'child'
           child: {
             toChange: 'childChangeMe'
             toKeep: 'childKeepMe'
           }
         }
       class TestApp extends Space.Application
-        RequiredModules: ['ChildModule']
-        Configuration: {
+        requiredModules: ['ChildModule']
+        configuration: {
           toChange: 'appChangeMe'
-          toKeep: 'appKeepMe'
+          subModuleValue: 'overriddenByApp'
         }
       app = new TestApp()
       app.configure {
@@ -92,9 +90,9 @@ describe 'Space.Application', ->
           toChange: 'grandchildNewValue'
         }
       }
-      expect(app.injector.get 'Configuration').toMatch {
+      expect(app.injector.get 'configuration').toMatch {
         toChange: 'appNewValue'
-        toKeep: 'appKeepMe'
+        subModuleValue: 'overriddenByApp'
         child: {
           toChange: 'childNewValue'
           toKeep: 'childKeepMe'
