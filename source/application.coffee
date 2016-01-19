@@ -12,7 +12,7 @@ class Space.Application extends Space.Module
   constructor: (options={}) ->
     super
     @modules = {}
-    @configuration = {}
+    @configuration = options.configuration || {}
     @constructor.publishedAs = @constructor.name
     @initialize this, options.injector ? new Space.Injector()
 
