@@ -51,6 +51,12 @@ Package.onUse(function(api) {
     'source/application.coffee'
   ]);
 
+  // Test helpers
+  api.addFiles([
+    'source/testing/bdd-api.coffee',
+    'source/testing/structs-with-types.js'
+  ]);
+
 });
 
 Package.onTest(function(api) {
