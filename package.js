@@ -51,6 +51,12 @@ Package.onUse(function(api) {
     'source/application.coffee'
   ]);
 
+  // Test helpers
+  api.addFiles([
+    'source/testing/bdd-api.coffee',
+    'source/testing/structs-with-types.js'
+  ]);
+
 });
 
 Package.onTest(function(api) {
@@ -77,7 +83,7 @@ Package.onTest(function(api) {
 
     'grigio:babel@0.1.3',
     'practicalmeteor:munit@2.1.5',
-    'space:testing@1.5.0'
+    'space:testing@3.0.1'
   ]);
 
   api.addFiles([
