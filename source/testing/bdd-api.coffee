@@ -1,27 +1,29 @@
-registeredBddApis = []
+if Meteor.isTesting is true
 
-Space.Module.registerBddApi = (api) -> registeredBddApis.push api
+  registeredBddApis = []
 
-Space.Module.test = Space.Application.test = (systemUnderTest, app=null) ->
-  throw new Error 'Cannot test <undefined>' unless systemUnderTest?
-  testApi = null
-  isModule = isSubclassOf(this, Space.Module)
-  isApplication = isSubclassOf(this, Space.Application)
+  Space.Module.registerBddApi = (api) -> registeredBddApis.push api
 
-  # BDD API relies on dependency injection provided by Application
-  if !app?
-    if isApplication
-      app = this
-    else
-      app = Space.Application.define('TestApp', {
-        configuration: { appId: 'testApp' },
-        requiredModules: [this.publishedAs]
-      })
-    appInstance = new app()
+  Space.Module.test = Space.Application.test = (systemUnderTest, app=null) ->
+    throw new Error 'Cannot test <undefined>' unless systemUnderTest?
+    testApi = null
+    isModule = isSubclassOf(this, Space.Module)
+    isApplication = isSubclassOf(this, Space.Application)
 
-  for api in registeredBddApis
-    returnValue = api(appInstance, systemUnderTest)
-    testApi = returnValue if returnValue?
+    # BDD API relies on dependency injection provided by Application
+    if !app?
+      if isApplication
+        app = this
+      else
+        app = Space.Application.define('TestApp', {
+          configuration: { appId: 'testApp' },
+          requiredModules: [this.publishedAs]
+        })
+      appInstance = new app()
 
-  if not testApi? then throw new Error "No testing API found for #{systemUnderTest}"
-  return testApi
+    for api in registeredBddApis
+      returnValue = api(appInstance, systemUnderTest)
+      testApi = returnValue if returnValue?
+
+    if not testApi? then throw new Error "No testing API found for #{systemUnderTest}"
+    return testApi

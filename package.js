@@ -83,7 +83,7 @@ Package.onTest(function(api) {
 
     'grigio:babel@0.1.3',
     'practicalmeteor:munit@2.1.5',
-    'space:testing@1.5.0'
+    'space:testing@3.0.1'
   ]);
 
   api.addFiles([
