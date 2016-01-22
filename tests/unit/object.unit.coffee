@@ -171,3 +171,15 @@ describe 'Space.Object', ->
         SubClass = SuperClass.extend()
         new SubClass().onDependenciesReady()
         expect(myMixin.onDependenciesReady).to.have.been.calledOnce
+
+    describe "construction hooks", ->
+
+      it "can provide a hook that is called on construction of host class", ->
+        myMixin = onConstruction: sinon.spy()
+        TestClass = Space.Object.extend()
+        TestClass.mixin myMixin
+        first = {}
+        second = {}
+        new TestClass(first, second)
+        expect(myMixin.onConstruction).to.have.been.calledWithExactly(first, second)
+
