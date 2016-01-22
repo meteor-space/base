@@ -85,6 +85,7 @@ Space.Object.extend('My.namespace.MyCustomClass');
 
 - [Rhys Bartels-Waller](https://github.com/rhyslbw)
 - [Darko Mijić](https://github.com/darko-mijic)
+- [Adam Desivi](https://github.com/qejk)
 - [Jonas Aschenbrenner](https://github.com/Sanjo)
 
 :clap:
