@@ -41,7 +41,7 @@ Space.Object.extend('CustomClass', { mixin: [FirstMixin, SecondMixin] });
 
 - Many bugfixes and improvements related to `Space.Module` lifecycle hooks.
 Previous hooks like `onStart` and `onConfigure` have been replaced with a complete
-lifecycle split into three main phases: `initialize`, `configure`, `start`. Each
+lifecycle split into three main phases: `initialize`, `start`, `reset`. Each
 with `on`, `before` and `after` hooks like `onInitialize` / `afterStart` etc.
 
 - Refactored all core api properties like `Dependencies`, `RequiredModules`,
