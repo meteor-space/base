@@ -1,7 +1,7 @@
 Package.describe({
   summary: 'Modular Application Architecture for Meteor.',
   name: 'space:base',
-  version: '0.7.0',
+  version: '4.0.0',
   git: 'https://github.com/meteor-space/base.git',
   documentation: 'README.md'
 });
@@ -53,8 +53,7 @@ Package.onUse(function(api) {
 
   // Test helpers
   api.addFiles([
-    'source/testing/bdd-api.coffee',
-    'source/testing/structs-with-types.js'
+    'source/testing/bdd-api.coffee'
   ]);
 
 });

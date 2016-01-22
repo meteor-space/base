@@ -339,6 +339,50 @@ ndicator that it is doing too much.
 Look through the tests of this package to see all
 features that `space:base` provides for you.
 
+## Migration Guide
+
+### 3.2.1 → 4.0.0
+
+The 4.0.0 release has brought many small breaking changes and improvements.
+
+#### Lowercase API properties
+
+All api properties, *significant* to the framework are now like "normal" properties:
+```javascript
+Space.Module.define('My.CustomModule', {
+  requiredModules: ['My.OtherModule'], // instead of RequiredModules
+  singletons: ['My.OtherModule'], // instead of Singletons
+})
+Space.Object.extend('My.CustomClass', {
+  dependencies: { /* … */ } // instead of Dependencies
+})
+```
+
+#### Module Lifecycle Changes
+
+Previous hooks like `onStart` and `onConfigure` have been replaced with a complete
+lifecycle split into three main phases: `initialize`, `start`, `reset`. Each
+with `on`, `before` and `after` hooks like `onInitialize` / `afterStart` etc.
+
+```javascript
+Space.Module.define('My.CustomModule', {
+  onInitialize() {} // instead of "onConfigure"
+  onStart() {} // same as previous "onStart"
+  onReset() {} // did not exist before -> hook to reset collections etc.
+})
+```
+
+#### New Class Registry
+
+There is a new recommended way to define classes with full class path for improved
+debugging and automatic type registration (EJSON / toData):
+```javascript
+// Instead of:
+Space.Object.extend(My.namespace, 'MyCustomClass');
+// Do this now:
+Space.Object.extend('My.namespace.MyCustomClass');
+```
+
 ## Install
 `meteor add space:base`
 

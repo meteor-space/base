@@ -1,12 +1,102 @@
 Changelog
 =========
+
+## 4.0.0 :tada:
+**This is a big major release with many new features and improvements:**
+
+- Adds extensible `Space.Error` class that has the same api as `Space.Object` but can
+be used for better custom error classes.
+```javascript
+// When throwing this: "MyError: The default message for this error"
+let MyError = Space.Error.extend('MyError', {
+    message: 'The default message for this error'
+});
+// When throwing this: "MyParamError: Custom message with <param>"
+let MyError = Space.Error.extend('MyParamError', {
+    Constructor: (param) {
+      Space.Error.call(this, `Custom message with ${param}`);
+    }
+});
+```
+
+- Improves mixins for `Space.Object` by making `onDependenciesReady` hooks
+available. All mixins can now define their own `onDependenciesReady` methods
+which all get called by the host class correctly. This way mixins can do setup
+work on host classes.
+```javascript
+My.CustomMixin = {
+    onDependenciesReady() { // Do some setup work }
+};
+My.CustomClass.mixin(My.CustomMixin);
+// Of course normally you dont have to call `onDependenciesReady` yourself
+new My.CustomClass().onDependenciesReady() // Mixin hook is called!
+```
+
+- You can now add mixins to any subclass of `Space.Object` like this:
+```javascript
+Space.Object.extend('CustomClass', { mixin: [FirstMixin, SecondMixin] });
+```
+
+- Mixin methods now override methods on the host class!
+
+- Many bugfixes and improvements related to `Space.Module` lifecycle hooks.
+Previous hooks like `onStart` and `onConfigure` have been replaced with a complete
+lifecycle split into three main phases: `initialize`, `start`, `reset`. Each
+with `on`, `before` and `after` hooks like `onInitialize` / `afterStart` etc.
+
+- Refactored all core api properties like `Dependencies`, `RequiredModules`,
+`Singletons` etc. to lowercase pendants: e.g `dependencies`, `requiredModules`
+
+- Added `Space.Logger`, an extensible logger based on [winston](https://www.npmjs.com/package/winston)
+available in your application as `dependencies: { log: 'log' }`
+
+- You can now do static setup work on classes like this:
+```javascript
+Space.Object.extend('CustomClass', {
+    onExtending() {
+      // <this> is the class itself here!
+    }
+});
+```
+
+- Adds static `Space.Object.isSubclassOf` method that is available for all
+sub classes automatically. So you can ask `MyFirstClass.isSubclassOf(OtherClass)`
+
+- Improved error handling and messages of `Space.Injector` (DI System)
+
+- `Space.Struct` can now be serialized `toData` and `Space.Struct.fromData`
+which has some benefits over EJSON: all fields are plain and accessible for
+queries!
+
+- New recommended way to define classes with full class path for improved
+debugging and automatic type registration (EJSON / toData):
+```javascript
+// Instead of:
+Space.Object.extend(My.namespace, 'MyCustomClass');
+// Do this now:
+Space.Object.extend('My.namespace.MyCustomClass');
+```
+
+- Added proper MIT license
+
+- Added BDD test helper `Space.Module.registerBddApi`
+
+*Thanks to all the new people on the team who made this awesome release possible:*
+
+- [Rhys Bartels-Waller](https://github.com/rhyslbw)
+- [Darko Mijić](https://github.com/darko-mijic)
+- [Adam Desivi](https://github.com/qejk)
+- [Jonas Aschenbrenner](https://github.com/Sanjo)
+
+:clap:
+
 ## 3.2.1
 - Bug fixes relating to package configuration
 
 ## 3.2.0
 **Module/Application state and lifecycle improvements**
 - Formalizes state to better manage module lifecycle
-- States include: Constructed -> Initialized -> Stopped -> Running 
+- States include: Constructed -> Initialized -> Stopped -> Running
 - Accessor method `app.is(expectedState) // eg 'running'`
 - Calling .reset() on a running Application or Module now calls .stop()
 on it first, then start() again after it's been reset.
@@ -15,7 +105,7 @@ on it first, then start() again after it's been reset.
 - `Space.getenv` helper wraps [getenv](https://www.npmjs.com/package/getenv) to provide support for ENV typecasting, particularly for merging with runtime config
 
 **Other Changes**
-- Default Meteor mappings have been moved down to Module from Application 
+- Default Meteor mappings have been moved down to Module from Application
 - `MongoInternals` is now mapped on the server
 
 **Bugfixes**
