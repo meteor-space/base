@@ -122,32 +122,6 @@ describe 'Space.Object', ->
       TestClass.mixin myMixin
       expect(myMixin.onMixinApplied).to.have.been.calledOnce
 
-    it "can provide a hook that is called when dependencies of host class are ready", ->
-      myMixin = onDependenciesReady: sinon.spy()
-      TestClass = Space.Object.extend()
-      TestClass.mixin myMixin
-      new TestClass().onDependenciesReady()
-      expect(myMixin.onDependenciesReady).to.have.been.calledOnce
-
-    it "inherits the onDependenciesReady hooks to sub classes", ->
-      firstMixin = onDependenciesReady: sinon.spy()
-      secondMixin = onDependenciesReady: sinon.spy()
-      SuperClass = Space.Object.extend()
-      SuperClass.mixin firstMixin
-      SubClass = SuperClass.extend()
-      SubClass.mixin secondMixin
-      new SubClass().onDependenciesReady()
-      expect(firstMixin.onDependenciesReady).to.have.been.calledOnce
-      expect(secondMixin.onDependenciesReady).to.have.been.calledOnce
-
-    it "calls inherited mixin hooks only once per chain", ->
-      myMixin = onDependenciesReady: sinon.spy()
-      SuperClass = Space.Object.extend()
-      SuperClass.mixin myMixin
-      SubClass = SuperClass.extend()
-      new SubClass().onDependenciesReady()
-      expect(myMixin.onDependenciesReady).to.have.been.calledOnce
-
     it "does not apply mixins to super classes", ->
       firstMixin = onDependenciesReady: sinon.spy()
       secondMixin = onDependenciesReady: sinon.spy()
@@ -169,3 +143,31 @@ describe 'Space.Object', ->
       MyClass = Space.Object.extend mixin: [myMixin]
       MyClass.myMethod()
       expect(myMixin.statics.myMethod).to.have.been.calledOn(MyClass)
+
+    describe "onDependenciesReady hooks", ->
+
+      it "can provide a hook that is called when dependencies of host class are ready", ->
+        myMixin = onDependenciesReady: sinon.spy()
+        TestClass = Space.Object.extend()
+        TestClass.mixin myMixin
+        new TestClass().onDependenciesReady()
+        expect(myMixin.onDependenciesReady).to.have.been.calledOnce
+
+      it "inherits the onDependenciesReady hooks to sub classes", ->
+        firstMixin = onDependenciesReady: sinon.spy()
+        secondMixin = onDependenciesReady: sinon.spy()
+        SuperClass = Space.Object.extend()
+        SuperClass.mixin firstMixin
+        SubClass = SuperClass.extend()
+        SubClass.mixin secondMixin
+        new SubClass().onDependenciesReady()
+        expect(firstMixin.onDependenciesReady).to.have.been.calledOnce
+        expect(secondMixin.onDependenciesReady).to.have.been.calledOnce
+
+      it "calls inherited mixin hooks only once per chain", ->
+        myMixin = onDependenciesReady: sinon.spy()
+        SuperClass = Space.Object.extend()
+        SuperClass.mixin myMixin
+        SubClass = SuperClass.extend()
+        new SubClass().onDependenciesReady()
+        expect(myMixin.onDependenciesReady).to.have.been.calledOnce
