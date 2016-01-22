@@ -1,11 +1,17 @@
 @Space.Dependency = (propertyName, dependencyId) ->
+  if (typeof dependencyId == 'undefined')
+    dependencyId = propertyName
   (target) ->
-    target.prototype.Dependencies ?= {}
-    target.prototype.Dependencies[propertyName] = dependencyId
+    if target.prototype.dependencies and not target.prototype.hasOwnProperty('Dependencies')
+      target.prototype.dependencies = _.clone target.prototype.dependencies
+    target.prototype.dependencies ?= {}
+    target.prototype.dependencies[propertyName] = dependencyId
     return target
 
 @Space.RequireModule = (moduleId) ->
   (target) ->
-    target.prototype.RequiredModules ?= []
-    target.prototype.RequiredModules.push moduleId
+    if target.prototype.requiredModules and not target.prototype.hasOwnProperty('RequiredModules')
+      target.prototype.requiredModules = _.clone target.prototype.requiredModules
+    target.prototype.requiredModules ?= []
+    target.prototype.requiredModules.push moduleId
     return target

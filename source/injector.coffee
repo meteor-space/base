@@ -1,11 +1,14 @@
 
+Space.Error.extend(Space, 'InjectionError')
+
 class Space.Injector
 
-  @ERRORS:
-    cannotMapUndefinedId: -> new Error 'Cannot map undefined value.'
-    mappingExists: (id) -> new Error "A mapping for <#{id}> already exists."
-    valueNotResolved: (path) -> new Error "Could not resolve <#{path}>."
-    cannotGetValueForUndefined: -> new Error "Cannot get value for undefined."
+  ERRORS: {
+    cannotMapUndefinedId: -> 'Cannot map <null> or <undefined>.'
+    mappingExists: (id) -> "<#{id}> would be overwritten. Use <Injector::override> for that."
+    noMappingFound: (id) -> "no mapping found for <#{id}>"
+    cannotGetValueForUndefined: -> "Cannot get injection mapping for <undefined>."
+  }
 
   constructor: (providers) ->
     @_mappings = {}
@@ -14,11 +17,12 @@ class Space.Injector
   toString: -> 'Instance <Space.Injector>'
 
   map: (id, override) ->
-    if not id? then throw Injector.ERRORS.cannotMapUndefinedId()
+    if not id?
+      throw new Space.InjectionError(@ERRORS.cannotMapUndefinedId())
     mapping = @_mappings[id]
     # Avoid accidential override of existing mapping
     if mapping? and !override
-      throw Injector.ERRORS.mappingExists(id)
+      throw new Space.InjectionError(@ERRORS.mappingExists(id))
     else if mapping? and override
       mapping.markForOverride()
       return mapping
@@ -26,20 +30,15 @@ class Space.Injector
       @_mappings[id] = new Mapping id, @_providers
       return @_mappings[id]
 
-  autoMap: (id) ->
-    value = @_resolveValue id
-    if _.isFunction(value)
-      @map(id).toSingleton value
-    else
-      @map(id).to value
-
   override: (id) -> @map id, true
 
   remove: (id) -> delete @_mappings[id]
 
   get: (id, dependentObject=null) ->
-    if !id? then throw Injector.ERRORS.cannotGetValueForUndefined()
-    if not @_mappings[id]? then @autoMap id
+    if !id?
+      throw new Space.InjectionError(@ERRORS.cannotGetValueForUndefined())
+    if not @_mappings[id]?
+      throw new Space.InjectionError(@ERRORS.noMappingFound(id))
     dependency = @_mappings[id].provide(dependentObject)
     @injectInto dependency
     return dependency
@@ -61,7 +60,13 @@ class Space.Injector
     # Get flat map of dependencies (possibly inherited)
     dependencies = @_mapDependencies value
     # Inject into dependencies to create the object graph
-    value[key] ?= @get(id, value) for key, id of dependencies
+    for key, id of dependencies
+      try
+        value[key] ?= @get(id, value)
+      catch error
+        error.message += " for {#{key}: '#{id}'} in <#{value}>. Did you forget
+                           to map it in your application?"
+        throw error
     # Notify when dependencies are ready
     if value.onDependenciesReady? then value.onDependenciesReady()
 
@@ -83,13 +88,10 @@ class Space.Injector
     # Recurse down the prototype chain
     if SuperClass? then @_mapDependencies SuperClass.constructor::, deps
     # Add dependencies of current value
-    deps[key] = id for key, id of value.Dependencies
+    deps[key] = id for key, id of value.dependencies
     return deps
 
-  _resolveValue: (path) ->
-    value = Space.resolvePath path
-    if not value? then throw Injector.ERRORS.valueNotResolved(path)
-    return value
+  _resolveValue: (path) -> Space.resolvePath path
 
 # ========= PRIVATE CLASSES ========== #
 
@@ -127,16 +129,21 @@ class Mapping
   _setup: (provider) ->
     return (value) => # We are inside an API call like injector.map('this').to('that')
       # Set the provider of this mapping to what the API user chose
-      @_provider = new provider @_id, value
+      try
+        @_provider = new provider @_id, value
+      catch error
+        error.message += " could not be found! Maybe you forgot to
+                           include a file in package.js?"
+        throw error
       # Override the dependency in all dependent objects if this mapping is flagged
       if @_overrideInDependents
         # Get the value from the provider
         value = @_provider.provide()
         # Loop over the dependents
         for dependent in @_dependents
-          # Loop over their Dependencies and override the one this mapping
+          # Loop over their dependencies and override the one this mapping
           # is managing if it exists (it should)
-          dependencies = dependent.Dependencies ? {}
+          dependencies = dependent.dependencies ? {}
           for key, id of dependencies
             if id is @_id
               dependent[key] = value

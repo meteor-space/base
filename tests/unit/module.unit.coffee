@@ -34,13 +34,13 @@ describe 'Space.Module', ->
 
     it 'sets required modules to empty array if none defined', ->
       module = new Space.Module()
-      expect(module.RequiredModules).to.be.instanceof Array
-      expect(module.RequiredModules).to.be.empty
+      expect(module.requiredModules).to.be.instanceof Array
+      expect(module.requiredModules).to.be.empty
 
     it 'leaves the defined required modules intact', ->
       testArray = []
-      module = Space.Module.create RequiredModules: testArray
-      expect(module.RequiredModules).to.equal testArray
+      module = Space.Module.create requiredModules: testArray
+      expect(module.requiredModules).to.equal testArray
 
     it 'sets the correct state', ->
       module = new Space.Module()
@@ -57,13 +57,8 @@ describe 'Space.Module - #initialize', ->
     @module = new Space.Module()
     # faked required modules to spy on
     @SubModule1 = Space.Module.define 'SubModule1'
-    @subModule1 = new @SubModule1()
     @SubModule2 = Space.Module.define 'SubModule2'
-    @subModule2 = new @SubModule2()
-    @app = modules: {
-      'SubModule1': @subModule1
-      'SubModule2': @subModule2
-    }
+    @app = modules: {}
 
   it 'asks the injector to inject dependencies into the module', ->
     @module.initialize @app, @injector
@@ -86,27 +81,17 @@ describe 'Space.Module - #initialize', ->
     @module.initialize @app, @injector
     expect(@module.onInitialize).to.have.been.calledOnce
 
-  it 'looks up required modules and adds them to the modules object', ->
-    # make our SUT module require our fake modules
-    @module.RequiredModules = [@SubModule1.name, @SubModule2.name]
+  it 'creates required modules and adds them to the app', ->
+    @module.requiredModules = [@SubModule1.name, @SubModule2.name]
     @module.initialize @app, @injector
-    expect(@app.modules[@SubModule1.name]).to.equal @subModule1
-    expect(@app.modules[@SubModule2.name]).to.equal @subModule2
+    expect(@app.modules[@SubModule1.name]).to.be.instanceof(@SubModule1)
+    expect(@app.modules[@SubModule2.name]).to.be.instanceof(@SubModule2)
 
-  it 'initializes required modules when they are not yet initialized', ->
-    sinon.spy @subModule1, 'initialize'
-    sinon.spy @subModule2, 'initialize'
-    @module.RequiredModules = [@SubModule1.name, @SubModule2.name]
+  it 'initializes required modules', ->
+    sinon.stub @SubModule1.prototype, 'initialize'
+    @module.requiredModules = [@SubModule1.name]
     @module.initialize @app, @injector
-    expect(@subModule1.initialize).to.have.been.called
-    expect(@subModule2.initialize).to.have.been.called
-
-  it 'doesnt initialize required modules if they are already initialized', ->
-    @subModule1._state = 'initialized'
-    sinon.spy @subModule1, 'initialize'
-    @module.RequiredModules = [@SubModule1.name]
-    @module.initialize @app, @injector
-    expect(@subModule1.initialize).not.to.have.been.called
+    expect(@SubModule1.prototype.initialize).to.have.been.calledOnce
 
   it 'can only be initialized once', ->
     @module.onInitialize = sinon.spy()
@@ -155,3 +140,24 @@ describe 'Space.Module - #reset', ->
     @module.reset()
     process.env.NODE_ENV = nodeEnvBackup
     expect(@module._runLifeCycleAction).not.to.have.been.called
+
+describe "Space.Module - wrappable lifecycle hooks", ->
+
+  it "allows mixins to hook into the module lifecycle", ->
+    moduleOnInitializeSpy = sinon.spy()
+    mixinOnInitializeSpy = sinon.spy()
+    MyModule = Space.Module.extend {
+      onInitialize: moduleOnInitializeSpy
+    }
+    MyModule.mixin {
+      onDependenciesReady: ->
+        @_wrapLifecycleHook 'onInitialize', (onInitialize) ->
+          onInitialize.call(this)
+          mixinOnInitializeSpy.call(this)
+    }
+    module = new MyModule()
+    module.initialize(module, new Space.Injector())
+
+    expect(moduleOnInitializeSpy).to.have.been.calledOnce
+    expect(mixinOnInitializeSpy).to.have.been.calledOnce
+    expect(moduleOnInitializeSpy).to.have.been.calledBefore(mixinOnInitializeSpy)

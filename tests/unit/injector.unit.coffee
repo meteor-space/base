@@ -11,7 +11,7 @@ describe 'Space.Injector', ->
   describe 'working with mappings', ->
 
     it 'injects into requested dependency', ->
-      myObject = Dependencies: test: 'test'
+      myObject = dependencies: test: 'test'
       testValue = {}
       @injector.map('test').to testValue
       @injector.map('myObject').to myObject
@@ -19,19 +19,10 @@ describe 'Space.Injector', ->
       expect(@injector.get('myObject').test).to.equal testValue
 
     it 'throws error if mapping doesnt exist', ->
-      expect(=> @injector.get('blablub')).to.throw Error
-
-    it 'auto-maps singletons', ->
-      first = @injector.get 'Space.Injector'
-      second = @injector.get 'Space.Injector'
-      expect(first).to.be.instanceof Space.Injector
-      expect(first).to.equal second
-
-    it 'auto-maps static values', ->
-      expect(@injector.get('Space')).to.equal Space
-
-    it 'throws if the auto-map value is undefined', ->
-      expect(=> @injector.get('NotExistingValue')).to.throw Error
+      id = 'blablub'
+      expect(=> @injector.get(id)).to.throw(
+        @injector.ERRORS.noMappingFound(id).message
+      )
 
     it 'throws error if mapping would be overriden', ->
       @injector.map('test').to 'test'
@@ -41,7 +32,7 @@ describe 'Space.Injector', ->
     it 'can remove existing mappings', ->
       @injector.map('test').to 'test'
       @injector.remove 'test'
-      expect(=> @injector.get 'test').to.throw Error
+      expect(=> @injector.get 'test').to.throw
 
     it 'provides an alias for getting values', ->
       @injector.map('test').to 'test'
@@ -55,8 +46,8 @@ describe 'Space.Injector', ->
       expect(@injector.get('TestClass')).to.be.instanceof TestClass
 
     it 'throws error if you try to map undefined', ->
-      expect(=> @injector.map(undefined)).to.throw 'Cannot map undefined value.'
-      expect(=> @injector.map(null)).to.throw 'Cannot map undefined value.'
+      expect(=> @injector.map(undefined)).to.throw @injector.ERRORS.cannotMapUndefinedId()
+      expect(=> @injector.map(null)).to.throw @injector.ERRORS.cannotMapUndefinedId()
 
   describe 'overriding mappings', ->
 
@@ -66,7 +57,7 @@ describe 'Space.Injector', ->
       expect(@injector.get('test')).to.equal 'other'
 
     it 'dynamically updates all dependent objects with the new dependency', ->
-      myObject = Dependencies: test: 'test'
+      myObject = dependencies: test: 'test'
       firstValue = { first: true }
       secondValue = { second: true }
       @injector.map('test').to firstValue
@@ -77,7 +68,7 @@ describe 'Space.Injector', ->
 
     it 'allows to de-register a dependent object from the mappings', ->
       myObject = {
-        Dependencies:
+        dependencies:
           first: 'First'
           second: 'Second'
       }
@@ -98,7 +89,7 @@ describe 'Space.Injector', ->
 
     it 'tells the dependent object when a dependency changed', ->
       dependentObject = {
-        Dependencies: {
+        dependencies: {
           test: 'Test'
         }
         onDependencyChanged: sinon.spy()
@@ -120,13 +111,13 @@ describe 'Space.Injector', ->
     it 'injects static values', ->
       value = {}
       @injector.map('test').to value
-      instance = Space.Object.create Dependencies: value: 'test'
+      instance = Space.Object.create dependencies: value: 'test'
       @injector.injectInto instance
       expect(instance.value).to.equal value
 
     it 'injects into provided dependencies', ->
-      first = Dependencies: value: 'test'
-      second = Dependencies: first: 'first'
+      first = dependencies: value: 'test'
+      second = dependencies: first: 'first'
       @injector.map('test').to 'value'
       @injector.map('first').to first
 
@@ -135,8 +126,8 @@ describe 'Space.Injector', ->
       expect(first.value).to.equal 'value'
 
     it 'handles inherited dependencies', ->
-      Base = Space.Object.extend Dependencies: base: 'base'
-      Extended = Base.extend Dependencies: extended: 'extended'
+      Base = Space.Object.extend dependencies: base: 'base'
+      Extended = Base.extend dependencies: extended: 'extended'
       @injector.map('base').to 'base'
       @injector.map('extended').to 'extended'
 
@@ -147,7 +138,7 @@ describe 'Space.Injector', ->
 
     it 'never overrides existing properties', ->
       instance = Space.Object.create
-        Dependencies: test: 'test'
+        dependencies: test: 'test'
         test: 'value'
 
       @injector.map('test').to('test')
@@ -160,7 +151,7 @@ describe 'Space.Injector', ->
       it 'tells the instance that they are ready', ->
         value = 'test'
         instance = Space.Object.create
-          Dependencies: value: 'value'
+          dependencies: value: 'value'
           onDependenciesReady: sinon.spy()
 
         @injector.map('value').to('value')
@@ -172,7 +163,7 @@ describe 'Space.Injector', ->
       it 'tells every single instance exactly once', ->
         readySpy = sinon.spy()
         class TestClass extends Space.Object
-          Dependencies: value: 'test'
+          dependencies: value: 'test'
           onDependenciesReady: readySpy
 
         @injector.map('test').to 'test'
