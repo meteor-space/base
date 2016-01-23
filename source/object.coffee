@@ -2,20 +2,29 @@
 class Space.Object
 
   # Assign given properties to the instance
-  constructor: (properties) -> @[key] = value for key, value of properties
+  constructor: (properties) ->
+    @_invokeConstructionCallbacks.apply(this, arguments)
+    # Copy properties to instance by default
+    @[key] = value for key, value of properties
 
   onDependenciesReady: ->
     # Let mixins initialize themselves when dependencies are ready
-    callback.call(this) for callback in @_getMixinCallbacks(@constructor)
-
-  _getMixinCallbacks: (Class) ->
-    if Class.__super__?
-      superMixins = @_getMixinCallbacks(Class.__super__.constructor)
-      return _.union(superMixins, Class.__mixinCallbacks__ ? [])
-    else
-      return Class.__mixinCallbacks__ ? []
+    callback.call(this) for callback in @_getCallbacks(@constructor, 'onDependenciesReady')
 
   toString: -> @constructor.toString()
+
+  _invokeConstructionCallbacks: ->
+    # Let mixins initialize themselves on construction
+    for callback in @_getCallbacks(@constructor, 'onConstruction')
+      callback.apply(this, arguments)
+
+  _getCallbacks: (Class, callbackName) ->
+    callbacks = "__#{callbackName}Callbacks__"
+    if Class.__super__?
+      superMixins = @_getCallbacks(Class.__super__.constructor, callbackName)
+      return _.union(superMixins, Class[callbacks] ? [])
+    else
+      return Class[callbacks] ? []
 
   # Extends this class and return a child class with inherited prototype
   # and static properties.
@@ -204,18 +213,11 @@ class Space.Object
     # Create a clone so that we can remove properties without affecting the global mixin
     mixin = _.clone mixin
 
+    # Register the onConstruction method of mixins as a initialization callback
+    @_registerMixinCallback mixin, 'onConstruction'
+
     # Register the onDependenciesReady method of mixins as a initialization callback
-    mixinCallback = mixin.onDependenciesReady
-    if mixinCallback?
-      # A bit ugly but necessary to check that sub classes don't statically
-      # inherit mixin callback arrays from their super classes (coffeescript)
-      hasInheritedMixins = (
-        @__super__? and
-        @__super__.constructor.__mixinCallbacks__ is @__mixinCallbacks__
-      )
-      @__mixinCallbacks__ = [] if hasInheritedMixins or !@__mixinCallbacks__?
-      @__mixinCallbacks__.push mixinCallback
-      delete mixin.onDependenciesReady
+    @_registerMixinCallback mixin, 'onDependenciesReady'
 
     # Mixin static properties into the host class
     _.extend(this, mixin.statics) if mixin.statics?
@@ -246,3 +248,16 @@ class Space.Object
         value = _.clone(value) if isPlainObject(value)
         # Set non-existing props and override existing methods
         prototype[key] = value
+
+  @_registerMixinCallback: (mixin, type) ->
+    callback = mixin[type]
+    callbacks = "__#{type}Callbacks__"
+    if callback?
+      # A bit ugly but necessary to check that sub classes don't statically
+      # inherit mixin callback arrays from their super classes (coffeescript)
+      hasInheritedMixins = (
+        @__super__? and @__super__.constructor[callbacks] is @[callbacks]
+      )
+      @[callbacks] = [] if hasInheritedMixins or !@[callbacks]?
+      @[callbacks].push callback
+      delete mixin[type]

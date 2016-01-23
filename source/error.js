@@ -2,6 +2,7 @@ let IntermediateInheritor = function() {};
 IntermediateInheritor.prototype = Error.prototype;
 
 Space.Error = function(params) {
+  this._invokeConstructionCallbacks.apply(this, arguments);
   let data = null;
   if (_.isString(params)) {
     data = { message: params };
@@ -16,39 +17,33 @@ Space.Error = function(params) {
 
 Space.Error.prototype = new IntermediateInheritor();
 
-_.extend(Space.Error.prototype, {
-  message: '',
-  fields() {
-    let fields = Space.Struct.prototype.fields.call(this);
-    _.extend(fields, {
-      name: String,
-      message: String,
-      stack: Match.Optional(String),
-      code: Match.Optional(Match.Integer)
-    });
-    return fields;
-  },
-  extractErrorProperties(data) {
-    let message = data.message ? data.message : this.message;
-    let error = Error.call(this, message);
-    data.name = error.name = this.constructor.name;
-    data.message = error.message;
-    if (error.stack !== undefined) data.stack = error.stack;
-    return data;
-  },
-  toPlainObject: Space.Struct.prototype.toPlainObject,
-  _checkFields: Space.Struct.prototype._checkFields,
-  _assignData: Space.Struct.prototype._assignData,
-  _getMixinCallbacks: Space.Object.prototype._getMixinCallbacks,
-  onDependenciesReady: Space.Object.prototype.onDependenciesReady
-});
+_.extend(
+  Space.Error.prototype, // target
+  Space.Struct.prototype,
+  _.omit(Space.Object.prototype, 'toString'),
+  {
+    message: '',
+    fields() {
+      let fields = Space.Struct.prototype.fields.call(this);
+      _.extend(fields, {
+        name: String,
+        message: String,
+        stack: Match.Optional(String),
+        code: Match.Optional(Match.Integer)
+      });
+      return fields;
+    },
+    extractErrorProperties(data) {
+      let message = data.message ? data.message : this.message;
+      let error = Error.call(this, message);
+      data.name = error.name = this.constructor.name;
+      data.message = error.message;
+      if (error.stack !== undefined) data.stack = error.stack;
+      return data;
+    }
+  }
+);
 
-_.extend(Space.Error, {
-  extend: Space.Object.extend,
-  mixin: Space.Object.mixin,
-  create: Space.Object.create,
-  type: Space.Object.type,
-  _applyMixin: Space.Object._applyMixin,
-  _mergeIntoPrototype: Space.Object._mergeIntoPrototype,
+_.extend(Space.Error, _.omit(Space.Object, 'toString'), {
   __keepToStringMethod__: true // Do not override #toString method
 });
