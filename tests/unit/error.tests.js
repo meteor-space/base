@@ -46,4 +46,20 @@ describe("Space.Error", function() {
     expect(error.stack).to.be.a.string;
   });
 
+  describe("applying mixins", function() {
+
+    it("supports mixin callbacks", function() {
+      let MyMixin = {
+        onConstruction: sinon.spy(),
+        onDependenciesReady: sinon.spy()
+      };
+      let MyMixinError = Space.Error.extend('MyMixinError', { mixin: MyMixin });
+      let param = 'test';
+      let error = new MyMixinError(param);
+      expect(MyMixin.onConstruction).to.have.been.calledOn(error);
+      expect(MyMixin.onConstruction).to.have.been.calledWithExactly(param);
+    });
+
+  });
+
 });

@@ -3,15 +3,20 @@ class Space.Object
 
   # Assign given properties to the instance
   constructor: (properties) ->
-    # Let mixins initialize themselves on construction
-    for callback in @_getCallbacks(@constructor, 'onConstruction')
-      callback.apply(this, arguments)
+    @_invokeConstructionCallbacks.apply(this, arguments)
     # Copy properties to instance by default
     @[key] = value for key, value of properties
 
   onDependenciesReady: ->
     # Let mixins initialize themselves when dependencies are ready
     callback.call(this) for callback in @_getCallbacks(@constructor, 'onDependenciesReady')
+
+  toString: -> @constructor.toString()
+
+  _invokeConstructionCallbacks: ->
+    # Let mixins initialize themselves on construction
+    for callback in @_getCallbacks(@constructor, 'onConstruction')
+      callback.apply(this, arguments)
 
   _getCallbacks: (Class, callbackName) ->
     callbacks = "__#{callbackName}Callbacks__"
@@ -20,8 +25,6 @@ class Space.Object
       return _.union(superMixins, Class[callbacks] ? [])
     else
       return Class[callbacks] ? []
-
-  toString: -> @constructor.toString()
 
   # Extends this class and return a child class with inherited prototype
   # and static properties.
