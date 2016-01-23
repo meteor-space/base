@@ -1,6 +1,12 @@
 Changelog
 =========
 
+### 4.0.1
+
+- Improves `Space.Object.extend()` implementations
+- Fixes bug in `Space.Error`
+- Adds tests for mixin callbacks
+
 ## 4.0.0 :tada:
 **This is a big major release with many new features and improvements:**
 
