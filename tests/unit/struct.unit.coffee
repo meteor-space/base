@@ -12,6 +12,17 @@ describe 'Space.Struct', ->
       fields.extra = Match.Integer
       return fields
 
+  it "is a Space.Object", ->
+    expect(Space.Struct).to.extend(Space.Object)
+
+  it "calls the super constructor", ->
+    constructorSpy = sinon.spy(Space.Object.prototype, 'constructor')
+    data = {}
+    struct = new Space.Struct(data)
+    expect(constructorSpy).to.have.been.calledWithExactly(data)
+    expect(constructorSpy).to.have.been.calledOn(struct)
+    constructorSpy.restore()
+
   describe 'defining fields', ->
 
     it 'assigns the properties to the instance', ->

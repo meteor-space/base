@@ -5,7 +5,7 @@ class Space.Struct extends Space.Object
 
   constructor: (data={}) ->
     @_checkFields(data)
-    @_assignData(data)
+    super
 
   fields: -> _.clone(@constructor.fields) ? {}
 
@@ -16,6 +16,3 @@ class Space.Struct extends Space.Object
 
   # Use the fields configuration to check given data during runtime
   _checkFields: (data) -> check data, @fields()
-
-  # Copy data to instance
-  _assignData: (data) -> @[key] = data[key] for key of data
