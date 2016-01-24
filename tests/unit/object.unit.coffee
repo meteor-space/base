@@ -144,6 +144,12 @@ describe 'Space.Object', ->
       MyClass.myMethod()
       expect(myMixin.statics.myMethod).to.have.been.calledOn(MyClass)
 
+    it 'can be checked which mixins a class has', ->
+      MyMixin = {}
+      MyClass = Space.Object.extend({ mixin: MyMixin })
+      expect(MyClass.hasMixin(MyMixin)).to.be.true
+      expect(new MyClass().hasMixin(MyMixin)).to.be.true
+
     describe "onDependenciesReady hooks", ->
 
       it "can provide a hook that is called when dependencies of host class are ready", ->
