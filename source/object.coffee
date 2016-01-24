@@ -9,22 +9,17 @@ class Space.Object
 
   onDependenciesReady: ->
     # Let mixins initialize themselves when dependencies are ready
-    callback.call(this) for callback in @_getCallbacks(@constructor, 'onDependenciesReady')
+    for mixin in @constructor._getAppliedMixins()
+      mixin.onDependenciesReady?.call(this)
 
   toString: -> @constructor.toString()
 
+  hasMixin: (mixin) -> _.contains(@constructor._getAppliedMixins(), mixin)
+
   _invokeConstructionCallbacks: ->
     # Let mixins initialize themselves on construction
-    for callback in @_getCallbacks(@constructor, 'onConstruction')
-      callback.apply(this, arguments)
-
-  _getCallbacks: (Class, callbackName) ->
-    callbacks = "__#{callbackName}Callbacks__"
-    if Class.__super__?
-      superMixins = @_getCallbacks(Class.__super__.constructor, callbackName)
-      return _.union(superMixins, Class[callbacks] ? [])
-    else
-      return Class[callbacks] ? []
+    for mixin in @constructor._getAppliedMixins()
+      mixin.onConstruction?.apply(this, arguments)
 
   # Extends this class and return a child class with inherited prototype
   # and static properties.
@@ -208,32 +203,38 @@ class Space.Object
     else
       @_applyMixin(mixins)
 
-  @_applyMixin: (mixin) ->
-
-    # Create a clone so that we can remove properties without affecting the global mixin
-    mixin = _.clone mixin
-
-    # Register the onConstruction method of mixins as a initialization callback
-    @_registerMixinCallback mixin, 'onConstruction'
-
-    # Register the onDependenciesReady method of mixins as a initialization callback
-    @_registerMixinCallback mixin, 'onDependenciesReady'
-
-    # Mixin static properties into the host class
-    _.extend(this, mixin.statics) if mixin.statics?
-    delete mixin.statics
-
-    # Give mixins the chance to do static setup when applied to the host class
-    mixin.onMixinApplied?.call this
-    delete mixin.onMixinApplied
-
-    # Copy over the mixin to the prototype and merge objects
-    @_mergeIntoPrototype @prototype, mixin
-
-  @isSubclassOf = (sup) ->
+  @isSubclassOf: (sup) ->
     isSubclass = this.prototype instanceof sup
     isSameClass = this is sup
     return isSubclass || isSameClass
+
+  @hasMixin: (mixin) -> _.contains(@_getAppliedMixins(), mixin)
+
+  @_applyMixin: (mixin) ->
+
+    # Add the original mixin to the registry so we can ask if a specific
+    # mixin has been added to a host class / instance
+    @_registerMixin mixin
+
+    # Create a clone so that we can remove properties without affecting the global mixin
+    mixinCopy = _.clone mixin
+
+    # Remove hooks from mixin, so that they are not added to host class
+    delete mixinCopy.onDependenciesReady
+    delete mixinCopy.onConstruction
+
+    # Mixin static properties into the host class
+    _.extend(this, mixinCopy.statics) if mixinCopy.statics?
+    delete mixinCopy.statics
+
+    # Give mixins the chance to do static setup when applied to the host class
+    mixinCopy.onMixinApplied?.call this
+    delete mixinCopy.onMixinApplied
+
+    # Copy over the mixin to the prototype and merge objects
+    @_mergeIntoPrototype @prototype, mixinCopy
+
+  @_getAppliedMixins: -> @_appliedMixins ? []
 
   @_mergeIntoPrototype: (prototype, extension) ->
     # Helper function to check for object literals only
@@ -249,15 +250,20 @@ class Space.Object
         # Set non-existing props and override existing methods
         prototype[key] = value
 
-  @_registerMixinCallback: (mixin, type) ->
-    callback = mixin[type]
-    callbacks = "__#{type}Callbacks__"
-    if callback?
-      # A bit ugly but necessary to check that sub classes don't statically
-      # inherit mixin callback arrays from their super classes (coffeescript)
-      hasInheritedMixins = (
-        @__super__? and @__super__.constructor[callbacks] is @[callbacks]
-      )
-      @[callbacks] = [] if hasInheritedMixins or !@[callbacks]?
-      @[callbacks].push callback
-      delete mixin[type]
+  @_registerMixin: (mixin) ->
+    # A bit ugly but necessary to check that sub classes don't statically
+    # inherit mixin arrays from their super classes
+    if @__super__?
+      superMixins = @__super__.constructor._appliedMixins
+      hasInheritedMixins = @_appliedMixins? and (superMixins is @_appliedMixins)
+    else
+      hasInheritedMixins = false
+
+    if hasInheritedMixins
+      # Create a shallow copy of the inherited mixins array
+      @_appliedMixins = @_appliedMixins.slice()
+    else
+      @_appliedMixins ?= []
+
+    # Keep the mixins array clean from duplicates
+    @_appliedMixins.push(mixin) if !_.contains(@_appliedMixins, mixin)
