@@ -7,12 +7,12 @@ describe("Space.Module - regressions", function() {
     let singletonReadySpy = sinon.spy();
     let myInjector = new Space.Injector();
 
-    Space.Object.extend(Test, 'MySingleton', {
+    Space.Object.extend('Test.MySingleton', {
       dependencies: { someLib: 'SomeLib' },
       onDependenciesReady: singletonReadySpy
     });
 
-    Test.MyModule = Space.Module.extend(Test, 'MyModule', {
+    Test.MyModule = Space.Module.extend('Test.MyModule', {
       singletons: ['Test.MySingleton'],
       onInitialize() { this.injector.map('SomeLib').to(SomeLib); }
     });
