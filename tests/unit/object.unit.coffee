@@ -77,7 +77,9 @@ describe 'Space.Object', ->
       expect(instance.get 'first').to.equal 1
 
     it 'forwards any number of arguments to the constructor', ->
-      Base = Space.Object.extend Constructor: (@first, @second) ->
+      Base = Space.Object.extend 'Base', {
+        Constructor: (@first, @second) -> return this
+      }
       instance = Base.create 1, 2
       expect(instance.first).to.equal 1
       expect(instance.second).to.equal 2

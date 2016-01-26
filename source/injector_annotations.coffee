@@ -1,4 +1,4 @@
-@Space.Dependency = (propertyName, dependencyId) ->
+Space.Dependency = (propertyName, dependencyId) ->
   if (typeof dependencyId == 'undefined')
     dependencyId = propertyName
   (target) ->
@@ -8,7 +8,7 @@
     target.prototype.dependencies[propertyName] = dependencyId
     return target
 
-@Space.RequireModule = (moduleId) ->
+Space.RequireModule = (moduleId) ->
   (target) ->
     if target.prototype.requiredModules and not target.prototype.hasOwnProperty('RequiredModules')
       target.prototype.requiredModules = _.clone target.prototype.requiredModules

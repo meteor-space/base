@@ -1,6 +1,5 @@
 
 Injector = Space.Injector
-global = this
 
 describe 'Space.Injector', ->
 
@@ -190,14 +189,6 @@ describe 'Space.Injector', ->
         expect(@injector.get('first')).to.equal value
         expect(@injector.get('second')).to.equal value
 
-      it 'supports global namespace lookup', ->
-        global.Space.__test__ = TestClass: Space.Object.extend()
-        path = 'Space.__test__.TestClass'
-        @injector.map(path).asStaticValue()
-
-        expect(@injector.get(path)).to.equal Space.__test__.TestClass
-        delete global.Space.__test__
-
       it 'can uses static toString method if available', ->
         class Test
           @toString: -> 'Test'
@@ -238,17 +229,6 @@ describe 'Space.Injector', ->
 
         expect(first).to.be.instanceof Test
         expect(first).to.equal second
-
-      it 'looks up the value on global namespace if only a path is given', ->
-        global.Space.__test__ = TestClass: Space.Object.extend()
-        @injector.map('Space.__test__.TestClass').asSingleton()
-
-        first = @injector.get('Space.__test__.TestClass')
-        second = @injector.get('Space.__test__.TestClass')
-
-        expect(first).to.be.instanceof Space.__test__.TestClass
-        expect(first).to.equal second
-        delete global.Space.__test__
 
   # ============ CUSTOM PROVIDERS ============ #
 

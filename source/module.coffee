@@ -1,6 +1,8 @@
 
 class Space.Module extends Space.Object
 
+  @type 'Space.Module'
+
   ERRORS: {
     injectorMissing: 'Instance of Space.Injector needed to initialize module.'
   }
@@ -17,6 +19,7 @@ class Space.Module extends Space.Object
   constructor: ->
     super
     @requiredModules ?= []
+    return this
 
   initialize: (@app, @injector, isSubModule=false) ->
     return if not @is('constructed') # only initialize once
@@ -85,9 +88,8 @@ class Space.Module extends Space.Object
 
   # ========== STATIC MODULE MANAGEMENT ============ #
 
-  @define: (moduleName, prototype={}) ->
-    prototype.toString = -> moduleName # For better debugging
-    @publish Space.Module.extend(moduleName, prototype), moduleName
+  @define: (classPath, prototype={}) ->
+    @publish Space.Module.extend(classPath, prototype), classPath
 
   # All published modules register themselves here
   @published = {}

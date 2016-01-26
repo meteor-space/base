@@ -48,7 +48,7 @@ Package.onUse(function(api) {
     'source/injector.coffee',
     'source/injector_annotations.coffee',
     'source/module.coffee',
-    'source/application.coffee'
+    'source/application.js'
   ]);
 
   // Test helpers

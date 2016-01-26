@@ -1,4 +1,4 @@
-
+JsObject = Object
 class Space.Object
 
   # Assign given properties to the instance
@@ -6,6 +6,7 @@ class Space.Object
     @_invokeConstructionCallbacks.apply(this, arguments)
     # Copy properties to instance by default
     @[key] = value for key, value of properties
+    return this
 
   onDependenciesReady: ->
     # Let mixins initialize themselves when dependencies are ready
@@ -126,6 +127,7 @@ class Space.Object
     # consoles are displaying the class name nicely.
     Child = new Function('initialize', 'return function ' + className + '() {
       initialize.apply(this, arguments);
+      return this;
     }')(Constructor)
 
     # Copy the static properties of this class over to the extended
@@ -187,13 +189,9 @@ class Space.Object
   # Create and instance of the class that this method is called on
   # e.g.: Space.Object.create() would return an instance of Space.Object
   @create: ->
-    # Use a wrapper class to hand the constructor arguments
-    # to the context class that #create was called on
-    args = arguments
-    Context = this
-    wrapper = -> Context.apply this, args
-    wrapper extends Context
-    new wrapper()
+    # Using this trick from the internets:
+    # http://www.bennadel.com/blog/2291-invoking-a-native-javascript-constructor-using-call-or-apply.htm
+    this.apply JsObject.create(this.prototype), arguments
 
   # Mixin properties and methods to the class prototype and merge
   # properties that are plain objects to support the mixin of configs etc.
