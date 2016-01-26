@@ -38,7 +38,7 @@ Package.onUse(function(api) {
 
   api.addFiles([
     'source/lib/underscore_deep_extend_mixin.js',
-    'source/namespace.coffee',
+    'source/namespace.js',
     'source/helpers.coffee',
     'source/configuration.js',
     'source/object.coffee',
@@ -55,6 +55,8 @@ Package.onUse(function(api) {
   api.addFiles([
     'source/testing/bdd-api.coffee'
   ]);
+
+  api.export('Space');
 
 });
 
