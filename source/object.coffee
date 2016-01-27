@@ -1,6 +1,8 @@
 
 class Space.Object
 
+  # ============= PUBLIC PROTOTYPE ============== #
+
   # Assign given properties to the instance
   constructor: (properties) ->
     @_invokeConstructionCallbacks.apply(this, arguments)
@@ -14,12 +16,25 @@ class Space.Object
 
   toString: -> @constructor.toString()
 
+  hasSuperClass: -> @constructor.__super__?
+
+  # Returns either the super class constructor (if no param given) or
+  # the prototype property or method with [key]
+  superClass: (key) ->
+    sup = @constructor.__super__.constructor
+    if key? then sup.prototype[key] else sup
+
+  # Returns true if the passed in mixin has been applied to this or a super class
   hasMixin: (mixin) -> _.contains(@constructor._getAppliedMixins(), mixin)
 
+  # This method needs to stay separate from the constructor so that
+  # Space.Error can use it too!
   _invokeConstructionCallbacks: ->
     # Let mixins initialize themselves on construction
     for mixin in @constructor._getAppliedMixins()
       mixin.onConstruction?.apply(this, arguments)
+
+  # ============= PUBLIC STATIC ============== #
 
   # Extends this class and return a child class with inherited prototype
   # and static properties.
@@ -128,8 +143,12 @@ class Space.Object
       initialize.apply(this, arguments);
     }')(Constructor)
 
+    # Add subclass to parent class
+    Parent._subClasses.push(Child)
+
     # Copy the static properties of this class over to the extended
     Child[key] = this[key] for key of this
+    Child._subClasses = []
 
     # Copy over static class properties defined on the extension
     if extension.statics?
@@ -203,18 +222,43 @@ class Space.Object
     else
       @_applyMixin(mixins)
 
+  # Returns true if this class has a super class
+  @hasSuperClass: -> @__super__?
+
   @isSubclassOf: (sup) ->
     isSubclass = this.prototype instanceof sup
     isSameClass = this is sup
     return isSubclass || isSameClass
 
+  # Returns either the super class constructor (if no param given) or
+  # the static property or method with [key]
+  @superClass: (key) ->
+    sup = @__super__.constructor
+    if key? then sup[key] else sup
+
+  # Returns a flat, uniq array of all sub classes
+  @subClasses: ->
+    subs = [].concat(@_subClasses)
+    subs = subs.concat(subClass.subClasses()) for subClass in subs
+    return _.uniq(subs)
+
+  # Returns true if the passed in mixin has been applied to this or a super class
   @hasMixin: (mixin) -> _.contains(@_getAppliedMixins(), mixin)
 
-  @_applyMixin: (mixin) ->
+  # ============= PRIVATE STATIC ============== #
 
+  @_subClasses: []
+
+  @_applyMixin: (mixin) ->
     # Add the original mixin to the registry so we can ask if a specific
     # mixin has been added to a host class / instance
-    @_registerMixin mixin
+    # Each class has its own mixins array
+    hasMixins = @_appliedMixins?
+    areInherited = hasMixins and @superClass('_appliedMixins') is @_appliedMixins
+    if !hasMixins or areInherited then @_appliedMixins = []
+
+    # Keep the mixins array clean from duplicates
+    @_appliedMixins.push(mixin) if !_.contains(@_appliedMixins, mixin)
 
     # Create a clone so that we can remove properties without affecting the global mixin
     mixinCopy = _.clone mixin
@@ -224,8 +268,11 @@ class Space.Object
     delete mixinCopy.onConstruction
 
     # Mixin static properties into the host class
-    _.extend(this, mixinCopy.statics) if mixinCopy.statics?
-    delete mixinCopy.statics
+    if mixinCopy.statics?
+      statics = mixinCopy.statics
+      _.extend(this, statics)
+      _.extend(sub, statics) for sub in @subClasses()
+      delete mixinCopy.statics
 
     # Give mixins the chance to do static setup when applied to the host class
     mixinCopy.onMixinApplied?.call this
@@ -234,7 +281,11 @@ class Space.Object
     # Copy over the mixin to the prototype and merge objects
     @_mergeIntoPrototype @prototype, mixinCopy
 
-  @_getAppliedMixins: -> @_appliedMixins ? []
+  @_getAppliedMixins: ->
+    mixins = []
+    mixins = mixins.concat(@superClass()._getAppliedMixins()) if @hasSuperClass()
+    mixins = mixins.concat(@_appliedMixins) if @_appliedMixins?
+    return _.uniq(mixins)
 
   @_mergeIntoPrototype: (prototype, extension) ->
     # Helper function to check for object literals only
@@ -249,21 +300,3 @@ class Space.Object
         value = _.clone(value) if isPlainObject(value)
         # Set non-existing props and override existing methods
         prototype[key] = value
-
-  @_registerMixin: (mixin) ->
-    # A bit ugly but necessary to check that sub classes don't statically
-    # inherit mixin arrays from their super classes
-    if @__super__?
-      superMixins = @__super__.constructor._appliedMixins
-      hasInheritedMixins = @_appliedMixins? and (superMixins is @_appliedMixins)
-    else
-      hasInheritedMixins = false
-
-    if hasInheritedMixins
-      # Create a shallow copy of the inherited mixins array
-      @_appliedMixins = @_appliedMixins.slice()
-    else
-      @_appliedMixins ?= []
-
-    # Keep the mixins array clean from duplicates
-    @_appliedMixins.push(mixin) if !_.contains(@_appliedMixins, mixin)
