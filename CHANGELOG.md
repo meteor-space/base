@@ -1,5 +1,20 @@
 Changelog
 =========
+
+## 4.1.1
+- Improves the way mixins are applied to classes and ensures that:
+  - Sub classes always inherit all mixins applied to parent classes, even when this happens "later on"
+  - All sub classes inherit the static mixin properties, even after extending the base class
+
+- Adds the following helpers are added to `Space.Object` for convenience:
+  - **static**
+    - `MyClass.hasSuperClass()`
+    - `MyClass.superClass([key])` - either returns the super class constructor or static property/method
+    - `MyClass.subClasses()` - returns flat array of all sub classes
+  - **prototype**
+    - `myInstance.hasSuperClass()`
+    - `myInstance.superClass([key])` - same as static version but returns prototype props/methods
+
 ## 4.1.0
 - Adds `hasMixin()` instance method to Space.Object to check if the class has applied or inherited a specific mixin
 

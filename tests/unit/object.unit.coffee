@@ -54,7 +54,6 @@ describe 'Space.Object', ->
         MyClass = Space.Object.extend('MyClass')
         expect(Space.resolvePath 'MyClass').to.equal(MyClass)
 
-
     describe "working with static class properties", ->
 
       it 'allows you to define static class properties', ->
@@ -81,6 +80,45 @@ describe 'Space.Object', ->
       instance = Base.create 1, 2
       expect(instance.first).to.equal 1
       expect(instance.second).to.equal 2
+
+  describe "inheritance helpers", ->
+
+    Base = Space.Object.extend {
+      statics: { prop: 'static', method: -> }
+      prop: 'prototype'
+      method: ->
+    }
+    Sub = Base.extend()
+    GrandSub = Sub.extend()
+
+    describe "static", ->
+
+      it "can tell if there is a super class", ->
+        expect(Sub.hasSuperClass()).to.be.true
+
+      it "can return the super class", ->
+        expect(Sub.superClass()).to.equal(Base)
+
+      it "can return a static prop or method of the super class", ->
+        expect(Sub.superClass('prop')).to.equal(Base.prop)
+        expect(Sub.superClass('method')).to.equal(Base.method)
+
+      it "can give back a flat array of sub classes", ->
+        expect(Base.subClasses()).to.eql [Sub, GrandSub]
+        expect(Sub.subClasses()).to.eql [GrandSub]
+        expect(GrandSub.subClasses()).to.eql []
+
+    describe "prototype", ->
+
+      it "can tell if there is a super class", ->
+        expect(new Sub().hasSuperClass()).to.be.true
+
+      it "can return the super class", ->
+        expect(new Sub().superClass()).to.equal(Base)
+
+      it "can return a static prop or method of the super class", ->
+        expect(new Sub().superClass('prop')).to.equal(Base::prop)
+        expect(new Sub().superClass('method')).to.equal(Base::method)
 
   describe 'mixins', ->
 
@@ -122,17 +160,6 @@ describe 'Space.Object', ->
       TestClass.mixin myMixin
       expect(myMixin.onMixinApplied).to.have.been.calledOnce
 
-    it "does not apply mixins to super classes", ->
-      firstMixin = onDependenciesReady: sinon.spy()
-      secondMixin = onDependenciesReady: sinon.spy()
-      SuperClass = Space.Object.extend()
-      SuperClass.mixin firstMixin
-      SubClass = SuperClass.extend()
-      SubClass.mixin secondMixin
-      new SuperClass().onDependenciesReady()
-      expect(firstMixin.onDependenciesReady).to.have.been.calledOnce
-      expect(secondMixin.onDependenciesReady).not.to.have.been.called
-
     it 'can be defined as prototype property when extending classes', ->
       myMixin = { onMixinApplied: sinon.spy() }
       MyClass = Space.Object.extend mixin: [myMixin]
@@ -159,6 +186,30 @@ describe 'Space.Object', ->
       expect(instance.hasMixin(FirstMixin)).to.be.true
       expect(instance.hasMixin(SecondMixin)).to.be.true
       expect(instance.hasMixin(ThirdMixin)).to.be.false
+
+    describe "mixin inheritance", ->
+
+      it "does not apply mixins to super classes", ->
+        firstMixin = {}
+        secondMixin = {}
+        SuperClass = Space.Object.extend mixin: firstMixin
+        SubClass = SuperClass.extend mixin: secondMixin
+        expect(SuperClass.hasMixin(firstMixin)).to.be.true
+        expect(SuperClass.hasMixin(secondMixin)).to.be.false
+        expect(SubClass.hasMixin(firstMixin)).to.be.true
+        expect(SubClass.hasMixin(secondMixin)).to.be.true
+
+      it "inherits mixins to children when added to base class later on", ->
+        LateMixin = { statics: { test: 'property' } }
+        # Base class with a mixin
+        BaseClass = Space.Object.extend()
+        # Sublcass with its own mixin
+        SubClass = BaseClass.extend()
+        # Later we extend base class
+        BaseClass.mixin LateMixin
+        # Sub class should have all three mixins correctly applied
+        expect(SubClass.hasMixin(LateMixin)).to.be.true
+        expect(SubClass.test).to.equal LateMixin.statics.test
 
     describe "onDependenciesReady hooks", ->
 
