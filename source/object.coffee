@@ -233,6 +233,7 @@ class Space.Object
   # Returns either the super class constructor (if no param given) or
   # the static property or method with [key]
   @superClass: (key) ->
+    return undefined if !@__super__?
     sup = @__super__.constructor
     if key? then sup[key] else sup
 
