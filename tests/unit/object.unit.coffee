@@ -99,7 +99,7 @@ describe 'Space.Object', ->
       it "can return the super class", ->
         expect(Sub.superClass()).to.equal(Base)
 
-      it "returns null if there is no super class", ->
+      it "returns undefined if there is no super class", ->
         expect(Space.Object.superClass()).to.equal(undefined)
 
       it "can return a static prop or method of the super class", ->
