@@ -1,5 +1,7 @@
 Changelog
 =========
+## 4.1.2
+- Fixes superClass method for classes that are not directly extending Space.Object
 
 ## 4.1.1
 - Improves the way mixins are applied to classes and ensures that:
