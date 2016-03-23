@@ -1,5 +1,8 @@
 Changelog
 =========
+## 4.1.3
+- Fixes the BDD test helper on `Space.Module` and `Space.Application` to actually accept a second param that can be a existing app instance.
+
 ## 4.1.2
 - Fixes superClass method for classes that are not directly extending Space.Object
 
