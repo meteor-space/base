@@ -11,16 +11,15 @@ Space.Module.test = Space.Application.test = (systemUnderTest, app=null) ->
   # BDD API relies on dependency injection provided by Application
   if !app?
     if isApplication
-      app = this
+      app = new this()
     else
-      app = Space.Application.define('TestApp', {
+      app = new (Space.Application.define('TestApp', {
         configuration: { appId: 'testApp' },
         requiredModules: [this.publishedAs]
-      })
-    appInstance = new app()
+      }))
 
   for api in registeredBddApis
-    returnValue = api(appInstance, systemUnderTest)
+    returnValue = api(app, systemUnderTest)
     testApi = returnValue if returnValue?
 
   if not testApi? then throw new Error "No testing API found for #{systemUnderTest}"
