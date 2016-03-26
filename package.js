@@ -1,7 +1,7 @@
 Package.describe({
   summary: 'Modular Application Architecture for Meteor.',
   name: 'space:base',
-  version: '4.1.2',
+  version: '4.1.3',
   git: 'https://github.com/meteor-space/base.git',
   documentation: 'README.md'
 });
@@ -79,7 +79,6 @@ Package.onTest(function(api) {
     'email',
     'session',
     'reactive-var',
-
     'grigio:babel@0.1.3',
     'practicalmeteor:munit@2.1.5',
     'space:testing@3.0.1'
