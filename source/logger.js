@@ -1,9 +1,3 @@
-let config = Space.configuration;
-
-if (Meteor.isServer) {
-  winston = Npm.require('winston');
-}
-
 Space.Object.extend(Space, 'Logger', {
 
   _logger: null,
@@ -18,31 +12,12 @@ Space.Object.extend(Space, 'Logger', {
     'debug': 7
   },
 
-  Constructor() {
-    if (Meteor.isServer) {
-      this._logger = new winston.Logger({
-        transports: [
-          new winston.transports.Console({
-            colorize: true,
-            prettyPrint: true
-          })
-        ]
-      });
-      this._logger.setLevels(winston.config.syslog.levels);
-    }
-    if (Meteor.isClient) {
-      this._logger = console;
-    }
+  Constructor(logger) {
+    this._logger = logger;
   },
 
-  setMinLevel(name) {
-    let newCode = this._levelCode(name);
-    if (this._minLevel !== newCode) {
-      this._minLevel = newCode;
-      if (Meteor.isServer) {
-        this._logger.transports.console.level = name;
-      }
-    }
+  addTransport() {
+    this._logger.add.apply(this._logger, arguments);
   },
 
   start() {
@@ -95,10 +70,3 @@ Space.Object.extend(Space, 'Logger', {
   }
 
 });
-
-Space.log = new Space.Logger();
-
-if (config.log.enabled) {
-  Space.log.setMinLevel(config.log.minLevel);
-  Space.log.start();
-}
