@@ -1,15 +1,6 @@
 Space.Object.extend Space, 'Logger',
 
-  _minLevel: 6
-
   _state: 'stopped'
-
-  _levels:
-    'error': 3
-    'warning': 4
-    'warn': 4
-    'info': 6
-    'debug': 7
 
   Constructor: ->
     @_adapters = {}
@@ -60,24 +51,15 @@ Space.Object.extend Space, 'Logger',
   error: (message) ->
     @_log 'error', arguments
 
-  setMinLevel: (name) ->
-    newCode = @_levelCode(name)
-    if @_minLevel != newCode
-      @_minLevel = newCode
-      for id, adapter of @_adapters
-        adapter.setMinLevel(name)
-
-  _levelCode: (name) ->
-    @_levels[name]
-
   _is: (expectedState) ->
     if @_state == expectedState
       return true
 
   _log: (level, message) ->
-    if @_is('running') and @_levelCode(level) <= @_minLevel
-      for id, adapter of @_adapters
-        adapter[level].apply adapter, message
+    return unless @_is('running')
+
+    for id, adapter of @_adapters
+      adapter[level].apply adapter, message
 
   ERRORS:
     cannotMapUndefinedId: ->

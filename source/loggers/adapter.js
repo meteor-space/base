@@ -22,10 +22,6 @@ Space.Object.extend('Space.Logger.Adapter', {
     this._log('error', arguments);
   },
 
-  setMinLevel(name)  {
-    return;
-  },
-
   setLib(lib) {
     this._lib = lib;
   },

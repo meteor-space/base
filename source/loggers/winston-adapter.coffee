@@ -15,6 +15,14 @@ Space.Logger.Adapter.extend 'Space.Logger.WinstonAdapter',
   removeTransport: ->
     @_lib.remove.apply @_lib, arguments
 
-  setMinLevel: (name) ->
-    for id, transports of @_lib.transports
-      @_lib.transports[id].level = name
+  hasTransport: (name) ->
+    return @_lib.transports[transportName]?
+
+  setMinLevel: (transportName, levelName) ->
+    unless @hasTransport(transportName)
+      throw new Error(@ERRORS.transportNotAdded(transportName))
+    @_lib.transports[transportName].level = levelName
+
+  ERRORS:
+    transportNotAdded: (transportName) ->
+      return "Winston transport with #{transportName} is not added"
