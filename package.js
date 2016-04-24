@@ -42,14 +42,20 @@ Package.onUse(function(api) {
     'source/helpers.coffee',
     'source/configuration.js',
     'source/object.coffee',
-    'source/logger.js',
+    'source/logger.coffee',
     'source/struct.coffee',
     'source/error.js',
     'source/injector.coffee',
     'source/injector_annotations.coffee',
     'source/module.coffee',
-    'source/application.coffee'
+    'source/application.coffee',
+    'source/loggers/adapter.js',
+    'source/loggers/console-adapter.coffee',
   ]);
+
+  api.addFiles([
+    'source/loggers/winston-adapter.coffee',
+  ], 'server');
 
   // Test helpers
   api.addFiles([
