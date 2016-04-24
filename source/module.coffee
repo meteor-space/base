@@ -21,6 +21,7 @@ class Space.Module extends Space.Object
   initialize: (@app, @injector, isSubModule=false) ->
     return if not @is('constructed') # only initialize once
     if not @injector? then throw new Error @ERRORS.injectorMissing
+    @_setDefaultsToConfiguration(@configuration)
     @_state = 'configuring'
     unless isSubModule
       @log = @_setupLogger()
@@ -115,6 +116,14 @@ class Space.Module extends Space.Object
     else
       return module
 
+  _setDefaultsToConfiguration: (configuration) ->
+    _.defaults(configuration, Space.getenv.multi({
+      log: {
+        enabled: ['SPACE_LOG_ENABLED', false, 'bool'],
+        minLevel: ['SPACE_LOG_MIN_LEVEL', 'info', 'string']
+      }
+    }))
+
   # Invokes the lifecycle action on all required modules, then on itself,
   # calling the instance hooks before, on, and after
   _runLifeCycleAction: (action, func) ->
@@ -193,6 +202,7 @@ class Space.Module extends Space.Object
     adapter = new adapterClass(defaultTransports)
     logger = new Space.Logger()
     logger.addAdapter(type, adapter)
+    logger.setMinLevel(config.minLevel) if config.minLevel?
 
     @_setupAdapterTransports(type, adapter)
     logger.start() if config.enabled == true
