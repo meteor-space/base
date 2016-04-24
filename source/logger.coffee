@@ -60,6 +60,13 @@ Space.Object.extend Space, 'Logger',
   error: (message) ->
     @_log 'error', arguments
 
+  setMinLevel: (name) ->
+    newCode = @_levelCode(name)
+    if @_minLevel != newCode
+      @_minLevel = newCode
+      for id, adapter of @_adapters
+        adapter.setMinLevel(name)
+
   _levelCode: (name) ->
     @_levels[name]
 
