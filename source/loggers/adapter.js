@@ -41,6 +41,4 @@ Space.Object.extend('Space.Logger.Adapter', {
     undefinedLib: 'Logging library is not set on adapter'
   }
 
-})
-
-
+});

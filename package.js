@@ -41,7 +41,7 @@ Package.onUse(function(api) {
     'source/helpers.coffee',
     'source/configuration.js',
     'source/object.coffee',
-    'source/logger.coffee',
+    'source/logger.js',
     'source/struct.coffee',
     'source/error.js',
     'source/injector.coffee',
@@ -49,7 +49,7 @@ Package.onUse(function(api) {
     'source/module.coffee',
     'source/application.coffee',
     'source/loggers/adapter.js',
-    'source/loggers/console-adapter.coffee',
+    'source/loggers/console-adapter.js',
   ]);
 
   // Test helpers
