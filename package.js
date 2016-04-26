@@ -7,8 +7,7 @@ Package.describe({
 });
 
 Npm.depends({
-  "getenv": "0.5.0",
-  "winston": "2.1.0"
+  "getenv": "0.5.0"
 });
 
 Package.onUse(function(api) {
@@ -52,10 +51,6 @@ Package.onUse(function(api) {
     'source/loggers/adapter.js',
     'source/loggers/console-adapter.coffee',
   ]);
-
-  api.addFiles([
-    'source/loggers/winston-adapter.coffee',
-  ], 'server');
 
   // Test helpers
   api.addFiles([
