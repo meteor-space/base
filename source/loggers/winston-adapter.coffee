@@ -1,6 +1,6 @@
 winston = Npm.require('winston')
 
-Space.Logger.Adapter.extend 'Space.Logger.WinstonAdapter',
+Space.Logger.WinstonAdapter = Space.Logger.Adapter.extend 'Space.Logger.WinstonAdapter',
 
   Constructor: (transports) ->
     lib = new winston.Logger({
@@ -26,3 +26,13 @@ Space.Logger.Adapter.extend 'Space.Logger.WinstonAdapter',
   ERRORS:
     transportNotAdded: (transportName) ->
       return "Winston transport with #{transportName} is not added"
+
+Space.Logger.WinstonAdapter.console = (options) ->
+  unless options?
+    options =
+      colorize: true
+      prettyPrint: true
+      level: 'info'
+
+  return new winston.transports.Console(options)
+
