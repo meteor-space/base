@@ -172,63 +172,16 @@ class Space.Module extends Space.Object
     this[hook] = _.wrap(this[hook], wrapper)
 
   _setupLogger: ->
-    if Meteor.isServer
-      config = @_loggingConfig(@configuration)
-    else
-      config = {}
-
-    transports = []
-    if Meteor.isServer
-      adapterName = 'winston'
-      adapterClass = Space.Logger.WinstonAdapter
-      transports = config.winston?.transports or []
-
-    if Meteor.isClient
-      adapterName = 'console'
-      adapterClass = Space.Logger.ConsoleAdapter
-
-    adapter = new adapterClass(transports)
+    config = @_loggingConfig(@configuration)
     logger = new Space.Logger()
-    logger.addAdapter(adapterName, adapter)
     logger.start() if config.enabled == true
-
     return logger
 
   _loggingConfig: () ->
     config = {}
-    _.deepExtend(config, Space.getenv.multi({
-      log: {
-        enabled: ['SPACE_LOG_ENABLED', false, 'bool'],
-        winston: {
-          console: {
-            enabled: ['SPACE_CONSOLE_LOG_ENABLED', false, 'bool'],
-            minLevel: ['SPACE_CONSOLE_LOG_MIN_LEVEL', 'info', 'string']
-          }
-        }
-      }
-    }))
     _.deepExtend(config, @configuration)
     _.deepExtend(config, @constructor.prototype.configuration)
-
-    winstonCfg = config.log?.winston or {}
-
-    if _.isEmpty(winstonCfg.transports) and winstonCfg.console.enabled == true
-      _.deepExtend(config, log: {
-        winston: {
-          transports: [@_setupWinstonConsoleTransport(
-            winstonCfg.console.minLevel
-          )]
-        }
-      })
-
     return config.log or {}
-
-  _setupWinstonConsoleTransport: (minLevel) ->
-    options =
-      colorize: true
-      prettyPrint: true
-    options.level = minLevel if minLevel?
-    return Space.Logger.WinstonAdapter.console(options)
 
   _mapSpaceServices: ->
     @injector.map('log').toStaticValue(@log)
