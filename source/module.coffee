@@ -21,7 +21,7 @@ class Space.Module extends Space.Object
   initialize: (@app, @injector, isSubModule=false) ->
     return if not @is('constructed') # only initialize once
     if not @injector? then throw new Error @ERRORS.injectorMissing
-    @_setDefaultsOnConfiguration(@configuration)
+
     @_state = 'configuring'
     unless isSubModule
       @log = @_setupLogger()
@@ -116,17 +116,6 @@ class Space.Module extends Space.Object
     else
       return module
 
-  _setDefaultsOnConfiguration: (configuration) ->
-    _.extend(configuration, Space.getenv.multi({
-      log: {
-        enabled: ['SPACE_LOG_ENABLED', false, 'bool'],
-        console: {
-          enabled: ['SPACE_CONSOLE_LOG_ENABLED', false, 'bool'],
-          minLevel: ['SPACE_CONSOLE_LOG_MIN_LEVEL', 'info', 'string']
-        }
-      }
-    }))
-
   # Invokes the lifecycle action on all required modules, then on itself,
   # calling the instance hooks before, on, and after
   _runLifeCycleAction: (action, func) ->
@@ -183,50 +172,63 @@ class Space.Module extends Space.Object
     this[hook] = _.wrap(this[hook], wrapper)
 
   _setupLogger: ->
-    config = @constructor.prototype.configuration.log or {}
-    defaultTransports = []
+    if Meteor.isServer
+      config = @_loggingConfig(@configuration)
+    else
+      config = {}
 
+    transports = []
     if Meteor.isServer
       adapterName = 'winston'
       adapterClass = Space.Logger.WinstonAdapter
-      unless @_areCustomAdapterTransportsConfigured(adapterName, config)
-        defaultTransports = @_getDefaultTransportsForWinston(config)
+      transports = config.winston?.transports or []
 
     if Meteor.isClient
       adapterName = 'console'
       adapterClass = Space.Logger.ConsoleAdapter
 
-    adapter = new adapterClass(defaultTransports)
+    adapter = new adapterClass(transports)
     logger = new Space.Logger()
     logger.addAdapter(adapterName, adapter)
-
-    @_setupAdapterTransports(adapterName, adapter, config)
     logger.start() if config.enabled == true
 
     return logger
 
-  _setupAdapterTransports: (adapterName, adapter, config) ->
-    transports = config[adapterName]?.transports
-    return unless transports
+  _loggingConfig: () ->
+    config = {}
+    _.deepExtend(config, Space.getenv.multi({
+      log: {
+        enabled: ['SPACE_LOG_ENABLED', false, 'bool'],
+        winston: {
+          console: {
+            enabled: ['SPACE_CONSOLE_LOG_ENABLED', false, 'bool'],
+            minLevel: ['SPACE_CONSOLE_LOG_MIN_LEVEL', 'info', 'string']
+          }
+        }
+      }
+    }))
+    _.deepExtend(config, @configuration)
+    _.deepExtend(config, @constructor.prototype.configuration)
 
-    for transport in transports
-      adapter.addTransport.apply(adapter, transport)
+    winstonCfg = config.log?.winston or {}
 
-  _getDefaultTransportsForWinston: (config) ->
-    winston = Npm.require('winston')
-    defaultTransports = []
+    if _.isEmpty(winstonCfg.transports) and winstonCfg.console.enabled == true
+      _.deepExtend(config, log: {
+        winston: {
+          transports: [@_setupWinstonConsoleTransport(
+            winstonCfg.console.minLevel
+          )]
+        }
+      })
 
-    if config.console?.enabled
-      options =
-        colorize: true
-        prettyPrint: true
-      options.level = config.console.minLevel if config.console?.minLevel?
-      defaultTransports.push(new winston.transports.Console(options))
+    return config.log or {}
 
-    return defaultTransports
-
-  _areCustomAdapterTransportsConfigured: (adapterName, config) ->
-    return (config[adapterName]?.transports?)
+  _setupWinstonConsoleTransport: (minLevel) ->
+    options =
+      colorize: true
+      prettyPrint: true
+    options.level = minLevel if minLevel?
+    return Space.Logger.WinstonAdapter.console(options)
 
   _mapSpaceServices: ->
     @injector.map('log').toStaticValue(@log)
