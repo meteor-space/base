@@ -1,8 +1,12 @@
 Space.Object.extend('Space.Logger', {
 
-  _state: 'stopped',
+  STATES: {
+    stopped: 'stopped',
+    running: 'running'
+  },
 
   Constructor() {
+    this._state = this.STATES.stopped;
     return this._adapters = {};
   },
 
@@ -10,9 +14,7 @@ Space.Object.extend('Space.Logger', {
     if (override == null) {
       let override = false;
     }
-    if (id == null) {
-      throw new Error(this.ERRORS.cannotMapUndefinedId());
-    }
+    check(id, String);
     if (this.existsAdapter(id) && !override) {
       throw new Error(this.ERRORS.mappingExists(id));
     }
@@ -43,14 +45,14 @@ Space.Object.extend('Space.Logger', {
   },
 
   start() {
-    if (this._is('stopped')) {
-      return this._state = 'running';
+    if (this._is(this.STATES.stopped)) {
+      return this._state = this.STATES.running;
     }
   },
 
   stop() {
-    if (this._is('running')) {
-      return this._state = 'stopped';
+    if (this._is(this.STATES.running)) {
+      return this._state = this.STATES.stopped;;
     }
   },
 
@@ -63,12 +65,7 @@ Space.Object.extend('Space.Logger', {
   },
 
   warning(message) {
-    if (Meteor.isClient) {
-      this._log('warn', arguments);
-    }
-    if (Meteor.isServer) {
-      return this._log('warning', arguments);
-    }
+    return this._log('warning', arguments);
   },
 
   error(message) {
@@ -76,13 +73,19 @@ Space.Object.extend('Space.Logger', {
   },
 
   _is(expectedState) {
-    if (this._state === expectedState) {
-      return true;
-    }
+    return (this._state === expectedState);
+  },
+
+  isRunning() {
+    return this._is(this.STATES.running);
+  },
+
+  isStopped() {
+    return this._is(this.STATES.stopped);
   },
 
   _log(level, message) {
-    if (!this._is('running')) {
+    if (!this._is(this.STATES.running)) {
       return;
     }
 
@@ -92,9 +95,6 @@ Space.Object.extend('Space.Logger', {
   },
 
   ERRORS: {
-    cannotMapUndefinedId() {
-      return "Cannot add adapter with <null> or <undefined> id";
-    },
     mappingExists(id) {
       return `Adapter with id <${id}> would be overwritten. Use method <Space.Logger::overrideAdapter> for that`;
     }
