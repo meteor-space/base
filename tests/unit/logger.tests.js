@@ -49,7 +49,7 @@ describe("Space.Logger", () => {
       const overrideAdapter = () => this.log.addAdapter(adapterId, adapter);
       expect(overrideAdapter).to.throw(
         Space.Logger.prototype.ERRORS.mappingExists(adapterId)
-      )
+      );
     });
 
     it('throws error if adding adapter without string id', () => {
@@ -76,7 +76,7 @@ describe("Space.Logger", () => {
       this.log.addAdapter(adapterId, adapter);
       const overrideAdapter = () => {
         this.log.overrideAdapter(adapterId, overridingAdapter);
-      }
+      };
       expect(overrideAdapter).to.not.throw(Error);
       expect(this.log.adapter(adapterId)).to.equal(overridingAdapter);
     });
@@ -106,15 +106,15 @@ describe("Space.Logger", () => {
       const adapters = {
         console: new TestAdapter(sinon.spy()),
         file: new TestAdapter(sinon.spy())
-      }
-      this.log.addAdapter('console', adapters['console']);
-      this.log.addAdapter('file',  adapters['file']);
+      };
+      this.log.addAdapter('console', adapters.console);
+      this.log.addAdapter('file',  adapters.file);
       expect(this.log.adapters()).to.include(adapters);
     });
   });
 
   it("only logs after starting", () => {
-    this.log.addAdapter('test', this.testAdapter)
+    this.log.addAdapter('test', this.testAdapter);
     const message = 'My log message';
 
     expect(this.log.isRunning()).to.be.false;
@@ -130,12 +130,12 @@ describe("Space.Logger", () => {
   });
 
   it("allows logging output to be stopped", () => {
-    this.log.addAdapter('test', this.testAdapter)
+    this.log.addAdapter('test', this.testAdapter);
     const message = 'My log message';
 
     expect(this.log.isRunning()).to.be.false;
     expect(this.log.isStopped()).to.be.true;
-    this.log.start()
+    this.log.start();
     expect(this.log.isRunning()).to.be.true;
     expect(this.log.isStopped()).to.be.false;
     this.log.info(message);

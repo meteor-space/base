@@ -52,7 +52,7 @@ Space.Object.extend('Space.Logger', {
 
   stop() {
     if (this._is(this.STATES.running)) {
-      return this._state = this.STATES.stopped;;
+      return this._state = this.STATES.stopped;
     }
   },
 
