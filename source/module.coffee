@@ -184,7 +184,7 @@ class Space.Module extends Space.Object
     return config.log or {}
 
   _mapSpaceServices: ->
-    @injector.map('log').toStaticValue(@log)
+    @injector.map('log').to @log
 
   _mapMeteorApis: ->
     @log.debug("#{@constructor.publishedAs}: _mapMeteorApis")
