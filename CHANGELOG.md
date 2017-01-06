@@ -1,6 +1,6 @@
 Changelog
 =========
-## Next
+## 4.1.4
 - Removes deprecated `grigio:babel@0.1.3` meteor dependency. It was causing errors related to long or failed builds (like: `Cannot enlarge memory arrays`)
 
 ## 4.1.3
