@@ -1,4 +1,4 @@
-Space.Object.extend('Space.Logger', {
+const Logger = Space.Object.extend('Space.Logger', {
 
   STATES: {
     stopped: 'stopped',
@@ -7,96 +7,94 @@ Space.Object.extend('Space.Logger', {
 
   Constructor() {
     this._state = this.STATES.stopped;
-    return this._adapters = {};
+    this._adapters = {};
   },
 
-  addAdapter(id, adapter, override) {
-    if (override == null) {
-      let override = false;
+  addAdapter(id, adapter, shouldOverride = false) {
+    if (!id || typeof id !== 'string') {
+      throw new Error(this.constructor.ERRORS.invalidId);
     }
-    check(id, String);
-    if (this.existsAdapter(id) && !override) {
-      throw new Error(this.ERRORS.mappingExists(id));
+    if (this.hasAdapter(id) && !shouldOverride) {
+      throw new Error(this.constructor.ERRORS.mappingExists(id));
     }
-    check(adapter, Space.Logger.Adapter);
-    return this._adapters[id] = adapter;
+    this._adapters[id] = adapter;
   },
 
-  overrideAdapter(id, item) {
-    return this.addAdapter(id, item, true);
+  overrideAdapter(id, adapter) {
+    return this.addAdapter(id, adapter, true);
   },
 
-  adapter(id) {
+  getAdapter(id) {
     return this._adapters[id] || null;
   },
 
-  existsAdapter(id) {
-    return (this._adapters[id] != null);
+  hasAdapter(id) {
+    return (this._adapters[id] !== null && this._adapters[id] !== undefined);
   },
 
   removeAdapter(id) {
-    if (this._adapters[id]) {
-      return delete this._adapters[id];
-    }
+    if (this._adapters[id]) {delete this._adapters[id];}
   },
 
-  adapters() {
+  getAdapters() {
     return this._adapters;
   },
 
   start() {
-    if (this._is(this.STATES.stopped)) {
-      return this._state = this.STATES.running;
+    if (this.isInState(this.STATES.stopped)) {
+      this._state = this.STATES.running;
     }
   },
 
   stop() {
-    if (this._is(this.STATES.running)) {
-      return this._state = this.STATES.stopped;
+    if (this.isInState(this.STATES.running)) {
+      this._state = this.STATES.stopped;
     }
   },
 
-  debug(message) {
-    return this._log('debug', arguments);
+  debug(...args) {
+    this._log('debug', args);
   },
 
-  info(message) {
-    return this._log('info', arguments);
+  info(...args) {
+    this._log('info', args);
   },
 
-  warning(message) {
-    return this._log('warning', arguments);
+  warning(...args) {
+    this._log('warning', args);
   },
 
-  error(message) {
-    return this._log('error', arguments);
+  error(...args) {
+    this._log('error', args);
   },
 
-  _is(expectedState) {
+  isInState(expectedState) {
     return (this._state === expectedState);
   },
 
   isRunning() {
-    return this._is(this.STATES.running);
+    return this.isInState(this.STATES.running);
   },
 
   isStopped() {
-    return this._is(this.STATES.stopped);
+    return this.isInState(this.STATES.stopped);
   },
 
-  _log(level, message) {
-    if (!this._is(this.STATES.running)) {
-      return;
-    }
+  _log(level, args) {
+    if (!this.isInState(this.STATES.running)) {return;}
 
-    _.each(this._adapters, function(adapter, id) {
-      adapter[level].apply(adapter, message);
-    });
-  },
-
-  ERRORS: {
-    mappingExists(id) {
-      return `Adapter with id <${id}> would be overwritten. Use method <Space.Logger::overrideAdapter> for that`;
+    for (let adapter of Object.values(this.getAdapters())) {
+      adapter[level].apply(adapter, args);
     }
   }
 });
+
+Logger.ERRORS =  {
+  mappingExists(id) {
+    return `Adapter with id '${id}' would be overwritten. Use method
+    'overrideAdapter' for that`;
+  },
+  invalidId: 'Cannot map <null> or <undefined> or non string values'
+};
+
+export default Logger;

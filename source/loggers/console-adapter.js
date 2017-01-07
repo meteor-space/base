@@ -1,12 +1,14 @@
-Space.Logger.Adapter.extend('Space.Logger.ConsoleAdapter', {
+import LoggingAdapter from './adapter';
+
+const ConsoleLogger = LoggingAdapter.extend('Space.Logger.ConsoleAdapter', {
 
   Constructor() {
-    return this.setLib(console);
+    LoggingAdapter.call(this, console);
   },
 
-  warning(message) {
-    check(message, String);
-    return this._log('warn', arguments);
+  warning(...args) {
+    return this._log('warn', args);
   }
-
 });
+
+export default ConsoleLogger;

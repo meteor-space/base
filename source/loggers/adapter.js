@@ -1,44 +1,44 @@
-Space.Object.extend('Space.Logger.Adapter', {
+const LoggingAdapter = Space.Object.extend('Space.Logger.LoggingAdapter', {
 
   _lib: null,
-
-  debug(message) {
-    check(message, String);
-    this._log('debug', arguments);
+  Constructor(lib) {
+    if (!lib) {
+      throw new Error(this.ERRORS.undefinedLibrary);
+    }
+    this.setLibrary(lib);
   },
 
-  info(message) {
-    check(message, String);
-    this._log('info', arguments);
-  },
-
-  warning(message) {
-    check(message, String);
-    this._log('warning', arguments);
-  },
-
-  error(message) {
-    check(message, String);
-    this._log('error', arguments);
-  },
-
-  setLib(lib) {
+  setLibrary(lib) {
     this._lib = lib;
   },
 
-  lib() {
-    if (!this._lib) {
-      throw new Error(this.ERRORS.undefinedLib);
-    }
-    return this._lib;
+  getLibrary() {
+    return this._lib || null;
   },
 
-  _log(level, message) {
-    this._lib[level].apply(this._lib, message);
+  debug(...args) {
+    this._log('debug', args);
+  },
+
+  info(...args) {
+    this._log('info', args);
+  },
+
+  warning(...args) {
+    this._log('warning', args);
+  },
+
+  error(...args) {
+    this._log('error', args);
+  },
+
+  _log(level, args) {
+    this._lib[level].apply(this._lib, args);
   },
 
   ERRORS: {
-    undefinedLib: 'Logging library is not set on adapter'
+    undefinedLibrary: 'Logging library is required'
   }
-
 });
+
+export default LoggingAdapter;
