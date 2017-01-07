@@ -1,0 +1,14 @@
+{
+  "name": "space-base",
+  "version": "4.1.4",
+  "description": "Modular Application Architecture",
+  "dependencies": {
+    "getenv": "0.7.x",
+    "underscore": "1.8.3",
+    "simplecheck": "git://github.com/meteor-space/base.git"
+  },
+  "devDependencies": {},
+  "scripts": {},
+  "author": "Dominik Guzei, Rhys Bartels-Waller, Darko Mijic, Adam Desivi",
+  "license": "MIT"
+}
