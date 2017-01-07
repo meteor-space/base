@@ -1,13 +1,15 @@
 Package.describe({
   summary: 'Modular Application Architecture for Meteor.',
   name: 'space:base',
-  version: '4.1.3',
+  version: '4.1.4',
   git: 'https://github.com/meteor-space/base.git',
   documentation: 'README.md'
 });
 
 Npm.depends({
-  "getenv": "0.5.0"
+  "getenv": "0.5.0",
+  "winston": "2.1.0",
+  "babel-plugin-transform-decorators-legacy": "1.3.4"
 });
 
 Package.onUse(function(api) {
@@ -80,7 +82,6 @@ Package.onTest(function(api) {
     'email',
     'session',
     'reactive-var',
-    'grigio:babel@0.1.3',
     'practicalmeteor:munit@2.1.5',
     'space:testing@3.0.1'
   ]);
@@ -93,7 +94,7 @@ Package.onTest(function(api) {
     'tests/unit/struct.unit.coffee',
     'tests/unit/application.unit.coffee',
     'tests/unit/injector.unit.coffee',
-    'tests/unit/injector_annotations.unit.es6',
+    'tests/unit/injector_annotations.unit.js',
     'tests/unit/helpers.unit.coffee',
     'tests/unit/error.tests.js',
     'tests/unit/logger.tests.js',
