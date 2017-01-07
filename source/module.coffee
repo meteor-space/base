@@ -1,3 +1,4 @@
+import _ from 'underscore';
 
 class Space.Module extends Space.Object
 

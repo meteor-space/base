@@ -1,3 +1,6 @@
+import _ from 'underscore';
+import {optional, Integer} from 'simplecheck';
+
 let IntermediateInheritor = function() {};
 IntermediateInheritor.prototype = Error.prototype;
 
@@ -28,8 +31,8 @@ _.extend(
       _.extend(fields, {
         name: String,
         message: String,
-        stack: Match.Optional(String),
-        code: Match.Optional(Match.Integer)
+        stack: optional(String),
+        code: optional(Integer)
       });
       return fields;
     },

@@ -1,15 +1,16 @@
+import {MatchError, Integer} from 'simplecheck';
 
 describe 'Space.Struct', ->
 
   class MyTestStruct extends Space.Struct
     @type 'MyTestStruct'
-    fields: -> name: String, age: Match.Integer
+    fields: -> name: String, age: Integer
 
   class MyExtendedTestStruct extends MyTestStruct
     @type 'MyExtendedTestStruct'
     fields: ->
       fields = super()
-      fields.extra = Match.Integer
+      fields.extra = Integer
       return fields
 
   it "is a Space.Object", ->
@@ -39,26 +40,26 @@ describe 'Space.Struct', ->
       expect(copy).not.to.be.instanceof MyTestStruct
 
     it 'throws a match error if a property is of wrong type', ->
-      expect(-> new MyTestStruct name: 5, age: 26).to.throw Match.Error
+      expect(-> new MyTestStruct name: 5, age: 26).to.throw MatchError
 
     it 'throws a match error if additional properties are given', ->
-      expect(-> new MyTestStruct name: 5, age: 26, extra: 0).to.throw Match.Error
+      expect(-> new MyTestStruct name: 5, age: 26, extra: 0).to.throw MatchError
 
     it 'throws a match error if a property is missing', ->
-      expect(-> new MyTestStruct name: 5).to.throw Match.Error
+      expect(-> new MyTestStruct name: 5).to.throw MatchError
 
     it 'allows to extend the fields of base classes', ->
       expect(-> new MyExtendedTestStruct name: 'test', age: 26, extra: 0)
-      .not.to.throw Match.Error
+      .not.to.throw MatchError
 
     # TODO: remove when breaking change is made for next major version:
     it 'stays backward compatible with static fields api', ->
       class StaticFieldsStruct extends Space.Struct
-        @fields: { name: String, age: Match.Integer }
+        @fields: { name: String, age: Integer }
 
       properties = name: 'Dominik', age: 26
       instance = new StaticFieldsStruct properties
       expect(instance).toMatch properties
-      expect(-> new StaticFieldsStruct name: 5).to.throw Match.Error
+      expect(-> new StaticFieldsStruct name: 5).to.throw MatchError
 
 

@@ -1,3 +1,5 @@
+import _ from 'underscore';
+import {ensure, matches, oneOf, optional, anything} from 'simplecheck';
 
 class Space.Object
 
@@ -128,10 +130,10 @@ class Space.Object
       className = args[1]
       extension = args[2]
 
-    check namespace, Match.OneOf(Match.ObjectIncluding({}), Space.Namespace, Function)
-    check classPath, Match.OneOf(String, null)
-    check className, String
-    check extension, Match.ObjectIncluding({})
+    ensure namespace, oneOf(anything, Space.Namespace, Function)
+    ensure classPath, oneOf(String, null)
+    ensure className, String
+    ensure extension, anything
 
     # Assign the optional custom constructor for this class
     Parent = this

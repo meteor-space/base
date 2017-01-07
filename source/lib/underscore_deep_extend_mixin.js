@@ -1,3 +1,5 @@
+import _ from 'underscore';
+
 // Deep object extend for underscore
 // As found on http://stackoverflow.com/a/29563346
 

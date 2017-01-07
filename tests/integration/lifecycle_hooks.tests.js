@@ -1,3 +1,5 @@
+import _ from 'underscore';
+
 describe("Space.base - Application lifecycle hooks", function() {
 
   // TEST HELPERS

@@ -1,3 +1,5 @@
+import _ from 'underscore';
+
 @Space.Dependency = (propertyName, dependencyId) ->
   if (typeof dependencyId == 'undefined')
     dependencyId = propertyName

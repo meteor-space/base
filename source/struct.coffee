@@ -1,3 +1,5 @@
+import {ensure} from 'simplecheck';
+import _ from 'underscore';
 
 class Space.Struct extends Space.Object
 
@@ -15,4 +17,4 @@ class Space.Struct extends Space.Object
     return copy
 
   # Use the fields configuration to check given data during runtime
-  _checkFields: (data) -> check data, @fields()
+  _checkFields: (data) -> ensure data, @fields()
