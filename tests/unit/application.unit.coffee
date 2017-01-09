@@ -1,52 +1,55 @@
+import Application from '../../source/application.coffee';
+import Module from '../../source/module.coffee';
+import {Injector} from '../../source/injector.coffee';
 
-describe 'Space.Application', ->
+describe 'Application', ->
 
   beforeEach ->
     # Reset published space modules
-    Space.Module.published = {}
+    Module.published = {}
 
-  it 'extends Space.Module', ->
-    expect(Space.Application).to.extend Space.Module
+  it 'extends Module', ->
+    expect(Application).to.extend Module
 
   describe 'construction', ->
 
     it 'initializes modules map as empty object', ->
-      expect(new Space.Application().modules).to.eql {}
+      expect(new Application().modules).to.eql {}
 
     it 'creates a new injector instance if none was given', ->
-      expect(new Space.Application().injector).to.be.instanceof Space.Injector
+      expect(new Application().injector).to.be.instanceof Injector
 
     it 'uses the provided injector when given', ->
-      injector = new Space.Injector()
-      application = new Space.Application injector: injector
+      injector = new Injector()
+      application = new Application injector: injector
       expect(application.injector).to.equal injector
 
     it 'can also be created via static create method', ->
-      injector = new Space.Injector()
-      application = Space.Application.create injector: injector
+      injector = new Injector()
+      application = Application.create injector: injector
       expect(application.injector).to.equal injector
-      expect(Space.Application.create().injector).to.be.instanceof Space.Injector
+      expect(Application.create().injector).to.be.instanceof Injector
 
     it 'maps injector instance with itself', ->
-      injector = new Space.Injector()
+      injector = new Injector()
       injectionMapping =
         to: sinon.spy()
         toInstancesOf: sinon.spy()
       injector.map = sinon.stub().returns injectionMapping
-      application = new Space.Application injector: injector
+      application = new Application injector: injector
 
       expect(injector.map).to.have.been.calledWithExactly 'Injector'
       expect(injectionMapping.to).to.have.been.calledWithExactly injector
 
     it 'initializes the application', ->
-      initializeSpy = sinon.spy Space.Application.prototype, 'initialize'
-      application = new Space.Application()
+      initializeSpy = sinon.spy Application.prototype, 'initialize'
+      application = new Application()
       expect(initializeSpy).to.have.been.calledOnce
       initializeSpy.restore()
 
     it 'can be passed a configuration', ->
 
-      @application = new Space.Application({
+      @application = new Application({
         configuration: {
           environment: 'testing'
         }
@@ -54,7 +57,7 @@ describe 'Space.Application', ->
       expect(@application.configuration.environment).to.equal('testing')
 
     it 'merges configurations of all modules and user options', ->
-      class GrandchildModule extends Space.Module
+      class GrandchildModule extends Module
         @publish this, 'GrandchildModule'
         configuration: {
           subModuleValue: 'grandChild'
@@ -64,7 +67,7 @@ describe 'Space.Application', ->
           }
         }
 
-      class ChildModule extends Space.Module
+      class ChildModule extends Module
         @publish this, 'ChildModule'
         requiredModules: ['GrandchildModule']
         configuration: {
@@ -74,7 +77,7 @@ describe 'Space.Application', ->
             toKeep: 'childKeepMe'
           }
         }
-      class TestApp extends Space.Application
+      class TestApp extends Application
         requiredModules: ['ChildModule']
         configuration: {
           toChange: 'appChangeMe'

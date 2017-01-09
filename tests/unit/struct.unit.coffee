@@ -1,8 +1,9 @@
 import {MatchError, Integer} from 'simplecheck';
+import Struct from '../../source/struct.coffee';
+import SpaceObject from '../../source/object.coffee';
 
-describe 'Space.Struct', ->
-
-  class MyTestStruct extends Space.Struct
+describe 'Struct', ->
+  class MyTestStruct extends Struct
     @type 'MyTestStruct'
     fields: -> name: String, age: Integer
 
@@ -13,13 +14,13 @@ describe 'Space.Struct', ->
       fields.extra = Integer
       return fields
 
-  it "is a Space.Object", ->
-    expect(Space.Struct).to.extend(Space.Object)
+  it "is a SpaceObject", ->
+    expect(Struct).to.extend(SpaceObject)
 
   it "calls the super constructor", ->
-    constructorSpy = sinon.spy(Space.Object.prototype, 'constructor')
+    constructorSpy = sinon.spy(SpaceObject.prototype, 'constructor')
     data = {}
-    struct = new Space.Struct(data)
+    struct = new Struct(data)
     expect(constructorSpy).to.have.been.calledWithExactly(data)
     expect(constructorSpy).to.have.been.calledOn(struct)
     constructorSpy.restore()
@@ -54,7 +55,7 @@ describe 'Space.Struct', ->
 
     # TODO: remove when breaking change is made for next major version:
     it 'stays backward compatible with static fields api', ->
-      class StaticFieldsStruct extends Space.Struct
+      class StaticFieldsStruct extends Struct
         @fields: { name: String, age: Integer }
 
       properties = name: 'Dominik', age: 26

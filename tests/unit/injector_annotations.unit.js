@@ -1,4 +1,5 @@
-describe('Space.Injector annotations', function() {
+
+describe('Injector annotations', function() {
 
   describe('Dependency annotation', function() {
 

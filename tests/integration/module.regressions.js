@@ -1,18 +1,23 @@
-describe("Space.Module - regressions", function() {
+import Module from '../../source/module.coffee';
+import SpaceObject from '../../source/object.coffee';
+import {Injector} from '../../source/injector.coffee';
+
+describe("Module - regressions", function() {
 
   it("ensures autoboot singletons have access to injector mappings made in module onInitialize", function() {
 
     Test = Space.namespace('Test');
+
     SomeLib = { libMethod: function() {} };
     let singletonReadySpy = sinon.spy();
-    let myInjector = new Space.Injector();
+    let myInjector = new Injector();
 
-    Space.Object.extend(Test, 'MySingleton', {
+    SpaceObject.extend(Test, 'MySingleton', {
       dependencies: { someLib: 'SomeLib' },
       onDependenciesReady: singletonReadySpy
     });
 
-    Test.MyModule = Space.Module.extend(Test, 'MyModule', {
+    Test.MyModule = Module.extend(Test, 'MyModule', {
       singletons: ['Test.MySingleton'],
       onInitialize() { this.injector.map('SomeLib').to(SomeLib); }
     });

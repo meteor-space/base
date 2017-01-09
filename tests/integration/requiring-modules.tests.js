@@ -1,19 +1,21 @@
+import Module from '../../source/module.coffee';
+import Application from '../../source/application.coffee';
 
 describe("Space.base - Requiring modules in other modules and apps", function() {
 
   it("multiple modules should be able to require the same base module", function() {
 
-    Space.Module.define('BaseModule', {
+    Module.define('BaseModule', {
       // Regression test -> this was invoked twice at some point
       afterInitialize: function() {
         this.injector.map('x').to('y');
       }
     });
 
-    Space.Module.define('DependentModule1', { requiredModules: ['BaseModule'] });
-    Space.Module.define('DependentModule2', { requiredModules: ['BaseModule'] });
+    Module.define('DependentModule1', { requiredModules: ['BaseModule'] });
+    Module.define('DependentModule2', { requiredModules: ['BaseModule'] });
 
-    const MyApp = Space.Application.define('MyApp', {
+    const MyApp = Application.define('MyApp', {
       requiredModules: ['DependentModule1', 'DependentModule2']
     });
 

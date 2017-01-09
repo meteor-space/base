@@ -1,8 +1,10 @@
+import Module from '../../source/module.coffee';
+import Application from '../../source/application.coffee';
 
 describe('Building applications based on modules', function() {
 
   beforeEach(function() {
-    Space.Module.published = {}; // reset published space modules
+    Module.published = {}; // reset published space modules
   });
 
   it('loads required module correctly', function() {
@@ -10,13 +12,13 @@ describe('Building applications based on modules', function() {
     let testValue = {};
     let testResult = null;
 
-    Space.Module.define('FirstModule', {
+    Module.define('FirstModule', {
       onInitialize: function() {
         this.injector.map('testValue').to(testValue);
       }
     });
 
-    Space.Application.create({
+    Application.create({
       requiredModules: ['FirstModule'],
       dependencies: { testValue: 'testValue' },
       onInitialize: function() { testResult = this.testValue; }
@@ -31,7 +33,7 @@ describe('Building applications based on modules', function() {
     let appValue = 'application configuration';
     let testResult = null;
 
-    Space.Module.define('FirstModule', {
+    Module.define('FirstModule', {
       onInitialize: function() {
         this.injector.map('moduleValue').to(moduleValue);
       },
@@ -40,7 +42,7 @@ describe('Building applications based on modules', function() {
       }
     });
 
-    let app = Space.Application.create({
+    let app = Application.create({
       requiredModules: ['FirstModule'],
       dependencies: { moduleValue: 'moduleValue' },
       onInitialize: function() {

@@ -1,18 +1,19 @@
+import SpaceObject from '../../source/object.coffee';
 
-describe 'Space.Object', ->
+describe 'SpaceObject', ->
 
   beforeEach -> @namespace = {}
 
   describe 'extending', ->
 
     it 'creates and returns a subclass', ->
-      Space.Object.extend(@namespace, 'MyClass')
-      expect(@namespace.MyClass).to.extend Space.Object
+      SpaceObject.extend(@namespace, 'MyClass')
+      expect(@namespace.MyClass).to.extend SpaceObject
 
     it 'applies the arguments to the super constructor', ->
       [first, second, third] = ['first', 2, {}]
       spy = sinon.spy()
-      Space.Object.extend @namespace, 'Base', {
+      SpaceObject.extend @namespace, 'Base', {
         Constructor: -> spy.apply this, arguments
       }
       @namespace.Base.extend(@namespace, 'Extended')
@@ -21,7 +22,7 @@ describe 'Space.Object', ->
       expect(spy).to.have.been.calledOn instance
 
     it 'allows to extend the prototype', ->
-      First = Space.Object.extend first: 1, get: (property) -> @[property]
+      First = SpaceObject.extend first: 1, get: (property) -> @[property]
       Second = First.extend second: 2, get: -> First::get.apply this, arguments
       class Third extends Second
         get: (property) -> super property
@@ -33,57 +34,57 @@ describe 'Space.Object', ->
 
       it "registers the class for internal lookup", ->
         Space.namespace('My.custom')
-        FirstClass = Space.Object.extend('My.custom.FirstClass', {})
-        SecondClass = Space.Object.extend('My.custom.SecondClass', {})
+        FirstClass = SpaceObject.extend('My.custom.FirstClass', {})
+        SecondClass = SpaceObject.extend('My.custom.SecondClass', {})
         expect(Space.resolvePath 'My.custom.FirstClass').to.equal(FirstClass)
         expect(Space.resolvePath 'My.custom.SecondClass').to.equal(SecondClass)
 
       it "assigns the class path", ->
         className = 'My.custom.Class'
-        MyClass = Space.Object.extend(className)
+        MyClass = SpaceObject.extend(className)
         expect(MyClass.toString()).to.equal(className)
         expect(new MyClass().toString()).to.equal(className)
 
       it "exposes the class on the global scope if possible", ->
         my = {}
         my.namespace = Space.namespace('my.namespace')
-        MyClass = Space.Object.extend('my.namespace.MyClass')
+        MyClass = SpaceObject.extend('my.namespace.MyClass')
         expect(my.namespace.MyClass).to.equal(MyClass)
 
       it "works correctly without nested namespaces", ->
-        MyClass = Space.Object.extend('MyClass')
+        MyClass = SpaceObject.extend('MyClass')
         expect(Space.resolvePath 'MyClass').to.equal(MyClass)
 
     describe "working with static class properties", ->
 
       it 'allows you to define static class properties', ->
         myStatics = {}
-        MyClass = Space.Object.extend statics: { myStatics: myStatics }
+        MyClass = SpaceObject.extend statics: { myStatics: myStatics }
         expect(MyClass.myStatics).to.equal(myStatics)
 
       it 'provides an api for defining a callback while extending', ->
         onExtendingSpy = sinon.spy()
-        MyClass = Space.Object.extend onExtending: onExtendingSpy
+        MyClass = SpaceObject.extend onExtending: onExtendingSpy
         expect(onExtendingSpy).to.have.been.calledOn(MyClass)
 
   describe 'creating instances', ->
 
     it 'creates a new instance of given class', ->
-      expect(Space.Object.create()).to.be.instanceof Space.Object
+      expect(SpaceObject.create()).to.be.instanceof SpaceObject
 
     it 'allows to initialize the instance with given properties', ->
-      instance = Space.Object.create first: 1, get: (property) -> @[property]
+      instance = SpaceObject.create first: 1, get: (property) -> @[property]
       expect(instance.get 'first').to.equal 1
 
     it 'forwards any number of arguments to the constructor', ->
-      Base = Space.Object.extend Constructor: (@first, @second) ->
+      Base = SpaceObject.extend Constructor: (@first, @second) ->
       instance = Base.create 1, 2
       expect(instance.first).to.equal 1
       expect(instance.second).to.equal 2
 
   describe "inheritance helpers", ->
 
-    Base = Space.Object.extend {
+    Base = SpaceObject.extend {
       statics: { prop: 'static', method: -> }
       prop: 'prototype'
       method: ->
@@ -100,7 +101,7 @@ describe 'Space.Object', ->
         expect(Sub.superClass()).to.equal(Base)
 
       it "returns undefined if there is no super class", ->
-       expect(Space.Object.superClass()).to.equal(undefined)
+       expect(SpaceObject.superClass()).to.equal(undefined)
 
       it "can return a static prop or method of the super class", ->
         expect(Sub.superClass('prop')).to.equal(Base.prop)
@@ -127,26 +128,26 @@ describe 'Space.Object', ->
 
     it 'adds methods to the prototype', ->
       testMixin = test: ->
-      TestClass = Space.Object.extend()
+      TestClass = SpaceObject.extend()
       TestClass.mixin testMixin
       expect(TestClass::test).to.equal testMixin.test
 
     it 'overrides existing methods of the prototype', ->
       testMixin = test: ->
-      TestClass = Space.Object.extend test: ->
+      TestClass = SpaceObject.extend test: ->
       TestClass.mixin testMixin
       expect(TestClass::test).to.equal testMixin.test
 
     it 'merges object properties', ->
       testMixin = dependencies: second: 'second'
-      TestClass = Space.Object.extend dependencies: first: 'first'
+      TestClass = SpaceObject.extend dependencies: first: 'first'
       TestClass.mixin testMixin
       expect(TestClass::dependencies.first).to.equal 'first'
       expect(TestClass::dependencies.second).to.equal 'second'
 
     it "does not modify other mixins when merging properties", ->
       FirstMixin = dependencies: firstMixin: 'onExtending'
-      FirstClass = Space.Object.extend {
+      FirstClass = SpaceObject.extend {
         mixin: [FirstMixin]
         dependencies: first: 'first'
       }
@@ -159,18 +160,18 @@ describe 'Space.Object', ->
 
     it "can provide a hook that is called when the mixin is applied", ->
       myMixin = onMixinApplied: sinon.spy()
-      TestClass = Space.Object.extend()
+      TestClass = SpaceObject.extend()
       TestClass.mixin myMixin
       expect(myMixin.onMixinApplied).to.have.been.calledOnce
 
     it 'can be defined as prototype property when extending classes', ->
       myMixin = { onMixinApplied: sinon.spy() }
-      MyClass = Space.Object.extend mixin: [myMixin]
+      MyClass = SpaceObject.extend mixin: [myMixin]
       expect(myMixin.onMixinApplied).to.have.been.calledOn(MyClass)
 
     it 'can be used to mixin static properties on to the class', ->
       myMixin = statics: { myMethod: sinon.spy() }
-      MyClass = Space.Object.extend mixin: [myMixin]
+      MyClass = SpaceObject.extend mixin: [myMixin]
       MyClass.myMethod()
       expect(myMixin.statics.myMethod).to.have.been.calledOn(MyClass)
 
@@ -178,7 +179,7 @@ describe 'Space.Object', ->
       FirstMixin = {}
       SecondMixin = {}
       ThirdMixin = {}
-      MyClass = Space.Object.extend({ mixin: FirstMixin })
+      MyClass = SpaceObject.extend({ mixin: FirstMixin })
       MyClass.mixin(SecondMixin)
       instance = new MyClass()
       # Static checks
@@ -195,7 +196,7 @@ describe 'Space.Object', ->
       it "does not apply mixins to super classes", ->
         firstMixin = {}
         secondMixin = {}
-        SuperClass = Space.Object.extend mixin: firstMixin
+        SuperClass = SpaceObject.extend mixin: firstMixin
         SubClass = SuperClass.extend mixin: secondMixin
         expect(SuperClass.hasMixin(firstMixin)).to.be.true
         expect(SuperClass.hasMixin(secondMixin)).to.be.false
@@ -205,7 +206,7 @@ describe 'Space.Object', ->
       it "inherits mixins to children when added to base class later on", ->
         LateMixin = { statics: { test: 'property' } }
         # Base class with a mixin
-        BaseClass = Space.Object.extend()
+        BaseClass = SpaceObject.extend()
         # Sublcass with its own mixin
         SubClass = BaseClass.extend()
         # Later we extend base class
@@ -218,7 +219,7 @@ describe 'Space.Object', ->
 
       it "can provide a hook that is called when dependencies of host class are ready", ->
         myMixin = onDependenciesReady: sinon.spy()
-        TestClass = Space.Object.extend()
+        TestClass = SpaceObject.extend()
         TestClass.mixin myMixin
         new TestClass().onDependenciesReady()
         expect(myMixin.onDependenciesReady).to.have.been.calledOnce
@@ -226,7 +227,7 @@ describe 'Space.Object', ->
       it "inherits the onDependenciesReady hooks to sub classes", ->
         firstMixin = onDependenciesReady: sinon.spy()
         secondMixin = onDependenciesReady: sinon.spy()
-        SuperClass = Space.Object.extend()
+        SuperClass = SpaceObject.extend()
         SuperClass.mixin firstMixin
         SubClass = SuperClass.extend()
         SubClass.mixin secondMixin
@@ -236,7 +237,7 @@ describe 'Space.Object', ->
 
       it "calls inherited mixin hooks only once per chain", ->
         myMixin = onDependenciesReady: sinon.spy()
-        SuperClass = Space.Object.extend()
+        SuperClass = SpaceObject.extend()
         SuperClass.mixin myMixin
         SubClass = SuperClass.extend()
         new SubClass().onDependenciesReady()
@@ -246,7 +247,7 @@ describe 'Space.Object', ->
 
       it "can provide a hook that is called on construction of host class", ->
         myMixin = onConstruction: sinon.spy()
-        TestClass = Space.Object.extend()
+        TestClass = SpaceObject.extend()
         TestClass.mixin myMixin
         first = {}
         second = {}

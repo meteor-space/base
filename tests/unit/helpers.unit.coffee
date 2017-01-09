@@ -1,3 +1,4 @@
+import Space from '../../source/namespace.coffee';
 
 global = this
 

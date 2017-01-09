@@ -1,6 +1,8 @@
-describe("Space.Error", function() {
+import SpaceError from '../../source/error.js';
 
-  let MyError = Space.Error.extend('MyError', {
+describe("SpaceError", function() {
+
+  let MyError = SpaceError.extend('MyError', {
     message: 'The default message for this error'
   });
 
@@ -53,7 +55,7 @@ describe("Space.Error", function() {
         onConstruction: sinon.spy(),
         onDependenciesReady: sinon.spy()
       };
-      let MyMixinError = Space.Error.extend('MyMixinError', { mixin: MyMixin });
+      let MyMixinError = SpaceError.extend('MyMixinError', { mixin: MyMixin });
       let param = 'test';
       let error = new MyMixinError(param);
       expect(MyMixin.onConstruction).to.have.been.calledOn(error);

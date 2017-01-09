@@ -1,8 +1,9 @@
+import {Injector} from '../../source/injector.coffee';
+import SpaceObject from '../../source/object.coffee';
 
-Injector = Space.Injector
 global = this
 
-describe 'Space.Injector', ->
+describe 'Injector', ->
 
   beforeEach -> @injector = new Injector()
 
@@ -39,7 +40,7 @@ describe 'Space.Injector', ->
       expect(@injector.create 'test').to.equal 'test'
 
     it 'uses the toString method if its not a string id', ->
-      class TestClass extends Space.Object
+      class TestClass extends SpaceObject
         @toString: -> 'TestClass'
 
       @injector.map(TestClass).asSingleton()
@@ -111,7 +112,7 @@ describe 'Space.Injector', ->
     it 'injects static values', ->
       value = {}
       @injector.map('test').to value
-      instance = Space.Object.create dependencies: value: 'test'
+      instance = SpaceObject.create dependencies: value: 'test'
       @injector.injectInto instance
       expect(instance.value).to.equal value
 
@@ -126,7 +127,7 @@ describe 'Space.Injector', ->
       expect(first.value).to.equal 'value'
 
     it 'handles inherited dependencies', ->
-      Base = Space.Object.extend dependencies: base: 'base'
+      Base = SpaceObject.extend dependencies: base: 'base'
       Extended = Base.extend dependencies: extended: 'extended'
       @injector.map('base').to 'base'
       @injector.map('extended').to 'extended'
@@ -137,7 +138,7 @@ describe 'Space.Injector', ->
       expect(instance.extended).to.equal 'extended'
 
     it 'never overrides existing properties', ->
-      instance = Space.Object.create
+      instance = SpaceObject.create
         dependencies: test: 'test'
         test: 'value'
 
@@ -150,7 +151,7 @@ describe 'Space.Injector', ->
 
       it 'tells the instance that they are ready', ->
         value = 'test'
-        instance = Space.Object.create
+        instance = SpaceObject.create
           dependencies: value: 'value'
           onDependenciesReady: sinon.spy()
 
@@ -162,7 +163,7 @@ describe 'Space.Injector', ->
 
       it 'tells every single instance exactly once', ->
         readySpy = sinon.spy()
-        class TestClass extends Space.Object
+        class TestClass extends SpaceObject
           dependencies: value: 'test'
           onDependenciesReady: readySpy
 
@@ -191,7 +192,7 @@ describe 'Space.Injector', ->
         expect(@injector.get('second')).to.equal value
 
       it 'supports global namespace lookup', ->
-        global.Space.__test__ = TestClass: Space.Object.extend()
+        global.Space.__test__ = TestClass: SpaceObject.extend()
         path = 'Space.__test__.TestClass'
         @injector.map(path).asStaticValue()
 
@@ -240,7 +241,7 @@ describe 'Space.Injector', ->
         expect(first).to.equal second
 
       it 'looks up the value on global namespace if only a path is given', ->
-        global.Space.__test__ = TestClass: Space.Object.extend()
+        global.Space.__test__ = TestClass: SpaceObject.extend()
         @injector.map('Space.__test__.TestClass').asSingleton()
 
         first = @injector.get('Space.__test__.TestClass')
@@ -258,7 +259,7 @@ describe 'Space.Injector', ->
 
       loremIpsum = 'lorem ipsum'
 
-      @injector.addProvider 'toLoremIpsum', Space.Object.extend
+      @injector.addProvider 'toLoremIpsum', SpaceObject.extend
         Constructor: -> @provide = -> loremIpsum
 
       @injector.map('test').toLoremIpsum()

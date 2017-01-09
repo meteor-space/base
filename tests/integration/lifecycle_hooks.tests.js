@@ -1,4 +1,6 @@
 import _ from 'underscore';
+import Module from '../../source/module.coffee';
+import Application from '../../source/application.coffee';
 
 describe("Space.base - Application lifecycle hooks", function() {
 
@@ -48,15 +50,15 @@ describe("Space.base - Application lifecycle hooks", function() {
 
   beforeEach(function() {
     // reset published space modules
-    Space.Module.published = {};
+    Module.published = {};
     // Setup lifecycle hooks with sinon spys
     this.firstHooks = createLifeCycleHookSpies();
     this.secondHooks = createLifeCycleHookSpies();
     this.appHooks = createLifeCycleHookSpies();
     // Create a app setup with two modules and use the spied apon hooks
-    Space.Module.define('First', this.firstHooks);
-    Space.Module.define('Second', _.extend(this.secondHooks, { requiredModules: ['First'] }));
-    this.app = Space.Application.create(_.extend(this.appHooks, { requiredModules: ['Second'] }));
+    Module.define('First', this.firstHooks);
+    Module.define('Second', _.extend(this.secondHooks, { requiredModules: ['First'] }));
+    this.app = Application.create(_.extend(this.appHooks, { requiredModules: ['Second'] }));
   });
 
   it("runs the initialize hooks in correct order", function() {
