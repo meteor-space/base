@@ -19,3 +19,5 @@ class Space.Application extends Space.Module
 
   # Make it possible to override configuration (at any nested level)
   configure: (options) -> _.deepExtend @configuration, options
+
+export default Space.Application;

@@ -50,3 +50,5 @@ _.extend(
 _.extend(Space.Error, _.omit(Space.Object, 'toString'), {
   __keepToStringMethod__: true // Do not override #toString method
 });
+
+export default Space.Error;

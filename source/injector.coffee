@@ -1,8 +1,8 @@
 import _ from 'underscore';
 
-Space.Error.extend(Space, 'InjectionError')
+InjectionError = Space.Error.extend('Space.InjectionError')
 
-class Space.Injector
+Injector = class Space.Injector
 
   ERRORS: {
     cannotMapUndefinedId: -> 'Cannot map <null> or <undefined>.'
@@ -200,7 +200,6 @@ class SingletonProvider extends Provider
     return @_singleton
 
 Space.Injector.DEFAULT_PROVIDERS =
-
   to: ValueProvider
   toStaticValue: ValueProvider
   asStaticValue: ValueProvider
@@ -208,3 +207,5 @@ Space.Injector.DEFAULT_PROVIDERS =
   toInstancesOf: InstanceProvider
   asSingleton: SingletonProvider
   toSingleton: SingletonProvider
+
+export {InjectionError as InjectionError, Injector as Injector};

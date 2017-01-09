@@ -7,3 +7,5 @@ class Namespace
 @Space = new Namespace 'Space'
 @Space.Namespace = Namespace
 @Space.registry = {}
+
+export default Space;

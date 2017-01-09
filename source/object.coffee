@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import {ensure, matches, oneOf, optional, anything} from 'simplecheck';
+import {ensure, oneOf, anything} from 'simplecheck';
 
 class Space.Object
 
@@ -303,3 +303,5 @@ class Space.Object
         value = _.clone(value) if isPlainObject(value)
         # Set non-existing props and override existing methods
         prototype[key] = value
+
+export default Space.Object;

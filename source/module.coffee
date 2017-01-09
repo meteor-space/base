@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import Logger from './logger.js';
 
 class Space.Module extends Space.Object
 
@@ -173,7 +174,7 @@ class Space.Module extends Space.Object
 
   _setupLogger: ->
     config = @_loggingConfig(@configuration)
-    logger = new Space.Logger()
+    logger = new Logger()
     logger.start() if config.enabled == true
     return logger
 
@@ -185,3 +186,5 @@ class Space.Module extends Space.Object
 
   _mapSpaceServices: ->
     @injector.map('log').to @log
+
+export default Space.Module;
