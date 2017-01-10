@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import {ensure, oneOf, anything} from 'simplecheck';
 
-class Space.Object
+class SpaceObject
 
   # ============= PUBLIC PROTOTYPE ============== #
 
@@ -43,47 +43,47 @@ class Space.Object
   #
   # There are various ways you can call this method:
   #
-  # 1. Space.Object.extend()
+  # 1. SpaceObject.extend()
   # --------------------------------------------
   # Creates an anonymous child class without extra prototype properties.
-  # Basically the same as `class extend Space.Object` in coffeescript
+  # Basically the same as `class extend SpaceObject` in coffeescript
   #
-  # 2. Space.Object.extend(className)
+  # 2. SpaceObject.extend(className)
   # --------------------------------------------
   # Creates a named child class without extra prototype properties.
-  # Basically the same as `class ClassName extend Space.Object` in coffeescript
+  # Basically the same as `class ClassName extend SpaceObject` in coffeescript
   #
-  # 3. Space.Object.extend(classPath)
+  # 3. SpaceObject.extend(classPath)
   # --------------------------------------------
   # Creates a child class with fully qualified class path like "my.custom.Class"
   # assigned and registered internally so that Space.resolvePath can find it.
   # This also assigns the class path as type, which can be used for serialization
   #
-  # 4. Space.Object.extend({ prop: 'first', … })
+  # 4. SpaceObject.extend({ prop: 'first', … })
   # --------------------------------------------
   # Creates an anonymous child class with extra prototype properties.
   # Same as:
-  # class extend Space.Object
+  # class extend SpaceObject
   #   prop: 'first'
   #
-  # 5. Space.Object.extend(namespace, className)
+  # 5. SpaceObject.extend(namespace, className)
   # --------------------------------------------
-  # Creates a named class which inherits from Space.Object and assigns
+  # Creates a named class which inherits from SpaceObject and assigns
   # it to the given namespace object.
   #
-  # 6. Space.Object.extend(className, prototype)
+  # 6. SpaceObject.extend(className, prototype)
   # --------------------------------------------
-  # Creates a named class which inherits from Space.Object and extra prototype
+  # Creates a named class which inherits from SpaceObject and extra prototype
   # properties which are assigned to the new class
   #
-  # 7. Space.Object.extend(classPath, prototype)
+  # 7. SpaceObject.extend(classPath, prototype)
   # --------------------------------------------
-  # Creates a registered class which inherits from Space.Object and extra prototype
+  # Creates a registered class which inherits from SpaceObject and extra prototype
   # properties which are assigned to the new class
   #
-  # 8. Space.Object.extend(namespace, className, prototype)
+  # 8. SpaceObject.extend(namespace, className, prototype)
   # --------------------------------------------
-  # Creates a named class which inherits from Space.Object, has extra prototype
+  # Creates a named class which inherits from SpaceObject, has extra prototype
   # properties and is assigned to the given namespace.
   @extend: (args...) ->
 
@@ -206,7 +206,7 @@ class Space.Object
       namespace[className] = this
 
   # Create and instance of the class that this method is called on
-  # e.g.: Space.Object.create() would return an instance of Space.Object
+  # e.g.: SpaceObject.create() would return an instance of SpaceObject
   @create: ->
     # Use a wrapper class to hand the constructor arguments
     # to the context class that #create was called on
@@ -304,4 +304,4 @@ class Space.Object
         # Set non-existing props and override existing methods
         prototype[key] = value
 
-export default Space.Object;
+export default SpaceObject;
