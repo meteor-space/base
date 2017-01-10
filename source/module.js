@@ -1,8 +1,9 @@
 import _ from 'underscore';
 import Logger from './logger.js';
 import {capitalize, isNil} from 'lodash';
+import SpaceObject from './object.coffee';
 
-const Module = Space.Object.extend('Space.Module',  {
+const Module = SpaceObject.extend('Space.Module',  {
 
   ERRORS: {
     injectorMissing: 'Instance of Space.Injector needed to initialize module.'

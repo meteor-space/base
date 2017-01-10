@@ -1,4 +1,6 @@
-const Logger = Space.Object.extend('Space.Logger', {
+import SpaceObject from './object.coffee';
+
+const Logger = SpaceObject.extend('Space.Logger', {
 
   STATES: {
     stopped: 'stopped',

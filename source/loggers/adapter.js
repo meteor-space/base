@@ -1,4 +1,6 @@
-const LoggingAdapter = Space.Object.extend('Space.Logger.LoggingAdapter', {
+import SpaceObject from '../object.coffee';
+
+const LoggingAdapter = SpaceObject.extend('Space.Logger.LoggingAdapter', {
 
   _lib: null,
   Constructor(lib) {

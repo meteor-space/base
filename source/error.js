@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import {optional, Integer} from 'simplecheck';
 import Struct from './struct.js';
+import SpaceObject from './object.coffee';
 
 let IntermediateInheritor = function() {};
 IntermediateInheritor.prototype = Error.prototype;
@@ -24,7 +25,7 @@ SpaceError.prototype = new IntermediateInheritor();
 _.extend(
   SpaceError.prototype, // target
   Struct.prototype,
-  _.omit(Space.Object.prototype, 'toString'),
+  _.omit(SpaceObject.prototype, 'toString'),
   {
     message: '',
     fields() {
@@ -48,7 +49,7 @@ _.extend(
   }
 );
 
-_.extend(SpaceError, _.omit(Space.Object, 'toString'), {
+_.extend(SpaceError, _.omit(SpaceObject, 'toString'), {
   __keepToStringMethod__: true // Do not override #toString method
 });
 
