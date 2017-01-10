@@ -1,8 +1,23 @@
 import {isNil, get, capitalize} from 'lodash';
-import Space from './namespace.js';
+
+class Namespace {
+  constructor(path) {
+    this._path = path;
+  }
+  getPath() {
+    return this._path;
+  }
+  toString() {
+    return this._path;
+  }
+}
+
+// Define namespace for the space framework
+const Space = new Namespace('Space');
+Space.Namespace = Namespace;
+Space.registry = {};
 
 const global = this;
-
 // Resolves a (possibly nested) path to a global object
 // Returns the object or null (if not found)
 Space.resolvePath = function(path) {
@@ -36,3 +51,5 @@ Space.namespace = function(id) {
 
 // @backward {space:base} <= 4.1.3
 Space.capitalizeString = capitalize;
+
+export default Space;
