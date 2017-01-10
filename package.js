@@ -20,27 +20,41 @@ Package.onUse(function(api) {
   ]);
 
   api.addFiles([
-    'source/lib/underscore_deep_extend_mixin.js',
-    'source/namespace.coffee',
-    'source/helpers.coffee',
+    'source/lib/underscore-deep-extend-mixin.js',
+    'source/space.js',
     'source/configuration.js',
     'source/object.coffee',
     'source/logger.js',
     'source/struct.coffee',
     'source/error.js',
-    'source/injector.coffee',
-    'source/injector_annotations.coffee',
-    'source/module.coffee',
-    'source/application.coffee',
+    'source/injector.js',
+    'source/injector-annotations.js',
+    'source/module.js',
+    'source/application.js',
     'source/loggers/adapter.js',
-    'source/loggers/console-adapter.js'
+    'source/loggers/console-adapter.js',
+    'source/index.js',
+    'source/meteor.js'
   ]);
 
   // Test helpers
   api.addFiles([
-    'source/testing/bdd-api.coffee'
+    'source/testing/bdd-api.js'
   ]);
 
+  api.export([
+    'SpaceObject',
+    'Struct',
+    'SpaceError',
+    'Injector',
+    'InjectionError',
+    'Logger',
+    'LoggingAdapter',
+    'ConsoleLogger',
+    'Module',
+    'Application',
+    'Space'
+  ]);
 });
 
 Package.onTest(function(api) {
