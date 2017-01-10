@@ -1,7 +1,8 @@
 import _ from 'underscore';
 import {isNil} from 'lodash';
+import Space from './space.js';
 
-this.Space.Dependency = function(propertyName, dependencyId) {
+Space.Dependency = function(propertyName, dependencyId) {
   return function(target) {
     const proto = target.prototype;
     if (proto.dependencies && !proto.hasOwnProperty('Dependencies')) {
@@ -13,7 +14,7 @@ this.Space.Dependency = function(propertyName, dependencyId) {
   };
 };
 
-this.Space.RequireModule = function(moduleId) {
+Space.RequireModule = function(moduleId) {
   return function(target) {
     const proto = target.prototype;
     if (proto.requiredModules && !proto.hasOwnProperty('RequiredModules')) {

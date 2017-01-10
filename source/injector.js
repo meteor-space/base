@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import {isNil} from 'lodash';
 import SpaceError from './error.js';
+import Space from './space.js';
 
 InjectionError = SpaceError.extend('Space.InjectionError');
 
@@ -313,8 +314,6 @@ Injector.DEFAULT_PROVIDERS = {
   asSingleton: SingletonProvider,
   toSingleton: SingletonProvider
 };
-
-Space.Injector = Injector;
 
 export {
   InjectionError as InjectionError,

@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import Module from './module.js';
+import {Injector} from './injector.js';
 
 const Application = Module.extend('Space.Application', {
 
@@ -19,7 +20,7 @@ const Application = Module.extend('Space.Application', {
     this.modules = {};
     this.configuration = options.configuration || {};
     this.constructor.publishedAs = this.constructor.name;
-    this.initialize(this, options.injector || new Space.Injector());
+    this.initialize(this, options.injector || new Injector());
   },
 
   // Make it possible to override configuration (at any nested level)

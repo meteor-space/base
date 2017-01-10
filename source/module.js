@@ -19,7 +19,7 @@ const Module = SpaceObject.extend('Space.Module',  {
   _state: 'constructed',
 
   Constructor(...args) {
-    Space.Object.apply(this, args);
+    SpaceObject.apply(this, args);
     if (isNil(this.requiredModules)) {
       this.requiredModules = [];
     }
