@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import {optional, Integer} from 'simplecheck';
-import Struct from './struct.js';
+import Struct from './struct.coffee';
 import SpaceObject from './object.coffee';
 
 let IntermediateInheritor = function() {};
