@@ -1,4 +1,5 @@
 import SpaceObject from '../../source/object.coffee';
+import Space from '../../source/space.js';
 
 describe 'SpaceObject', ->
 

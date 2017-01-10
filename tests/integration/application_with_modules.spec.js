@@ -1,5 +1,5 @@
-import Module from '../../source/module.coffee';
-import Application from '../../source/application.coffee';
+import Module from '../../source/module.js';
+import Application from '../../source/application.js';
 
 describe('Building applications based on modules', function() {
 

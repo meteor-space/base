@@ -1,6 +1,7 @@
-import Module from '../../source/module.coffee';
+import Module from '../../source/module.js';
 import SpaceObject from '../../source/object.coffee';
-import {Injector} from '../../source/injector.coffee';
+import {Injector} from '../../source/injector.js';
+import Space from '../../source/space.js';
 
 describe("Module - regressions", function() {
 

@@ -1,6 +1,6 @@
-import Application from '../../source/application.coffee';
-import Module from '../../source/module.coffee';
-import {Injector} from '../../source/injector.coffee';
+import Application from '../../source/application.js';
+import Module from '../../source/module.js';
+import {Injector} from '../../source/injector.js';
 
 describe 'Application', ->
 

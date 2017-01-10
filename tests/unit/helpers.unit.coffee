@@ -1,4 +1,4 @@
-import Space from '../../source/namespace.coffee';
+import Space from '../../source/space.js';
 
 global = this
 

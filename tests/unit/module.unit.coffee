@@ -1,6 +1,6 @@
 import SpaceObject from '../../source/object.coffee';
-import Module from '../../source/module.coffee';
-import {Injector} from '../../source/injector.coffee';
+import Module from '../../source/module.js';
+import {Injector} from '../../source/injector.js';
 
 describe 'Module', ->
 

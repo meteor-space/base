@@ -1,3 +1,4 @@
+import Space from '../../source/space.js';
 
 describe('Injector annotations', function() {
 

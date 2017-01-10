@@ -1,5 +1,6 @@
 import Logger from '../../source/logger.js';
 import LoggingAdapter from '../../source/loggers/adapter.js';
+import SpaceObject from '../../source/object.coffee';
 
 const TestAdapter = LoggingAdapter.extend('TestAdapter', {
   Constructor(lib) {
@@ -20,8 +21,8 @@ describe("Logger", function() {
     this.logger = new Logger();
   });
 
-  it('extends Space.Object', () => {
-    expect(Logger).to.extend(Space.Object);
+  it('extends SpaceObject', () => {
+    expect(Logger).to.extend(SpaceObject);
   });
 
   it("is available of both client and server", () => {
