@@ -1,12 +1,16 @@
 machine:
   node:
-    version: 0.10.33
+    version: 4.0.0
   pre:
     - curl https://install.meteor.com | /bin/sh
 dependencies:
+  cache_directories:
+    - node_modules
   pre:
-    - npm install
     - npm install -g spacejam
+  override:
+    - npm prune && npm install
+
 test:
   override:
     - spacejam test-packages ./
