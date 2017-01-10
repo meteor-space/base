@@ -22,7 +22,6 @@ Package.onUse(function(api) {
   api.addFiles([
     'source/lib/underscore-deep-extend-mixin.js',
     'source/space.js',
-    'source/configuration.js',
     'source/object.coffee',
     'source/logger.js',
     'source/struct.coffee',
