@@ -1,10 +1,11 @@
 import _ from 'underscore';
 import {optional, Integer} from 'simplecheck';
+import Struct from './struct.js';
 
 let IntermediateInheritor = function() {};
 IntermediateInheritor.prototype = Error.prototype;
 
-Space.Error = function(params) {
+SpaceError = function(params) {
   this._invokeConstructionCallbacks.apply(this, arguments);
   let data = null;
   if (_.isString(params)) {
@@ -14,20 +15,20 @@ Space.Error = function(params) {
   } else {
     data = {};
   }
-  Space.Struct.call(this, this.extractErrorProperties(data));
+  Struct.call(this, this.extractErrorProperties(data));
   return this;
 };
 
-Space.Error.prototype = new IntermediateInheritor();
+SpaceError.prototype = new IntermediateInheritor();
 
 _.extend(
-  Space.Error.prototype, // target
-  Space.Struct.prototype,
+  SpaceError.prototype, // target
+  Struct.prototype,
   _.omit(Space.Object.prototype, 'toString'),
   {
     message: '',
     fields() {
-      let fields = Space.Struct.prototype.fields.call(this);
+      let fields = Struct.prototype.fields.call(this);
       _.extend(fields, {
         name: String,
         message: String,
@@ -47,8 +48,8 @@ _.extend(
   }
 );
 
-_.extend(Space.Error, _.omit(Space.Object, 'toString'), {
+_.extend(SpaceError, _.omit(Space.Object, 'toString'), {
   __keepToStringMethod__: true // Do not override #toString method
 });
 
-export default Space.Error;
+export default SpaceError;
