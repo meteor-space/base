@@ -3,9 +3,10 @@
   "version": "4.1.4",
   "description": "Modular Application Architecture",
   "dependencies": {
-    "getenv": "0.7.x",
-    "underscore": "1.8.3",
-    "simplecheck": "git://github.com/meteor-space/base.git"
+    "getenv": "0.7.*",
+    "underscore": "1.8.*",
+    "simplecheck": "git://github.com/qejk/simplecheck.git",
+    "lodash": "4.17.*"
   },
   "devDependencies": {},
   "scripts": {},
