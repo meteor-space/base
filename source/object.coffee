@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import {ensure, oneOf, anything} from 'simplecheck';
+import Space from './space.js';
 
 class SpaceObject
 
@@ -30,7 +31,7 @@ class SpaceObject
   hasMixin: (mixin) -> _.contains(@constructor._getAppliedMixins(), mixin)
 
   # This method needs to stay separate from the constructor so that
-  # Space.Error can use it too!
+  # SpaceError can use it too!
   _invokeConstructionCallbacks: ->
     # Let mixins initialize themselves on construction
     for mixin in @constructor._getAppliedMixins()
@@ -193,8 +194,6 @@ class SpaceObject
 
     return Child
 
-  @toString: -> @classPath
-
   @type: (@classPath) ->
     # Register this class with its class path
     Space.registry[@classPath] = this
@@ -303,5 +302,10 @@ class SpaceObject
         value = _.clone(value) if isPlainObject(value)
         # Set non-existing props and override existing methods
         prototype[key] = value
+
+# Incompatible with ES6 import/export without fallback
+# Fallback to original result from toString if classPath is not defined
+toStringFallback = SpaceObject.toString.bind(SpaceObject)
+SpaceObject.toString = -> @classPath || toStringFallback()
 
 export default SpaceObject;
