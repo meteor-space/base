@@ -5,6 +5,7 @@ machine:
     - curl https://install.meteor.com | /bin/sh
 dependencies:
   pre:
+    - npm install
     - npm install -g spacejam
 test:
   override:
