@@ -7,9 +7,8 @@ dependencies:
   cache_directories:
     - node_modules
   pre:
-    - npm install -g spacejam
+    - npm install -g spacejam@rc
 
 test:
   override:
-    - ./ci.sh
-
+    - spacejam test-packages --driver-package=practicalmeteor:mocha-console-runner ./
