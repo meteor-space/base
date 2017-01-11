@@ -8,6 +8,9 @@ class SpaceObject
 
   # Assign given properties to the instance
   constructor: (properties) ->
+    unless @constructor.classPath?
+      @constructor.type(@constructor.name);
+
     @_invokeConstructionCallbacks.apply(this, arguments)
     # Copy properties to instance by default
     @[key] = value for key, value of properties
