@@ -2,8 +2,29 @@
   "name": "space-base",
   "version": "4.1.4",
   "description": "Modular Application Architecture",
+  "keywords": [
+    "space",
+    "modular",
+    "architecture",
+    "dependencies",
+    "dependency",
+    "injection",
+    "di",
+    "ioc",
+    "inversion of control"
+  ],
+  "author": "Dominik Guzei, Rhys Bartels-Waller, Darko Mijic, Adam Desivi",
+  "contributors": [
+    "Dominik Guzei (https://github.com/DominikGuzei)",
+    "Rhys Bartels-Waller (https://github.com/rhyslbw)",
+    "Darko Mijić (https://github.com/darko-mijic)",
+    "Jonas Aschenbrenner (https://github.com/Sanjo)",
+    "Adam Desivi (https://github.com/qejk)"
+  ],
+  "license": "MIT",
   "engines": {
-    "node": ">=4.0.0"
+    "node": ">= 4.0.x",
+    "npm": ">= 1.4.x"
   },
   "dependencies": {
     "underscore": "1.8.*",
@@ -11,7 +32,5 @@
     "lodash": "4.17.*"
   },
   "devDependencies": {},
-  "scripts": {},
-  "author": "Dominik Guzei, Rhys Bartels-Waller, Darko Mijic, Adam Desivi",
-  "license": "MIT"
+  "scripts": {}
 }
