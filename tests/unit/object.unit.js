@@ -64,7 +64,7 @@ describe('SpaceObject', function() {
 
       it("assigns the class path", () => {
         const className = 'My.custom.Class';
-        MyClass = SpaceObject.extend(className);
+        const MyClass = SpaceObject.extend(className);
         expect(MyClass.toString()).to.equal(className);
         expect(new MyClass().toString()).to.equal(className);
       });
@@ -72,7 +72,7 @@ describe('SpaceObject', function() {
       it("exposes the class on the global scope if possible", () => {
         const my = {};
         my.namespace = Space.namespace('my.namespace');
-        MyClass = SpaceObject.extend('my.namespace.MyClass');
+        const MyClass = SpaceObject.extend('my.namespace.MyClass');
         expect(my.namespace.MyClass).to.equal(MyClass);
       });
 
@@ -86,13 +86,13 @@ describe('SpaceObject', function() {
 
       it('allows you to define static class properties', () => {
         const myStatics = {};
-        MyClass = SpaceObject.extend({statics: {myStatics: myStatics}});
+        const MyClass = SpaceObject.extend({statics: {myStatics: myStatics}});
         expect(MyClass.myStatics).to.equal(myStatics);
       });
 
       it('provides an api for defining a callback while extending', () => {
         const onExtendingSpy = sinon.spy();
-        MyClass = SpaceObject.extend({onExtending: onExtendingSpy});
+        const MyClass = SpaceObject.extend({onExtending: onExtendingSpy});
         expect(onExtendingSpy).to.have.been.calledOn(MyClass);
       });
     });
