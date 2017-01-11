@@ -23,7 +23,6 @@ Package.onUse(function(api) {
     'source/lib/underscore-deep-extend-mixin.js',
     'source/space.js',
     'source/object.js',
-    'source/object-extend.coffee',
     'source/logger.js',
     'source/struct.js',
     'source/error.js',
