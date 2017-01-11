@@ -10,12 +10,7 @@
     "simplecheck": "git://github.com/qejk/simplecheck.git",
     "lodash": "4.17.*"
   },
-  "devDependencies": {
-    "getenv": "0.7.*",
-    "underscore": "1.8.*",
-    "simplecheck": "git://github.com/qejk/simplecheck.git",
-    "lodash": "4.17.*"
-  },
+  "devDependencies": {},
   "scripts": {},
   "author": "Dominik Guzei, Rhys Bartels-Waller, Darko Mijic, Adam Desivi",
   "license": "MIT"

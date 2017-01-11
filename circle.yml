@@ -8,8 +8,6 @@ dependencies:
     - node_modules
   pre:
     - npm install -g spacejam
-  override:
-    - npm prune && npm install
 
 test:
   override:
