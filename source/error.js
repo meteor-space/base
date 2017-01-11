@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import {isNil, entries as ObjectEntries} from 'lodash';
 import {optional, Integer} from 'simplecheck';
 import Struct from './struct.js';
 import SpaceObject from './object.js';
@@ -16,7 +17,19 @@ SpaceError = function(params) {
   } else {
     data = {};
   }
-  new Struct(this.extractErrorProperties(data));
+  const properties = this.extractErrorProperties(data);
+
+  this._checkFields(properties);
+  // ES6 fallback
+  if (isNil(this.constructor.classPath)) {
+    this.constructor.type(this.constructor.name);
+  }
+  this._invokeConstructionCallbacks.apply(this, data);
+  // Copy properties to instance by default
+  for (let [key, value] of ObjectEntries(properties)) {
+    this[key] = value;
+  }
+
   return this;
 };
 
@@ -29,7 +42,7 @@ _.extend(
   {
     message: '',
     fields() {
-      let fields = Struct.prototype.fields.call(this);
+      let fields = _.clone(this.constructor.fields) || {};
       _.extend(fields, {
         name: String,
         message: String,
