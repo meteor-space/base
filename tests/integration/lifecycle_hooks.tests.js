@@ -48,7 +48,7 @@ describe("Space.base - Application lifecycle hooks", function() {
     }
   };
 
-  beforeEach(function() {
+  beforeEach(() => {
     // reset published space modules
     Module.published = {};
     // Setup lifecycle hooks with sinon spys
@@ -61,24 +61,24 @@ describe("Space.base - Application lifecycle hooks", function() {
     this.app = Application.create(_.extend(this.appHooks, { requiredModules: ['Second'] }));
   });
 
-  it("runs the initialize hooks in correct order", function() {
+  it("runs the initialize hooks in correct order", () => {
     testOrderOfLifecycleHook(this, 'beforeInitialize', 'onInitialize', 'afterInitialize');
   });
 
-  it("runs the start hooks in correct order", function() {
+  it("runs the start hooks in correct order", () => {
     expectHooksNotToBeCalledYet(this, 'beforeStart', 'onStart', 'afterStart');
     this.app.start();
     testOrderOfLifecycleHook(this, 'beforeStart', 'onStart', 'afterStart');
   });
 
-  it("runs the stop hooks in correct order", function() {
+  it("runs the stop hooks in correct order", () => {
     expectHooksNotToBeCalledYet(this, 'beforeStop', 'onStop', 'afterStop');
     this.app.start();
     this.app.stop();
     testOrderOfLifecycleHook(this, 'beforeStop', 'onStop', 'afterStop');
   });
 
-  it("runs the reset hooks in correct order when app is running", function() {
+  it("runs the reset hooks in correct order when app is running", () => {
     expectHooksNotToBeCalledYet(this, 'beforeReset', 'onReset', 'afterReset');
     this.app.start();
     this.app.reset();
@@ -87,7 +87,7 @@ describe("Space.base - Application lifecycle hooks", function() {
                              'onStart', 'afterStart');
   });
 
-  it("runs the reset hooks in correct order when app is stopped", function() {
+  it("runs the reset hooks in correct order when app is stopped", () => {
     expectHooksNotToBeCalledYet(this, 'beforeReset', 'onReset', 'afterReset');
     this.app.reset();
     testOrderOfLifecycleHook(this, 'beforeReset', 'onReset', 'afterReset');
