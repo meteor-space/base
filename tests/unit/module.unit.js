@@ -91,7 +91,7 @@ describe('Module - #initialize', () => {
     expect(this.module.is('initialized')).to.be.true;
   });
 
-  it.server('server adds Npm as property to the module', () => {
+  xit('server adds Npm as property to the module', () => {
     this.module.initialize(this.app, this.injector);
     expect(this.module.npm.require).to.be.defined;
   });
@@ -171,7 +171,7 @@ describe('Module - #reset', () => {
     this.module._runLifeCycleAction = sinon.spy();
   });
 
-  it.server('rejects attempts to reset when in production', () => {
+  xit('rejects attempts to reset when in production', () => {
     const nodeEnvBackup = process.env.NODE_ENV;
     process.env.NODE_ENV = 'production';
     this.module.reset();
