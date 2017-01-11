@@ -6,14 +6,14 @@ describe("Space.base - Application lifecycle hooks", function() {
 
   // TEST HELPERS
 
-  let addHookSpy = function(hooks, hookName) {
+  const addHookSpy = function(hooks, hookName) {
     hooks[hookName] = function() {};
     sinon.spy(hooks, hookName);
   };
 
-  let createLifeCycleHookSpies = function() {
-    hooks = {};
-    hookNames = [
+  const createLifeCycleHookSpies = function() {
+    const hooks = {};
+    const hookNames = [
       'beforeInitialize', 'onInitialize', 'afterInitialize', 'beforeStart', 'onStart',
       'afterStart', 'beforeReset', 'onReset', 'afterReset', 'beforeStop', 'onStop', 'afterStop'
     ];
@@ -23,9 +23,9 @@ describe("Space.base - Application lifecycle hooks", function() {
     return hooks;
   };
 
-  let testOrderOfLifecycleHook = function(context, before, on, after) {
-    modules = ['firstHooks', 'secondHooks', 'appHooks'];
-    hooks = [before, on, after];
+  const testOrderOfLifecycleHook = function(context, before, on, after) {
+    const modules = ['firstHooks', 'secondHooks', 'appHooks'];
+    const hooks = [before, on, after];
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
         expect(context[modules[i]][hooks[j]]).to.have.been.calledOnce;
@@ -38,9 +38,9 @@ describe("Space.base - Application lifecycle hooks", function() {
     }
   };
 
-  let expectHooksNotToBeCalledYet = function(context, before, on, after) {
-    modules = ['firstHooks', 'secondHooks', 'appHooks'];
-    hooks = [before, on, after];
+  const expectHooksNotToBeCalledYet = function(context, before, on, after) {
+    const modules = ['firstHooks', 'secondHooks', 'appHooks'];
+    const hooks = [before, on, after];
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
         expect(context[modules[i]][hooks[j]]).not.to.have.been.called;

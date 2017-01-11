@@ -10,8 +10,8 @@ describe("Module - regressions", function() {
     Test = Space.namespace('Test');
 
     SomeLib = { libMethod: function() {} };
-    let singletonReadySpy = sinon.spy();
-    let myInjector = new Injector();
+    const singletonReadySpy = sinon.spy();
+    const myInjector = new Injector();
 
     SpaceObject.extend(Test, 'MySingleton', {
       dependencies: { someLib: 'SomeLib' },
@@ -23,7 +23,7 @@ describe("Module - regressions", function() {
       onInitialize() { this.injector.map('SomeLib').to(SomeLib); }
     });
 
-    let module = new Test.MyModule();
+    const module = new Test.MyModule();
     module.initialize(module, myInjector);
 
     expect(singletonReadySpy).to.have.been.called;

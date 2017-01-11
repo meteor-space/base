@@ -29,8 +29,8 @@ describe('Building applications based on modules', function() {
 
   it('configures module before running', function() {
 
-    let moduleValue = 'module configuration';
-    let appValue = 'application configuration';
+    const moduleValue = 'module configuration';
+    const appValue = 'application configuration';
     let testResult = null;
 
     Module.define('FirstModule', {
@@ -42,7 +42,7 @@ describe('Building applications based on modules', function() {
       }
     });
 
-    let app = Application.create({
+    const app = Application.create({
       requiredModules: ['FirstModule'],
       dependencies: { moduleValue: 'moduleValue' },
       onInitialize: function() {
