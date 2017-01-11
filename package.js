@@ -71,13 +71,13 @@ Package.onTest(function(api) {
   api.addFiles([
 
     // unit tests
-    'tests/unit/object.unit.coffee',
-    'tests/unit/module.unit.coffee',
-    'tests/unit/struct.unit.coffee',
-    'tests/unit/application.unit.coffee',
-    'tests/unit/injector.unit.coffee',
+    'tests/unit/object.unit.js',
+    'tests/unit/module.unit.js',
+    'tests/unit/struct.unit.js',
+    'tests/unit/application.unit.js',
+    'tests/unit/injector.unit.js',
     'tests/unit/injector_annotations.unit.js',
-    'tests/unit/helpers.unit.coffee',
+    'tests/unit/helpers.unit.js',
     'tests/unit/error.tests.js',
     'tests/unit/logger.tests.js',
 
