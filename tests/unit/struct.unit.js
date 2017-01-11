@@ -1,0 +1,81 @@
+import {MatchError, Integer} from 'simplecheck';
+import Struct from '../../source/struct.coffee';
+import SpaceObject from '../../source/object.coffee';
+
+describe('Struct', function() {
+
+  class MyTestStruct extends Struct {
+    fields() {
+      return {name: String, age: Integer};
+    }
+  }
+
+  class MyExtendedTestStruct extends MyTestStruct {
+    fields() {
+      const fields = super.fields();
+      fields.extra = Integer;
+      return fields;
+    }
+  }
+
+  it("is a SpaceObject", () => {
+    expect(Struct).to.extend(SpaceObject);
+  });
+
+  it("calls the super constructor", () => {
+    const constructorSpy = sinon.spy(SpaceObject.prototype, 'constructor');
+    const data = {};
+    const struct = new Struct(data);
+    expect(constructorSpy).to.have.been.calledWithExactly(data);
+    expect(constructorSpy).to.have.been.calledOn(struct);
+    constructorSpy.restore();
+  });
+
+  describe('defining fields', () => {
+    it('assigns the properties to the instance', () => {
+      const properties = {name: 'Dominik', age: 26};
+      const instance = new MyTestStruct(properties);
+      expect(instance).toMatch(properties);
+    });
+
+    it('provides a method to cast to plain object', () => {
+      const instance = new MyTestStruct({name: 'Dominik', age: 26});
+      const copy = instance.toPlainObject();
+      expect(copy.name).to.equal('Dominik');
+      expect(copy.age).to.equal(26);
+      expect(copy).to.be.an.object;
+      expect(copy).not.to.be.instanceof(MyTestStruct);
+    });
+
+    it('throws a match error if a property is of wrong type', () => {
+      const properties = {name: 5, age: 26};
+      expect(() => new MyTestStruct(properties)).to.throw(MatchError);
+    });
+
+    it('throws a match error if additional properties are given', () => {
+      const properties = {name: 5, age: 26, extra: 0};
+      expect(() => new MyTestStruct(properties)).to.throw(MatchError);
+    });
+
+    it('throws a match error if a property is missing', () => {
+      const properties = {name: 5};
+      expect(() => new MyTestStruct(properties)).to.throw(MatchError);
+    });
+
+    it('allows to extend the fields of base classes', () => {
+      const properties = {name: 'test', age: 26, extra: 0};
+      expect(() => new MyExtendedTestStruct(properties)).not.to.throw(MatchError);
+    });
+
+    // TODO: remove when breaking change is made for next major version:
+    it('stays backward compatible with static fields api', () => {
+      class StaticFieldsStruct extends Struct {}
+      StaticFieldsStruct.fields = {name: String, age: Integer};
+
+      const properties = {name: 'Dominik', age: 26};
+      const instance = new StaticFieldsStruct(properties);
+      expect(instance).toMatch(properties);
+      expect(() => new StaticFieldsStruct({name: 5})).to.throw(MatchError);
+    });
+  });
+});
