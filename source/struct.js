@@ -33,5 +33,6 @@ class Struct extends SpaceObject {
     fields: {}
   }
 }
+Struct.type('Space.Struct');
 
 export default Struct;

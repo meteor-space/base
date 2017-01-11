@@ -20,10 +20,6 @@ SpaceError = function(params) {
   const properties = this.extractErrorProperties(data);
 
   this._checkFields(properties);
-  // ES6 fallback
-  if (isNil(this.constructor.classPath)) {
-    this.constructor.type(this.constructor.name);
-  }
   this._invokeConstructionCallbacks.apply(this, data);
   // Copy properties to instance by default
   for (let [key, value] of ObjectEntries(properties)) {

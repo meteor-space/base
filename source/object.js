@@ -3,16 +3,20 @@ import {isNil, entries as ObjectEntries, isPlainObject} from 'lodash';
 import {ensure, oneOf, anything} from 'simplecheck';
 import Space from './space.js';
 
+const __extends__ = function(child, parent) {
+  Object.getOwnPropertyNames(parent).forEach((name) => {
+    child[name] = parent[name];
+  });
+  child.prototype = Object.create(parent.prototype);
+  child.__super__ = parent.prototype;
+  return child;
+};
+
 class SpaceObject {
   // ============= PUBLIC PROTOTYPE ============== #
 
   // Assign given properties to the instance
   constructor(properties) {
-    // ES6 fallback
-    if (isNil(this.constructor.classPath)) {
-      this.constructor.type(this.constructor.name);
-    }
-
     this._invokeConstructionCallbacks.apply(this, arguments);
     // Copy properties to instance by default
     for (let [key, value] of ObjectEntries(properties)) {
@@ -247,6 +251,10 @@ class SpaceObject {
     } catch (error) {}
   }
 
+  static toString() {
+    return this.classPath;
+  }
+
   // Create and instance of the class that this method is called on
   // e.g.: SpaceObject.create() would return an instance of SpaceObject
   static create() {
@@ -373,20 +381,7 @@ class SpaceObject {
   }
 }
 
+SpaceObject.type('Space.Object');
 SpaceObject._subClasses = [];
 
-// Incompatible with ES6 import/export without fallback
-// Fallback to original result from toString if classPath is not defined
-let toStringFallback = SpaceObject.toString.bind(SpaceObject);
-SpaceObject.toString = function() { return this.classPath || toStringFallback(); };
-
-
-function __extends__(child, parent) {
-  Object.getOwnPropertyNames(parent).forEach(
-    name => child[name] = parent[name]
-  );
-  child.prototype = Object.create(parent.prototype);
-  child.__super__ = parent.prototype;
-  return child;
-}
 export default SpaceObject;
