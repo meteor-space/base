@@ -1,6 +1,6 @@
 import Space from './space.js';
-import SpaceObject from './object.coffee';
-import Struct from './struct.coffee';
+import SpaceObject from './object.js';
+import Struct from './struct.js';
 import SpaceError from './error.js';
 import {Injector, InjectionError} from './injector.js';
 import Logger from './logger.js';

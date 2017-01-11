@@ -1,4 +1,4 @@
-import SpaceObject from '../object.coffee';
+import SpaceObject from '../object.js';
 
 const LoggingAdapter = SpaceObject.extend('Space.Logger.LoggingAdapter', {
 

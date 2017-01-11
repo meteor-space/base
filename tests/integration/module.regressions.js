@@ -1,5 +1,5 @@
 import Module from '../../source/module.js';
-import SpaceObject from '../../source/object.coffee';
+import SpaceObject from '../../source/object.js';
 import {Injector} from '../../source/injector.js';
 import Space from '../../source/space.js';
 

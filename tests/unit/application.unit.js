@@ -10,7 +10,7 @@ describe('Application', function() {
   });
 
   it('extends Module', () => {
-    expect(Application).to.extend(Module);
+    expect(Application.prototype).to.be.instanceof(Module);
   });
 
   describe('construction', () => {

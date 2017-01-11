@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import Logger from './logger.js';
 import {capitalize, isNil} from 'lodash';
-import SpaceObject from './object.coffee';
+import SpaceObject from './object.js';
 
 const Module = SpaceObject.extend('Space.Module',  {
 

@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import {optional, Integer} from 'simplecheck';
-import Struct from './struct.coffee';
-import SpaceObject from './object.coffee';
+import Struct from './struct.js';
+import SpaceObject from './object.js';
 
 let IntermediateInheritor = function() {};
 IntermediateInheritor.prototype = Error.prototype;
@@ -16,7 +16,7 @@ SpaceError = function(params) {
   } else {
     data = {};
   }
-  Struct.call(this, this.extractErrorProperties(data));
+  new Struct(this.extractErrorProperties(data));
   return this;
 };
 

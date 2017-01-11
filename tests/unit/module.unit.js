@@ -1,4 +1,4 @@
-import SpaceObject from '../../source/object.coffee';
+import SpaceObject from '../../source/object.js';
 import Module from '../../source/module.js';
 import {Injector} from '../../source/injector.js';
 
@@ -10,7 +10,7 @@ describe('Module', function() {
   });
 
   it('extends space object', () => {
-    expect(Module).to.extend(SpaceObject);
+    expect(Module.prototype).to.be.instanceof(SpaceObject);
   });
 
   describe('static publish', () => {
