@@ -2,7 +2,7 @@ import SpaceError from '../../source/error.js';
 
 describe("SpaceError", function() {
 
-  let MyError = SpaceError.extend('MyError', {
+  const MyError = SpaceError.extend('MyError', {
     message: 'The default message for this error'
   });
 
@@ -11,8 +11,8 @@ describe("SpaceError", function() {
   });
 
   it("has same behavior as Space.Struct", function() {
-    let data = { message: 'test', code: 123 };
-    let error = new MyError(data);
+    const data = { message: 'test', code: 123 };
+    const error = new MyError(data);
     expect(error).to.be.instanceof(Error);
     expect(error).to.be.instanceof(MyError);
     expect(error.name).to.equal('MyError');
@@ -22,22 +22,22 @@ describe("SpaceError", function() {
 
   it("is easy to add additional fields", function() {
     MyError.fields = { customField: String };
-    let data = { message: 'test', code: 123, customField: 'test' };
-    let error = new MyError(data);
+    const data = { message: 'test', code: 123, customField: 'test' };
+    const error = new MyError(data);
     expect(error.customField).to.equal('test');
     MyError.fields = {};
   });
 
   it("throws the prototype message by default", function() {
-    let throwWithDefaultMessage = function() {
+    const throwWithDefaultMessage = function() {
       throw new MyError();
     };
     expect(throwWithDefaultMessage).to.throw(MyError.prototype.message);
   });
 
   it("takes an optional message during construction", function() {
-    let myMessage = 'this is a custom message';
-    let throwWithCustomMessage = function() {
+    const myMessage = 'this is a custom message';
+    const throwWithCustomMessage = function() {
       throw new MyError(myMessage);
     };
     expect(throwWithCustomMessage).to.throw(myMessage);
@@ -51,13 +51,13 @@ describe("SpaceError", function() {
   describe("applying mixins", function() {
 
     it("supports mixin callbacks", function() {
-      let MyMixin = {
+      const MyMixin = {
         onConstruction: sinon.spy(),
         onDependenciesReady: sinon.spy()
       };
-      let MyMixinError = SpaceError.extend('MyMixinError', { mixin: MyMixin });
-      let param = 'test';
-      let error = new MyMixinError(param);
+      const MyMixinError = SpaceError.extend('MyMixinError', { mixin: MyMixin });
+      const param = 'test';
+      const error = new MyMixinError(param);
       expect(MyMixin.onConstruction).to.have.been.calledOn(error);
       expect(MyMixin.onConstruction).to.have.been.calledWithExactly(param);
     });
