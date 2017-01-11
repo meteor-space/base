@@ -64,7 +64,10 @@ Package.onTest(function(api) {
     'space:base',
 
     // weak-dependencies
-    'practicalmeteor:munit@2.1.5',
+    'practicalmeteor:mocha@2.4.5_6',
+    'practicalmeteor:chai@2.1.0_1',
+    'practicalmeteor:sinon@1.14.1_2',
+
     'space:testing@3.0.1'
   ]);
 
