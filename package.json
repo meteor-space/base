@@ -47,6 +47,7 @@
     "babel-preset-latest": "^6.16.0",
     "chai": "^3.5.0",
     "sinon": "^1.17.7",
+    "sinon-chai": "^2.8.0",
     "mocha": "^3.2.0",
     "space-testing": "^4.0.0"
   },
