@@ -3,7 +3,7 @@ import {isNil} from 'lodash';
 import SpaceError from './error.js';
 import Space from './space.js';
 
-InjectionError = SpaceError.extend('Space.InjectionError');
+const InjectionError = SpaceError.extend('Space.InjectionError');
 
 class Injector {
   constructor(providers) {
@@ -316,10 +316,10 @@ Injector.DEFAULT_PROVIDERS = {
 };
 
 export {
-  InjectionError as InjectionError,
-  Injector as Injector,
-  Provider as Provider,
-  ValueProvider as ValueProvider,
-  InstanceProvider as InstanceProvider,
-  SingletonProvider as SingletonProvider
+  InjectionError,
+  Injector,
+  Provider,
+  ValueProvider,
+  InstanceProvider,
+  SingletonProvider
 };

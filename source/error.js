@@ -1,13 +1,13 @@
 import _ from 'underscore';
-import {isNil, entries as ObjectEntries} from 'lodash';
+import {entries as ObjectEntries} from 'lodash';
 import {optional, Integer} from 'simplecheck';
 import Struct from './struct.js';
 import SpaceObject from './object.js';
 
-let IntermediateInheritor = function() {};
+const IntermediateInheritor = function() {};
 IntermediateInheritor.prototype = Error.prototype;
 
-SpaceError = function(params) {
+const SpaceError = function(params) {
   this._invokeConstructionCallbacks.apply(this, arguments);
   let data = null;
   if (_.isString(params)) {

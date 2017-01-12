@@ -28,11 +28,8 @@ class Struct extends SpaceObject {
   _checkFields(data) {
     ensure(data, this.fields());
   }
-
-  statics: {
-    fields: {}
-  }
 }
+Struct.fields = {};
 Struct.type('Space.Struct');
 
 export default Struct;
