@@ -6,10 +6,9 @@ import Space from '../../source/space.js';
 describe("Module - regressions", function() {
 
   it("ensures autoboot singletons have access to injector mappings made in module onInitialize", function() {
+    const Test = Space.namespace('Test');
 
-    Test = Space.namespace('Test');
-
-    SomeLib = { libMethod: function() {} };
+    const SomeLib = { libMethod: function() {} };
     const singletonReadySpy = sinon.spy();
     const myInjector = new Injector();
 

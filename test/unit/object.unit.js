@@ -1,7 +1,5 @@
 import SpaceObject from '../../source/object.js';
 import Space from '../../source/space.js';
-import sinon from 'sinon';
-import {expect} from 'chai';
 
 describe('SpaceObject', function() {
 

@@ -131,7 +131,7 @@ describe('Injector', function() {
     it('injects static values', () => {
       const value = {};
       this.injector.map('test').to(value);
-      instance = SpaceObject.create({dependencies: {value: 'test'}});
+      const instance = SpaceObject.create({dependencies: {value: 'test'}});
       this.injector.injectInto(instance);
       expect(instance.value).to.equal(value);
     });
@@ -153,7 +153,7 @@ describe('Injector', function() {
       this.injector.map('base').to('base');
       this.injector.map('extended').to('extended');
 
-      instance = new Extended();
+      const instance = new Extended();
       this.injector.injectInto(instance);
       expect(instance.base).to.equal('base');
       expect(instance.extended).to.equal('extended');

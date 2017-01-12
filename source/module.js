@@ -58,7 +58,7 @@ const Module = SpaceObject.extend('Space.Module',  {
     for (let moduleId of this.requiredModules) {
       // Create a new module instance if not already registered with the app
       if (isNil(this.app.modules[moduleId])) {
-        ModuleClass = Module.require(moduleId, this.constructor.name);
+        const ModuleClass = Module.require(moduleId, this.constructor.name);
         this.app.modules[moduleId] = new ModuleClass();
         // Initialize required module
         const module = this.app.modules[moduleId];

@@ -218,12 +218,12 @@ class Mapping {
       // Override the dependency in all dependent objects if this mapping is flagged
       if (this._overrideInDependents) {
         // Get the value from the provider
-        providersValue = this._provider.provide();
+        const providersValue = this._provider.provide();
         // Loop over the dependents
         for (let dependent of ObjectValues(this._dependents)) {
           // Loop over their dependencies and override the one this mapping
           // is managing if it exists (it should)
-          dependencies = dependent.dependencies || {};
+          const dependencies = dependent.dependencies || {};
           for (let [key, id] of ObjectEntries(dependencies)) {
             if (id === this._id) {
               dependent[key] = providersValue;

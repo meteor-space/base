@@ -1,8 +1,6 @@
 import SpaceObject from '../../source/object.js';
 import Module from '../../source/module.js';
 import {Injector} from '../../source/injector.js';
-import sinon from 'sinon';
-import {expect} from 'chai';
 
 describe('Module', function() {
 
@@ -34,7 +32,7 @@ describe('Module', function() {
   describe('static require', () => {
     it('returns published module for given identifier', () => {
       const module = Module.define('test');
-      requiredModule = Module.require('test');
+      const requiredModule = Module.require('test');
       expect(requiredModule).to.equal(module);
     });
 
