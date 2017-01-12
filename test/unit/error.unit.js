@@ -44,7 +44,7 @@ describe("SpaceError", function() {
   });
 
   it("includes a stack trace", function() {
-    error = new MyError();
+    const error = new MyError();
     expect(error.stack).to.be.a.string;
   });
 

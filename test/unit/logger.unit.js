@@ -76,8 +76,8 @@ describe("Logger", function() {
     });
 
     it('resolves adapter by id', () => {
-      consoleAdapter = new TestAdapter(sinon.spy());
-      fileAdapter = new TestAdapter(sinon.spy());
+      const consoleAdapter = new TestAdapter(sinon.spy());
+      const fileAdapter = new TestAdapter(sinon.spy());
 
       this.logger.addAdapter('console', consoleAdapter);
       this.logger.addAdapter('file', fileAdapter);
