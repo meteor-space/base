@@ -1,5 +1,9 @@
 import _ from 'underscore';
-import {isNil} from 'lodash';
+import {
+  isNil,
+  entries as ObjectEntries,
+  values as ObjectValues
+} from 'lodash';
 import SpaceError from './error.js';
 import Space from './space.js';
 
@@ -74,7 +78,7 @@ class Injector {
     // Get flat map of dependencies (possibly inherited)
     const dependencies = this._mapDependencies(value);
     // Inject into dependencies to create the object graph
-    for (let [key, id] of Object.entries(dependencies)) {
+    for (let [key, id] of ObjectEntries(dependencies)) {
       try {
         if (isNil(value[key])) {value[key] = this.get(id, value);}
       } catch (error) {
@@ -98,7 +102,7 @@ class Injector {
   }
 
   getIdForValue(value) {
-    for (let [id, mapping] of Object.entries(this._mappings)) {
+    for (let [id, mapping] of ObjectEntries(this._mappings)) {
       if (mapping.getProvider().getValue() === value) {
         return id;
       }
@@ -107,7 +111,7 @@ class Injector {
   }
 
   release(dependent) {
-    for (let mapping of Object.values(this._mappings)) {
+    for (let mapping of ObjectValues(this._mappings)) {
       if (mapping.hasDependent(dependent)) {
         mapping.release(dependent);
       }
@@ -115,15 +119,15 @@ class Injector {
   }
 
   _mapDependencies(value, deps = {}) {
-    Class = value.constructor || null;
-    SuperClass = Class.__super__ || null;
+    const Class = value.constructor || null;
+    const SuperClass = Class.__super__ || null;
     // Recurse down the prototype chain
     if (!isNil(SuperClass)) {
       this._mapDependencies(SuperClass.constructor.prototype, deps);
     }
     if (isNil(value.dependencies)) {return deps;}
     // Add dependencies of current value
-    for (let [key, id] of Object.entries(value.dependencies)) {
+    for (let [key, id] of ObjectEntries(value.dependencies)) {
       deps[key] = id;
     }
     return deps;
@@ -158,7 +162,7 @@ class Mapping {
     this._dependents = [];
     this._overrideInDependents = null;
 
-    for (let [key, provider] of Object.entries(providers)) {
+    for (let [key, provider] of ObjectEntries(providers)) {
       this[key] = this._setup(provider);
     }
   }
@@ -216,11 +220,11 @@ class Mapping {
         // Get the value from the provider
         providersValue = this._provider.provide();
         // Loop over the dependents
-        for (let dependent of Object.values(this._dependents)) {
+        for (let dependent of ObjectValues(this._dependents)) {
           // Loop over their dependencies and override the one this mapping
           // is managing if it exists (it should)
           dependencies = dependent.dependencies || {};
-          for (let [key, id] of Object.entries(dependencies)) {
+          for (let [key, id] of ObjectEntries(dependencies)) {
             if (id === this._id) {
               dependent[key] = providersValue;
               if (!isNil(dependent.onDependencyChanged)) {

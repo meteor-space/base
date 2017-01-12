@@ -1,6 +1,12 @@
 import SpaceObject from '../../source/object.js';
 import Module from '../../source/module.js';
 import {Injector} from '../../source/injector.js';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import chai from 'chai';
+import {expect} from 'chai';
+chai.use(require('space-testing'));
+chai.use(sinonChai);
 
 describe('Module', function() {
 
@@ -62,7 +68,7 @@ describe('Module', function() {
   });
 });
 
-describe('Module - #initialize', () => {
+describe('Module - #initialize', function() {
 
   beforeEach(() => {
     // Reset published space modules
@@ -124,7 +130,7 @@ describe('Module - #initialize', () => {
   });
 });
 
-describe('Module - #start', () => {
+describe('Module - #start', function() {
 
   beforeEach(() => {
     this.module = new Module();
@@ -143,7 +149,7 @@ describe('Module - #start', () => {
   });
 });
 
-describe('Module - #stop', () => {
+describe('Module - #stop', function() {
 
   beforeEach(() => {
     this.module = new Module();
@@ -163,7 +169,7 @@ describe('Module - #stop', () => {
   });
 });
 
-describe('Module - #reset', () => {
+describe('Module - #reset', function() {
 
   beforeEach(() => {
     this.module = new Module();
@@ -180,11 +186,11 @@ describe('Module - #reset', () => {
   });
 });
 
-describe("Module - wrappable lifecycle hooks", () => {
+describe("Module - wrappable lifecycle hooks", function() {
   it("allows mixins to hook into the module lifecycle", () => {
     const moduleOnInitializeSpy = sinon.spy();
     const mixinOnInitializeSpy = sinon.spy();
-    MyModule = Module.extend({
+    const MyModule = Module.extend({
       onInitialize: moduleOnInitializeSpy
     });
 
