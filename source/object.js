@@ -366,7 +366,7 @@ class SpaceObject {
 
   static _mergeIntoPrototype(prototype, extension) {
     for (let [key, value] of ObjectEntries(extension)) {
-      hasProperty = prototype.hasOwnProperty(key);
+      const hasProperty = prototype.hasOwnProperty(key);
       if (hasProperty && isPlainObject(value) && isPlainObject(prototype[key])) {
         // Deep extend plain objects
         _.deepExtend(prototype[key], _.clone(value));
