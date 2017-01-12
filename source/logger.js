@@ -1,5 +1,5 @@
 import SpaceObject from './object.js';
-
+import {values as ObjectValues} from 'lodash';
 const Logger = SpaceObject.extend('Space.Logger', {
 
   STATES: {
@@ -85,7 +85,7 @@ const Logger = SpaceObject.extend('Space.Logger', {
   _log(level, args) {
     if (!this.isInState(this.STATES.running)) {return;}
 
-    for (let adapter of Object.values(this.getAdapters())) {
+    for (let adapter of ObjectValues(this.getAdapters())) {
       adapter[level].apply(adapter, args);
     }
   }
