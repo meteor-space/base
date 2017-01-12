@@ -6,7 +6,7 @@ require('./lib/underscore-deep-extend-mixin.js');
 
 const __extends__ = function(child, parent) {
   for (let key of ObjectValues(this)) {
-    child[name] = parent[name];
+    child[key] = parent[key];
   }
   child.prototype = Object.create(parent.prototype);
   child.__super__ = parent.prototype;
