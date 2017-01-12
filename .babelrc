@@ -1,5 +1,8 @@
 {
   "plugins": [
+    ["transform-es2015-classes", {
+      "loose": true
+    }],
     "transform-es2015-for-of",
     "transform-decorators-legacy",
     "transform-class-properties"
