@@ -6,9 +6,7 @@ machine:
 dependencies:
   cache_directories:
     - node_modules
-  pre:
-    - npm install -g spacejam@rc
 
 test:
   override:
-    - spacejam test-packages --driver-package=practicalmeteor:mocha-console-runner ./
+    - mocha --compilers js:babel-register --recursive tests/**/*.js
