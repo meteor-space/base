@@ -2,7 +2,7 @@
   "plugins": [
     "transform-es2015-for-of",
     "transform-decorators-legacy",
-    "transform-class-properties",
+    "transform-class-properties"
   ],
   "presets": ["latest", "stage-0", "stage-1", "stage-2", "stage-3"]
 }
