@@ -1,12 +1,13 @@
 import _ from 'underscore';
-import {isNil, entries as ObjectEntries, isPlainObject} from 'lodash';
+import {isNil, entries as ObjectEntries, values as ObjectValues, isPlainObject} from 'lodash';
 import {ensure, oneOf, anything} from 'simplecheck';
 import Space from './space.js';
+require('./lib/underscore-deep-extend-mixin.js');
 
 const __extends__ = function(child, parent) {
-  Object.getOwnPropertyNames(parent).forEach((name) => {
+  for (let key of ObjectValues(this)) {
     child[name] = parent[name];
-  });
+  }
   child.prototype = Object.create(parent.prototype);
   child.__super__ = parent.prototype;
   return child;
@@ -312,8 +313,8 @@ class SpaceObject {
     // Add the original mixin to the registry so we can ask if a specific
     // mixin has been added to a host class / instance
     // Each class has its own mixins array
-    hasMixins = !isNil(this._appliedMixins);
-    areInherited = (
+    const hasMixins = !isNil(this._appliedMixins);
+    const areInherited = (
       hasMixins && this.superClass('_appliedMixins') === this._appliedMixins
     );
     if (!hasMixins || areInherited) {
@@ -327,7 +328,7 @@ class SpaceObject {
 
     // Create a clone so that we can remove properties without affecting the global
     // mixin
-    mixinCopy = _.clone(mixin);
+    const mixinCopy = _.clone(mixin);
 
     // Remove hooks from mixin, so that they are not added to host class
     delete mixinCopy.onDependenciesReady;

@@ -1,5 +1,11 @@
 import SpaceObject from '../../source/object.js';
 import Space from '../../source/space.js';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import chai from 'chai';
+import {expect} from 'chai';
+chai.use(require('space-testing'));
+chai.use(sinonChai);
 
 describe('SpaceObject', function() {
 
@@ -15,7 +21,9 @@ describe('SpaceObject', function() {
     });
 
     it('applies the arguments to the super constructor', () => {
-      [first, second, third] = ['first', 2, {}];
+      const first = 'first';
+      const second = 2;
+      const third = {};
       const spy = sinon.spy();
       SpaceObject.extend(this.namespace, 'Base', {
         Constructor() {spy.apply(this, arguments);}
@@ -234,8 +242,8 @@ describe('SpaceObject', function() {
           firstMixin: 'afterExtending'
         }
       });
-      expect(FirstMixin).toMatch({dependencies: {firstMixin: 'onExtending'}});
-      expect(FirstClass.prototype.dependencies).toMatch({
+      expect(FirstMixin).to.be.sameAs({dependencies: {firstMixin: 'onExtending'}});
+      expect(FirstClass.prototype.dependencies).to.be.sameAs({
         first: 'first',
         firstMixin: 'afterExtending'
       });
