@@ -1,4 +1,5 @@
 import {isNil, get, capitalize} from 'lodash';
+import _ from 'underscore';
 
 class Namespace {
   constructor(path) {
@@ -17,7 +18,11 @@ const Space = new Namespace('Space');
 Space.Namespace = Namespace;
 Space.registry = {};
 
-const global = this;
+// Not available on browsers
+if (isNil(global)) {
+  let global = this;
+}
+global.Space = Space;
 // Resolves a (possibly nested) path to a global object
 // Returns the object or null (if not found)
 Space.resolvePath = function(path) {
@@ -31,8 +36,9 @@ Space.resolvePath = function(path) {
   if (get(Space, `Module.published.${path}`)) {
     return Space.Module.published[path];
   }
-  parts = path.split('.');
-  result = global; // Start with global namespace
+  const parts = path.split('.');
+
+  let result = global; // Start with global namespace
   for (let key of parts) { // Move down the object chain
     result = get(result, key);
     // Take published space modules into account
@@ -51,5 +57,29 @@ Space.namespace = function(id) {
 
 // @backward {space:base} <= 4.1.3
 Space.capitalizeString = capitalize;
+
+Space.Dependency = function(propertyName, dependencyId) {
+  return function(target) {
+    const proto = target.prototype;
+    if (proto.dependencies && !proto.hasOwnProperty('Dependencies')) {
+      proto.dependencies = _.clone(proto.dependencies);
+    }
+    if (isNil(proto.dependencies)) {proto.dependencies = {};}
+    proto.dependencies[propertyName] = dependencyId || propertyName;
+    return target;
+  };
+};
+
+Space.RequireModule = function(moduleId) {
+  return function(target) {
+    const proto = target.prototype;
+    if (proto.requiredModules && !proto.hasOwnProperty('RequiredModules')) {
+      proto.requiredModules = _.clone(proto.requiredModules);
+    }
+    if (isNil(proto.requiredModules)) {proto.requiredModules = [];}
+    proto.requiredModules.push(moduleId);
+    return target;
+  };
+};
 
 export default Space;
