@@ -2,6 +2,10 @@ import _ from 'underscore';
 import Logger from './logger.js';
 import {capitalize, isNil} from 'lodash';
 import SpaceObject from './object.js';
+require('./lib/underscore-deep-extend-mixin.js');
+
+const Meteor = Meteor || undefined;
+const Npm = Npm || undefined;
 
 const Module = SpaceObject.extend('Space.Module',  {
 

@@ -35,7 +35,7 @@ describe('Struct', function() {
     it('assigns the properties to the instance', () => {
       const properties = {name: 'Dominik', age: 26};
       const instance = new MyTestStruct(properties);
-      expect(instance).toMatch(properties);
+      expect(instance).to.be.sameAs(properties);
     });
 
     it('provides a method to cast to plain object', () => {
@@ -74,7 +74,7 @@ describe('Struct', function() {
 
       const properties = {name: 'Dominik', age: 26};
       const instance = new StaticFieldsStruct(properties);
-      expect(instance).toMatch(properties);
+      expect(instance).to.be.sameAs(properties);
       expect(() => new StaticFieldsStruct({name: 5})).to.throw(MatchError);
     });
   });

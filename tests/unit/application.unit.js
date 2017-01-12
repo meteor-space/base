@@ -105,7 +105,7 @@ describe('Application', function() {
         }
       });
 
-      expect(app.injector.get('configuration')).toMatch({
+      expect(app.injector.get('configuration')).to.be.sameAs({
         toChange: 'appNewValue',
         subModuleValue: 'overriddenByApp',
         child: {
