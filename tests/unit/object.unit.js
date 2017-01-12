@@ -1,11 +1,7 @@
 import SpaceObject from '../../source/object.js';
 import Space from '../../source/space.js';
 import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-import chai from 'chai';
 import {expect} from 'chai';
-chai.use(require('space-testing'));
-chai.use(sinonChai);
 
 describe('SpaceObject', function() {
 

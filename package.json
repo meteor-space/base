@@ -44,12 +44,12 @@
     "babel-preset-stage-1": "^6.16.0",
     "babel-preset-stage-2": "^6.18.0",
     "babel-preset-stage-3": "^6.17.0",
-    "babel-preset-latest": "^6.16.0",
     "chai": "^3.5.0",
     "sinon": "^1.17.7",
     "sinon-chai": "^2.8.0",
     "mocha": "^3.2.0",
-    "space-testing": "^4.0.0"
+    "space-testing": "https://github.com/meteor-space/testing.git#feature/convert-to-npm"
+
   },
   "scripts": {
     "test": "mocha --compilers js:babel-register --recursive tests/**/*.js",

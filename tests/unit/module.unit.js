@@ -2,11 +2,7 @@ import SpaceObject from '../../source/object.js';
 import Module from '../../source/module.js';
 import {Injector} from '../../source/injector.js';
 import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-import chai from 'chai';
 import {expect} from 'chai';
-chai.use(require('space-testing'));
-chai.use(sinonChai);
 
 describe('Module', function() {
 
