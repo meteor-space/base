@@ -1,6 +1,10 @@
+import {isNil} from 'lodash';
 import Space from '../../source/space.js';
 
-const global = this;
+// Not available on browsers
+if (isNil(global)) {
+  const global = this;
+}
 
 describe('Space.resolvePath', function() {
 
