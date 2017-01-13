@@ -1,13 +1,13 @@
 machine:
   node:
     version: 4.0.0
-  pre:
-    - curl https://install.meteor.com | /bin/sh
+
 dependencies:
+  override:
+    - npm install
   cache_directories:
     - node_modules
 
 test:
   override:
     - mocha --require babel-core/register --recursive test/**/*.js
-
