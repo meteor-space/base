@@ -262,7 +262,10 @@ const Module = SpaceObject.extend('Space.Module',  {
     // Publishes a module into the space environment to make it
     // visible and requireable for other modules and the application
     publish(module, identifier) {
-      module.publishedAs = module.name = identifier;
+      // TODO: its overriding name necessary?
+      // TypeError: Cannot assign to read only property 'name' of function 'function GrandchildModule() {       initialize.apply(this, arguments);     }'
+      // module.publishedAs = module.name = identifier;
+      module.publishedAs = identifier;
       if (!isNil(Module.published[identifier])) {
         throw new Error(`Two modules tried to be published as <${identifier}>`);
       } else {
