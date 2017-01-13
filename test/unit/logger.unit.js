@@ -1,6 +1,6 @@
-import Logger from '../../source/logger.js';
-import LoggingAdapter from '../../source/loggers/adapter.js';
-import SpaceObject from '../../source/object.js';
+import Logger from '../../lib/logger.js';
+import LoggingAdapter from '../../lib/loggers/adapter.js';
+import SpaceObject from '../../lib/object.js';
 
 const TestAdapter = LoggingAdapter.extend('TestAdapter', {
   Constructor(lib) {

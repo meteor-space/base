@@ -1,5 +1,5 @@
 import {isNil} from 'lodash';
-import Space from '../../source/space.js';
+import Space from '../../lib/space.js';
 
 // Not available on browsers
 if (isNil(global)) {

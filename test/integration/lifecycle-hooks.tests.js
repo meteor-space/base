@@ -1,6 +1,6 @@
 import _ from 'underscore';
-import Module from '../../source/module.js';
-import Application from '../../source/application.js';
+import Module from '../../lib/module.js';
+import Application from '../../lib/application.js';
 
 describe("Space.base - Application lifecycle hooks", function() {
 

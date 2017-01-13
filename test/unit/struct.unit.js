@@ -1,6 +1,6 @@
 import {MatchError, Integer} from 'simplecheck';
-import Struct from '../../source/struct.js';
-import SpaceObject from '../../source/object.js';
+import Struct from '../../lib/struct.js';
+import SpaceObject from '../../lib/object.js';
 
 describe('Struct', function() {
 

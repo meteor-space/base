@@ -1,5 +1,5 @@
-import SpaceObject from '../../source/object.js';
-import Space from '../../source/space.js';
+import SpaceObject from '../../lib/object.js';
+import Space from '../../lib/space.js';
 
 describe('SpaceObject', function() {
 

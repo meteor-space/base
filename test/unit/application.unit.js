@@ -1,6 +1,6 @@
-import Application from '../../source/application.js';
-import Module from '../../source/module.js';
-import {Injector} from '../../source/injector.js';
+import Application from '../../lib/application.js';
+import Module from '../../lib/module.js';
+import {Injector} from '../../lib/injector.js';
 
 describe('Application', function() {
 

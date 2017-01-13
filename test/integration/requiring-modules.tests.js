@@ -1,5 +1,5 @@
-import Module from '../../source/module.js';
-import Application from '../../source/application.js';
+import Module from '../../lib/module.js';
+import Application from '../../lib/application.js';
 
 describe("Space.base - Requiring modules in other modules and apps", function() {
 

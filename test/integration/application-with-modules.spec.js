@@ -1,5 +1,5 @@
-import Module from '../../source/module.js';
-import Application from '../../source/application.js';
+import Module from '../../lib/module.js';
+import Application from '../../lib/application.js';
 
 describe('Building applications based on modules', function() {
 

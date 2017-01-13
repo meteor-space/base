@@ -1,4 +1,4 @@
-import SpaceError from '../../source/error.js';
+import SpaceError from '../../lib/error.js';
 
 describe("SpaceError", function() {
 

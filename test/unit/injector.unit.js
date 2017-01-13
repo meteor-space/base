@@ -1,6 +1,6 @@
-import {Injector} from '../../source/injector.js';
-import SpaceObject from '../../source/object.js';
-import Space from '../../source/space.js';
+import {Injector} from '../../lib/injector.js';
+import SpaceObject from '../../lib/object.js';
+import Space from '../../lib/space.js';
 
 describe('Injector', function() {
 

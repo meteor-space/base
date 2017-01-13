@@ -1,7 +1,7 @@
-import Module from '../../source/module.js';
-import SpaceObject from '../../source/object.js';
-import {Injector} from '../../source/injector.js';
-import Space from '../../source/space.js';
+import Module from '../../lib/module.js';
+import SpaceObject from '../../lib/object.js';
+import {Injector} from '../../lib/injector.js';
+import Space from '../../lib/space.js';
 
 describe("Module - regressions", function() {
 
