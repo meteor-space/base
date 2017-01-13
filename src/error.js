@@ -8,7 +8,6 @@ const IntermediateInheritor = function() {};
 IntermediateInheritor.prototype = Error.prototype;
 
 const SpaceError = function(params) {
-  this._invokeConstructionCallbacks.apply(this, arguments);
   let data = null;
   if (_.isString(params)) {
     data = { message: params };
@@ -20,12 +19,11 @@ const SpaceError = function(params) {
   const properties = this.extractErrorProperties(data);
 
   this._checkFields(properties);
-  this._invokeConstructionCallbacks.apply(this, data);
+  this._invokeConstructionCallbacks.apply(this, arguments);
   // Copy properties to instance by default
   for (let [key, value] of ObjectEntries(properties)) {
     this[key] = value;
   }
-
   return this;
 };
 
@@ -61,5 +59,8 @@ _.extend(
 _.extend(SpaceError, _.omit(SpaceObject, 'toString'), {
   __keepToStringMethod__: true // Do not override #toString method
 });
+SpaceError.prototype.toString = function() {
+  return this.message;
+};
 
 export default SpaceError;
