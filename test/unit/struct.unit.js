@@ -4,11 +4,16 @@ import SpaceObject from '../../lib/object.js';
 
 describe('Struct', function() {
 
+  const MyMixin = {
+    onConstruction: sinon.spy()
+  };
+
   class MyTestStruct extends Struct {
     fields() {
       return {name: String, age: Integer};
     }
   }
+  MyTestStruct.mixin([MyMixin]);
 
   class MyExtendedTestStruct extends MyTestStruct {
     fields() {
@@ -22,13 +27,11 @@ describe('Struct', function() {
     expect(Struct.prototype).to.be.instanceof(SpaceObject);
   });
 
-  xit("calls the super constructor", () => {
-    const constructorSpy = sinon.spy(SpaceObject.prototype, 'constructor');
-    const data = {};
-    const struct = new Struct(data);
-    expect(constructorSpy).to.have.been.calledWithExactly(data);
-    expect(constructorSpy).to.have.been.calledOn(struct);
-    constructorSpy.restore();
+  it("calls the super constructor", () => {
+    const data = {name: 'Dominik', age: 26};
+    const struct = new MyTestStruct(data);
+    expect(MyMixin.onConstruction).to.have.been.calledWithExactly(data);
+    expect(MyMixin.onConstruction).to.have.been.calledOn(struct);
   });
 
   describe('defining fields', () => {
