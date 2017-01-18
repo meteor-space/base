@@ -1,26 +1,24 @@
-import Module from '../../lib/module.js';
-import Application from '../../lib/application.js';
+import Module from '../../src/module.js';
+import App from '../../src/app.js';
+import {expect} from 'chai';
 
 describe('Building applications based on modules', function() {
 
-  beforeEach(function() {
-    Module.published = {}; // reset published space modules
-  });
 
   it('loads required module correctly', function() {
 
     let testValue = {};
     let testResult = null;
 
-    Module.define('FirstModule', {
-      onInitialize: function() {
+    class FirstModule extends Module {
+      onInitialize() {
         this.injector.map('testValue').to(testValue);
       }
-    });
+    }
 
-    Application.create({
-      requiredModules: ['FirstModule'],
-      dependencies: { testValue: 'testValue' },
+    new App({
+      dependencies: {testValue: 'testValue'},
+      modules: [new FirstModule()],
       onInitialize: function() { testResult = this.testValue; }
     });
 
@@ -33,17 +31,17 @@ describe('Building applications based on modules', function() {
     const appValue = 'application configuration';
     let testResult = null;
 
-    Module.define('FirstModule', {
-      onInitialize: function() {
+    class FirstModule extends Module {
+      onInitialize() {
         this.injector.map('moduleValue').to(moduleValue);
-      },
-      onStart: function() {
+      }
+      onStart() {
         testResult = this.injector.get('moduleValue');
       }
-    });
+    }
 
-    const app = Application.create({
-      requiredModules: ['FirstModule'],
+    const app = new App({
+      modules: [new FirstModule()],
       dependencies: { moduleValue: 'moduleValue' },
       onInitialize: function() {
         this.injector.override('moduleValue').toStaticValue(appValue);
