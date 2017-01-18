@@ -1,8 +1,10 @@
 import _ from 'underscore';
-import Module from '../../lib/module.js';
-import Application from '../../lib/application.js';
+import Module from '../../src/module.js';
+import App from '../../src/app.js';
+import {expect} from 'chai';
+import sinon from 'sinon';
 
-describe("Space.base - Application lifecycle hooks", function() {
+describe("App lifecycle hooks", function() {
 
   // TEST HELPERS
 
@@ -49,16 +51,14 @@ describe("Space.base - Application lifecycle hooks", function() {
   };
 
   beforeEach(() => {
-    // reset published space modules
-    Module.published = {};
     // Setup lifecycle hooks with sinon spys
     this.firstHooks = createLifeCycleHookSpies();
     this.secondHooks = createLifeCycleHookSpies();
     this.appHooks = createLifeCycleHookSpies();
-    // Create a app setup with two modules and use the spied apon hooks
-    Module.define('First', this.firstHooks);
-    Module.define('Second', _.extend(this.secondHooks, { requiredModules: ['First'] }));
-    this.app = Application.create(_.extend(this.appHooks, { requiredModules: ['Second'] }));
+    // Create a app setup with two modules and use the spied added hooks
+    const first = new Module(this.firstHooks);
+    const second = new Module(_.extend(this.secondHooks, { modules: [first] }));
+    this.app = new App(_.extend(this.appHooks, { modules: [second] }));
   });
 
   it("runs the initialize hooks in correct order", () => {
