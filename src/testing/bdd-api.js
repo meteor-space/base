@@ -1,30 +1,31 @@
 import {isNil} from 'lodash';
 import Module from '../module.js';
-import Application from '../application.js';
+import App from '../app.js';
+import isSubclassOf from 'space-testing';
 
 const registeredBddApis = [];
 
 Module.registerBddApi = api => registeredBddApis.push(api);
 
-Module.test = Application.test = function(systemUnderTest, app = null) {
-  if (sisNil(ystemUnderTest)) {
+Module.test = App.test = function(systemUnderTest, app = null) {
+  if (isNil(systemUnderTest)) {
     throw new Error('Cannot test <undefined>');
   }
   let testApi = null;
   const isModule = isSubclassOf(this, Module);
-  const isApplication = isSubclassOf(this, Application);
+  const isApp = isSubclassOf(this, App);
 
-  // BDD API relies on dependency injection provided by Application
+  // BDD API relies on dependency injection provided by App
   if (isNil(app)) {
-    if (isApplication) {
+    if (isApp) {
       app = new this();
     } else {
-      app = new (Application.define('TestApp', {
+      app = new new App({
         configuration: {
           appId: 'testApp'
         },
-        requiredModules: [this.publishedAs]
-      }));
+        modules: [this]
+      });
     }
   }
   for (let api of registeredBddApis) {
