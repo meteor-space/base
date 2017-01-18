@@ -1,27 +1,31 @@
-import Logger from './logger.js';
-import {capitalize, isNil, get, set, isFunction} from 'lodash';
-require('./lib/underscore-deep-extend-mixin.js');
+import {capitalize, isNil, get, set, isFunction, includes} from 'lodash';
+import deepExtend from 'deep-extend';
 
 class Module {
 
   static ERRORS = {
+    appMissing: 'Instance of App is required to initialize module',
     injectorMissing: 'Instance of Injector is required to initialize module',
     invalidModule(value) {
-      return `Provided value '${value}' is not an instance of Module or
-      class inheriting from Module`;
+      return `Provided value '${value}' is not an instance of Module`;
+    },
+    invalidState(currentState, expectedStates) {
+      return `Expected module with current state of '${currentState}' to be in
+      '${expectedStates}'`;
+    },
+    invalidEnvironment(action, currentEnv) {
+      return `Trying to run action '${action}' on '${currentEnv}' environment`;
     }
   };
 
-  configuration = {
-    logging: {isEnabled: false}
-  };
-  modules = [];
-  // An array of paths to classes that you want to become
-  // singletons in your application e.g: ['EventBus']
-  // these are automatically mapped and created on `app.run()`
-  singletons = [];
-  injector = null;
-  _state = 'constructed';
+  STATES = {
+    constructed: `constructed`,
+    configuring: `configuring`,
+    initializing: `initializing`,
+    initialized: `initialized`,
+    running: `running`,
+    stopped: `stopped`
+  }
 
   /**
    * Create a Module.
@@ -29,66 +33,100 @@ class Module {
    * @param {Object} [properties.configuration] Configuration for Module.
    */
   constructor(properties = {}) {
+    // On time writing this package there is issue with Babel and class
+    // properties on inheriting classes
+    // TODO: move this to class property when its fixed
+    if (isNil(properties.modules)) {properties.modules = [];}
+    if (isNil(properties.configuration)) {
+      properties.configuration = {
+        log: {isEnabled: false}
+      };
+    }
+
     for (let [key, value] of Object.entries(properties)) {
       this[key] = value;
     }
+
+    this.injector = null;
+    this._state = this.STATES.constructed;
+    this._validateModules();
   }
 
   /**
    * Initializes module.
    * @param  {App}  app Application that requires module.
    * @param  {Injector}  injector Instance of injector set on application.
-   * @param  {Boolean} [isSubModule=false] Indicates that initialization is done
    * for submodule.
+   * @throws {Error} Will throw an error if the app argument is missing
+   * @throws {Error} Will throw an error if the injector argument is missing.
    */
-  initialize(app, injector, isSubModule = false) {
+  initialize(app, injector) {
+    if (isNil(app)) {
+      throw new Error(this.constructor.ERRORS.appMissing);
+    }
     if (isNil(injector)) {
       throw new Error(this.constructor.ERRORS.injectorMissing);
     }
     this.app = app;
     this.injector = injector;
 
-    if (!this.is('constructed')) {return;} // Only initialize once
-    this._state = 'configuring';
+    if (!this.hasState(this.STATES.constructed)) {return;} // Only initialize once
+    this._state = this.STATES.configuring;
 
-    this._initializeLogger(isSubModule);
+    this._initializeLogger();
     this.log.debug(`${this.constructor.name}: initialize`);
 
-    if (!isSubModule) {
-      this._mapTopLevelModuleDependencies();
-    }
     this._initializeModules();
-    this._mergeConfigurationWithApp(app, isSubModule);
+    this._mergeConfigurationWithApp(this.app);
 
-    this._runBeforeInitializeHooks();
-
-    if (!isSubModule) {return;}
-    // Top-level module
-    this.injector.map('configuration').to(this.configuration);
-    this._runOnInitializeHooks();
-    this._autoMapSingletons();
-    this._autoCreateSingletons();
-    this._runAfterInitializeHooks();
+    this._runHooks();
   }
 
   /**
    * Changes module state to 'running' and invokes lifecycle 'start' action.
+   * @throws {Error} Will throw an error if the module is not in correct state.
    */
   start() {
-    if (this.is('running')) {return;}
+    this._validateState([
+      this.STATES.initialized, this.STATES.stopped, this.STATES.running
+    ]);
+
+    if (this.hasState(this.STATES.running)) {return;}
     this._runLifeCycleAction('start');
-    this._state = 'running';
+    this._state = this.STATES.running;
+  }
+
+  /**
+   * Changes module state to 'stopped' and invokes lifecycle 'stop' action.
+   * @throws {Error} Will throw an error if the module is not in correct state.
+   */
+  stop() {
+    this._validateState([
+      this.STATES.initialized, this.STATES.stopped, this.STATES.running
+    ]);
+
+    if (this.hasState(this.STATES.stopped)) {return;}
+    this._runLifeCycleAction('stop', () => {});
+    this._state = this.STATES.stopped;
   }
 
   /**
    * Restarts module state and invokes all associated lifecycle hooks.
+   * @throws {Error} Will throw an error if the module is not in correct state.
    */
   reset() {
-    // Don't allow reseting on production env
-    if (this._isServer() && this._isProduction()) {return;}
+    this._validateState([
+      this.STATES.initialized, this.STATES.stopped, this.STATES.running
+    ]);
+
+    if (!this._isAllowedToResetOnProduction()) {
+      throw new Error(
+        this.constructor.ERRORS.invalidEnvironment('reset', process.env.NODE_ENV)
+      );
+    }
     if (this._isResetting) {return;}
 
-    const restartRequired = this.is('running');
+    const restartRequired = this.hasState(this.STATES.running);
     this._isResetting = true;
     if (restartRequired) {this.stop();}
     this._runLifeCycleAction('reset');
@@ -96,34 +134,28 @@ class Module {
   }
 
   /**
-   * Changes module state to 'stopped' and invokes lifecycle 'stop' action.
-   */
-  stop() {
-    if (this.is('stopped')) {return;}
-    this._runLifeCycleAction('stop', () => {});
-    this._state = 'stopped';
-  }
-
-  /**
    * Evaluates if module is in state.
    * @param  {String}  expectedState One of available states.
    * @return {Boolean}
    */
-  is(expectedState) {
+  hasState(expectedState) {
     return expectedState === this._state;
   }
 
   /**
    * Gets specific nested configuration.
    * @param  {String} path Path to nested configuration with dot notation.
-   * @return {*|null}
+   * @return {*|undefined}
    * @example
    * new Module().getConfig('foo');
    * new Module().getConfig('foo.bar');
    * new Module().getConfig('foo.bar.baz');
    */
-  getConfig(path) {
-    return get(this.configuration, path);
+  getConfig(path, defaultValue) {
+    let configuration = isNil(this.app) ?
+      this.configuration : this.app.configuration;
+
+    return get(configuration, path) || defaultValue;
   }
 
   /**
@@ -136,30 +168,60 @@ class Module {
    * new Module().setConfig('foo.bar.baz', 'value');
    */
   setConfig(path, value) {
-    return set(this.configuration, path, value);
+    let configuration = isNil(this.app) ?
+      this.configuration : this.app.configuration;
+
+    return set(configuration, path, value);
+  }
+
+  /**
+   * Evaluates if current environment is in production.
+   * @return {Boolean}
+   */
+  isProduction() {
+    return this.isOnEnviroment('production');
+  }
+
+  /**
+   * Evaluates if current environment matches provided one.
+   * @param  {String}  env
+   * @return {Boolean}
+   */
+  isOnEnviroment(env) {
+    return process.env.NODE_ENV === env;
+  }
+
+  /**
+   * Validates if module is in allowed states.
+   * @param  {String[]} expectedStates Allowed states list
+   * @throws {Error} Will throw an error if the module is not in correct state.
+   */
+  _validateState(allowedStates) {
+    if (!includes(allowedStates, this._state)) {
+      throw new Error(
+        this.constructor.ERRORS.invalidState(this._state, allowedStates.join(', '))
+      );
+    }
   }
   /**
-   * Initializes logger instance no module.
-   * @param {Object} config - Configuration for logger.
-   * @param  {Boolean} isSubModule Indicates that initialization is done
-   * for submodule.
+   * Validates set modules.
+   * @throws {Error} Will throw an error if one of set modules on Module
+   * is not inhering from Module.
    */
-  _initializeLogger(isSubModule) {
-    if (!isSubModule) {
-      const loggingConfig = this.getConfig('logging');
-      this.log = new Logger(loggingConfig);
-      if (loggingConfig.isEnabled) {this.log.start();}
-    } else {
-      this.log = this.injector.get('log');
+  _validateModules() {
+    for (let module of this.modules) {
+      if (!(module instanceof Module)) {
+        const strinified = JSON.stringify(module, null, 2);
+        throw new Error(this.constructor.ERRORS.invalidModule(strinified));
+      }
     }
   }
 
   /**
-   * Setup basic mappings required by all modules.
+   * Initializes logger instance no module.
    */
-  _mapTopLevelModuleDependencies() {
-    this.injector.map('log').to(this.log);
-    this.injector.map('Injector').to(this.injector);
+  _initializeLogger() {
+    this.log = this.injector.get('log');
   }
 
   /**
@@ -167,27 +229,35 @@ class Module {
    */
   _initializeModules() {
     for (let module of this.modules) {
-      module.initialize(this.app, this.injector, isSubModule = true);
+      module.initialize(this.app, this.injector);
     }
   }
 
-  _mergeConfigurationWithApp(app, isSubModule) {
-    // Merge in own configuration to give the chance for overwriting.
-    if (isSubModule) {
-      _.deepExtend(this.app.configuration, this.configuration);
-      this.configuration = this.app.configuration;
-    } else {
-      // The app can override all other modules
-      _.deepExtend(this.configuration, this.constructor.prototype.configuration);
-    }
+  /**
+   * Runs through 'beforeInitialize', 'onInitialize', 'afterInitialize' hooks.
+   */
+  _runHooks() {
+    this._runBeforeInitializeHooks();
+    this._runOnInitializeHooks();
+    this._runAfterInitializeHooks();
+  }
+  /**
+   * Merge in own configuration to give the chance for overwriting.
+   * @param  {App} app
+   */
+  _mergeConfigurationWithApp(app) {
+    const defaults = deepExtend(this.configuration, app.configuration);
+    deepExtend(app.configuration, defaults);
+    this.configuration = app.configuration;
   }
 
   /**
    * Provide lifecycle hook before any initialization has been done.
    */
   _runBeforeInitializeHooks() {
-    if (!isFunction(this.beforeInitialize)) {return;}
-    this.beforeInitialize();
+    if (isFunction(this.beforeInitialize)) {
+      this.beforeInitialize();
+    }
   }
 
   /**
@@ -199,7 +269,7 @@ class Module {
    */
   _runLifeCycleAction(action, fn) {
     this._invokeActionOnModules(action);
-    this.log.debug(`${this.constructor.publishedAs}: ${action}`);
+    this.log.debug(`${this.constructor.name}: ${action}`);
 
     if (isFunction(this[`before${capitalize(action)}`])) {
       this[`before${capitalize(action)}`]();
@@ -219,38 +289,14 @@ class Module {
   _runOnInitializeHooks() {
     this._invokeActionOnModules('_runOnInitializeHooks');
     // Never run this hook twice
-    if (this.is('configuring')) {
-      this.log.debug(`${this.constructor.publishedAs}: onInitialize`);
-      this._state = 'initializing';
+    if (this.hasState(this.STATES.configuring)) {
+      this.log.debug(`${this.constructor.name}: onInitialize`);
+      this._state = this.STATES.initializing;
       // Inject required dependencies into this module
       this.injector.injectInto(this);
       // Call custom lifecycle hook if existant
       if (isFunction(this.onInitialize)) {
         this.onInitialize();
-      }
-    }
-  }
-
-  _autoMapSingletons() {
-    this._invokeActionOnModules('_autoMapSingletons');
-    if (this.is('initializing')) {
-      this.log.debug(`${this.constructor.publishedAs}: _autoMapSingletons`);
-      this._state = 'auto-mapping-singletons';
-      // Map classes that are declared as singletons
-      for (let singleton of this.singletons) {
-        this.injector.map(singleton).asSingleton();
-      }
-    }
-  }
-
-  _autoCreateSingletons() {
-    this._invokeActionOnModules('_autoCreateSingletons');
-    if (this.is('auto-mapping-singletons')) {
-      this.log.debug(`${this.constructor.publishedAs}: _autoCreateSingletons`);
-      this._state = 'auto-creating-singletons';
-      // Create singleton classes
-      for (let singleton of this.singletons) {
-        this.injector.create(singleton);
       }
     }
   }
@@ -261,9 +307,9 @@ class Module {
   _runAfterInitializeHooks() {
     this._invokeActionOnModules('_runAfterInitializeHooks');
     // Never run this hook twice
-    if (this.is('auto-creating-singletons')) {
-      this.log.debug(`${this.constructor.publishedAs}: afterInitialize`);
-      this._state = 'initialized';
+    if (this.hasState(this.STATES.initializing)) {
+      this.log.debug(`${this.constructor.name}: afterInitialize`);
+      this._state = this.STATES.initialized;
       // Call custom lifecycle hook if existant
       if (isFunction(this.afterInitialize)) {
         this.afterInitialize();
@@ -271,29 +317,26 @@ class Module {
     }
   }
 
+  /**
+   * Runs lifecycle on each set modules on Module.
+   * @param  {String} action
+   */
   _invokeActionOnModules(action) {
-    for (let moduleId of this.requiredModules) {
-      if (isFunction(this.app.modules[moduleId][action])) {
-        this.app.modules[moduleId][action]();
+    for (let module of this.modules) {
+      if (isFunction(module[action])) {
+        module[action]();
       }
     }
   }
 
-  _wrapLifecycleHook(hook, wrapper) {
-    if (isNil(this[hook])) {
-      this[hook] = () => {};
-    }
-    this[hook] = _.wrap(this[hook], wrapper);
+  /**
+   * Futureproofing any more robust evaluation.
+   * @return {Boolean}
+   */
+  _isAllowedToResetOnProduction() {
+    return !this.isProduction();
   }
 
-
-  _isServer() {
-    return !(typeof window !== 'undefined' && window.document);
-  }
-
-  _isProduction() {
-    return process.env.NODE_ENV === 'production';
-  }
 }
 
 export default Module;
