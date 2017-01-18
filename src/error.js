@@ -1,66 +1,78 @@
-import _ from 'underscore';
-import {entries as ObjectEntries} from 'lodash';
-import {optional, Integer} from 'simplecheck';
-import Struct from './struct.js';
-import SpaceObject from './object.js';
+import {isString, isObject, isNil} from 'lodash';
+import {ensure, optional, oneOf, Integer} from 'simplecheck';
+import ExtendableError from 'es6-error';
 
-const IntermediateInheritor = function() {};
-IntermediateInheritor.prototype = Error.prototype;
+class SpaceError extends ExtendableError {
 
-const SpaceError = function(params) {
-  let data = null;
-  if (_.isString(params)) {
-    data = { message: params };
-  } else if (_.isObject(params)) {
-    data = params;
-  } else {
-    data = {};
+  /**
+  * Returns required fields pattern for data.
+  * @return {Object}
+  */
+  fields() {
+    return {
+      name: String,
+      message: String,
+      stack: optional(String),
+      code: optional(Integer)
+    };
   }
-  const properties = this.extractErrorProperties(data);
 
-  this._checkFields(properties);
-  this._invokeConstructionCallbacks.apply(this, arguments);
-  // Copy properties to instance by default
-  for (let [key, value] of ObjectEntries(properties)) {
-    this[key] = value;
-  }
-  return this;
-};
+  /**
+   * Create an SpaceError.
+   * @param  {String|Object} messageOrData Error message as string or object
+   * containing message with other properties matching fields pattern.
+   * @throws {MatchError} Will throw an error if the passed data object does
+   * not match fields pattern.
+   * @throws {MatchError} Will throw an error if the argument is not a string or
+   * an object.
+   */
+  constructor(messageOrData = '') {
+    let data = {};
+    if (isString(messageOrData) || isObject(messageOrData)) {
+      data = isObject(messageOrData) ? messageOrData : {message: messageOrData};
+      data.message = data.message ?
+        data.message : SpaceError.prototype.message || '';
+    } else {
+      // Throw nice error
+      ensure(messageOrData, oneOf(String, Object));
+    }
 
-SpaceError.prototype = new IntermediateInheritor();
+    super(data.message);
 
-_.extend(
-  SpaceError.prototype, // target
-  Struct.prototype,
-  _.omit(SpaceObject.prototype, 'toString'),
-  {
-    message: '',
-    fields() {
-      let fields = _.clone(this.constructor.fields) || {};
-      _.extend(fields, {
-        name: String,
-        message: String,
-        stack: optional(String),
-        code: optional(Integer)
-      });
-      return fields;
-    },
-    extractErrorProperties(data) {
-      let message = data.message ? data.message : this.message;
-      let error = Error.call(this, message);
-      data.name = error.name = this.constructor.name;
-      data.message = error.message;
-      if (error.stack !== undefined) data.stack = error.stack;
-      return data;
+    let error = Error.call(this, data.message);
+    data.name = error.name = this.constructor.name;
+    if (error.stack !== undefined) data.stack = error.stack;
+
+    this._ensureDataMatchesFieldsPattern(data);
+
+    for (let [key, value] of Object.entries(data)) {
+      this[key] = value;
     }
   }
-);
 
-_.extend(SpaceError, _.omit(SpaceObject, 'toString'), {
-  __keepToStringMethod__: true // Do not override #toString method
-});
-SpaceError.prototype.toString = function() {
-  return this.message;
-};
+  /**
+   * Converts SpaceError data to plain object.
+   * @return {Object}
+   */
+  toPlainObject() {
+    const copy = {};
+    for (let key of Object.keys(this.fields())) {
+      if (!isNil(this[key])) {
+        copy[key] = this[key];
+      }
+    }
+    return copy;
+  }
+
+  /**
+   * Ensures if provided data does match defined pattern.
+   * @param  {Object} data Data to validate.
+   * @throws {MatchError} Will throw an error if the passed data object does
+   * not match fields definition.
+   */
+  _ensureDataMatchesFieldsPattern(data) {
+    ensure(data, this.fields());
+  }
+}
 
 export default SpaceError;
