@@ -1,19 +1,34 @@
-import _ from 'underscore';
 import {ensure} from 'simplecheck';
 import {isNil} from 'lodash';
-import SpaceObject from './object.js';
 
-class Struct extends SpaceObject {
+class Struct {
 
-  constructor(data = {}) {
-    super(data);
-    this._checkFields(data);
-  }
-
+  /**
+  * Returns required fields pattern for data.
+  * @return {Object}
+  */
   fields() {
-    return _.clone(this.constructor.fields) || {};
+    return {};
   }
 
+  /**
+   * Create a Struct.
+   * @param  {Object} data Data matching fields pattern.
+   * @throws {MatchError} Will throw an error if the passed data object does
+   * not match fields pattern.
+   */
+  constructor(data = {}) {
+    this._ensureDataMatchesFieldsPattern(data);
+
+    for (let [key, value] of Object.entries(data)) {
+      this[key] = value;
+    }
+  }
+
+  /**
+   * Converts Struct data to plain object.
+   * @return {Object}
+   */
   toPlainObject() {
     const copy = {};
     for (let key of Object.keys(this.fields())) {
@@ -24,12 +39,15 @@ class Struct extends SpaceObject {
     return copy;
   }
 
-  //  Use the fields configuration to check given data during runtime
-  _checkFields(data) {
+  /**
+   * Ensures if provided data does match defined pattern.
+   * @param  {Object} data Data to validate.
+   * @throws {MatchError} Will throw an error if the passed data object does
+   * not match fields pattern.
+   */
+  _ensureDataMatchesFieldsPattern(data) {
     ensure(data, this.fields());
   }
 }
-Struct.fields = {};
-Struct.type('Space.Struct');
 
 export default Struct;
