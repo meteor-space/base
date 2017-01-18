@@ -1,162 +1,237 @@
-import Logger from '../../lib/logger.js';
-import LoggingAdapter from '../../lib/loggers/adapter.js';
-import SpaceObject from '../../lib/object.js';
+import Logger from '../../src/logger.js';
+import LoggingTransport from '../../src/logging-transports/logging-transport.js';
+import {expect} from 'chai';
+import sinon from 'sinon';
 
-const TestAdapter = LoggingAdapter.extend('TestAdapter', {
-  Constructor(lib) {
-    return this.setLibrary(lib);
+class MyTransport extends LoggingTransport {
+  constructor(lib) {
+    super(lib);
   }
-});
+}
 
 describe("Logger", function() {
 
   beforeEach(() => {
+    this.sb = sinon.sandbox.create();
     this.lib = {
-      debug: sinon.spy(),
-      info: sinon.spy(),
-      warning: sinon.spy(),
-      error: sinon.spy()
+      debug: this.sb.spy(),
+      info: this.sb.spy(),
+      warning: this.sb.spy(),
+      error: this.sb.spy()
     };
-    this.testAdapter = new TestAdapter(this.lib);
-    this.logger = new Logger();
   });
 
-  it('extends SpaceObject', () => {
-    expect(Logger.prototype).to.be.instanceof(SpaceObject);
+  afterEach(() => {
+    this.sb.reset();
   });
 
-  it("is available of both client and server", () => {
-    expect(this.logger).to.be.instanceOf(Logger);
+  describe(`contruction`, () => {
+    it(`sets logging state to stopped after construction`, () => {
+      const logger = new Logger();
+      expect(logger.hasState('stopped'));
+    });
+
+    it(`initializes adpaters as empty obejct`, () => {
+      const logger = new Logger();
+      expect(logger.getMappings()).to.be.eql({});
+    });
   });
 
-  describe('adapters', () => {
-    it('throws error if id does not exists', () => {
-      const adapter = new TestAdapter(sinon.spy());
-      expect(() => this.logger.addAdapter(undefined, adapter)).to.throw(
+  describe(`logging`, () => {
+    it(`allows to start logging`, () => {
+      const logger = new Logger();
+      logger.start();
+      logger.stop();
+
+      expect(logger.hasState('stopped'));
+    });
+
+    it(`allows to stop logging`, () => {
+      const logger = new Logger();
+      logger.stop();
+      logger.start();
+
+      expect(logger.hasState('running'));
+    });
+  });
+
+  describe(`evaluation`, () => {
+    it(`returns true if logger in in running state`, () => {
+      const logger = new Logger();
+      logger.start();
+      expect(logger.hasState('running')).to.be.true;
+    });
+
+    it(`returns false if logger is not in running state`, () => {
+      expect(new Logger().hasState('running')).to.be.false;
+    });
+  });
+
+  describe(`transports`, () => {
+    it('throws match error if id is not a string', () => {
+      const transport = new MyTransport(sinon.spy());
+      expect(() => new Logger().addTransport(undefined, transport)).to.throw(
         Logger.ERRORS.invalidId
       );
     });
 
-    it('throws error if id is not a string value', () => {
-      const adapter = new TestAdapter(sinon.spy());
-      expect(() => this.logger.addAdapter(adapter)).to.throw(
+    it('throws match error if id is omitted when adding transport', () => {
+      const transport = new MyTransport(sinon.spy());
+      expect(() => new Logger().addTransport(transport)).to.throw(
         Logger.ERRORS.invalidId
       );
     });
 
-    it('throws error if adapter would be overridden', () => {
-      const adapterId = 'testAdapter';
-      const adapter = new TestAdapter(sinon.spy());
+    it('throws error if transport would be overridden', () => {
+      const id = 'my-transport';
+      const transport = new MyTransport(sinon.spy());
 
-      this.logger.addAdapter(adapterId, adapter);
-      expect(() => this.logger.addAdapter(adapterId, adapter)).to.throw(
-        Logger.ERRORS.mappingExists(adapterId)
+      const logger = new Logger();
+      logger.addTransport(id, transport);
+      expect(() => logger.addTransport(id, transport)).to.throw(
+        Logger.ERRORS.mappingExists(id)
       );
     });
 
-    it('adds adapter', () => {
-      const adapterId = 'testAdapter';
-      const adapter = new TestAdapter(sinon.spy());
+    it('adds transport', () => {
+      const id = 'my-transport';
+      const transport = new MyTransport(sinon.spy());
 
-      this.logger.addAdapter(adapterId, adapter);
-      expect(this.logger.getAdapter(adapterId)).to.equal(adapter);
-      expect(this.logger.hasAdapter(adapterId)).to.be.true;
+      const logger = new Logger();
+      logger.addTransport(id, transport);
+      expect(logger.getTransport(id)).to.equal(transport);
+      expect(logger.hasTransport(id)).to.be.true;
     });
 
-    it('allows to override adapter', () => {
-      const adapterId = 'testAdapter';
-      const adapter = new TestAdapter(sinon.spy());
-      const overridingAdapter = new TestAdapter(sinon.spy());
+    it('allows to override transport', () => {
+      const id = 'my-transport';
+      const transport = new MyTransport(sinon.spy());
+      const otherTransport = new MyTransport(sinon.spy());
 
-      this.logger.addAdapter(adapterId, adapter);
+      const logger = new Logger();
+      logger.addTransport(id, transport);
       expect(() => {
-        this.logger.overrideAdapter(adapterId, overridingAdapter);
+        logger.overrideTransport(id, otherTransport);
       }).to.not.throw(Error);
-      expect(this.logger.getAdapter(adapterId)).to.equal(overridingAdapter);
+      expect(logger.getTransport(id)).to.equal(otherTransport);
     });
 
-    it('resolves adapter by id', () => {
-      const consoleAdapter = new TestAdapter(sinon.spy());
-      const fileAdapter = new TestAdapter(sinon.spy());
+    it('resolves transport by id', () => {
+      const consoleTransport = new MyTransport(sinon.spy());
+      const fileTransport = new MyTransport(sinon.spy());
 
-      this.logger.addAdapter('console', consoleAdapter);
-      this.logger.addAdapter('file', fileAdapter);
-      expect(this.logger.getAdapter('console')).to.equal(consoleAdapter);
-      expect(this.logger.getAdapter('file')).to.equal(fileAdapter);
-      expect(this.logger.getAdapter('non-existing-adapter')).to.be.null;
+      const logger = new Logger();
+      logger.addTransport('console', consoleTransport);
+      logger.addTransport('file', fileTransport);
+      expect(logger.getTransport('console')).to.equal(consoleTransport);
+      expect(logger.getTransport('file')).to.equal(fileTransport);
+      expect(logger.getTransport('non-existing-transport')).to.be.null;
     });
 
-    it('removes adapter', () => {
-      const adapterId = 'testAdapter';
-      const adapter = new TestAdapter(sinon.spy());
+    it('removes transport', () => {
+      const id = 'my-transport';
+      const transport = new MyTransport(sinon.spy());
 
-      this.logger.addAdapter(adapterId, adapter);
-      this.logger.removeAdapter(adapterId);
-      expect(this.logger.getAdapter(adapterId)).to.be.null;
-      expect(this.logger.hasAdapter(adapterId)).to.be.false;
+      const logger = new Logger();
+      logger.addTransport(id, transport);
+      logger.removeTransport(id);
+      expect(logger.getTransport(id)).to.be.null;
+      expect(logger.hasTransport(id)).to.be.false;
     });
 
-    it('returns adapters', () => {
-      const adapters = {
-        console: new TestAdapter(sinon.spy()),
-        file: new TestAdapter(sinon.spy())
+    it(`returns true if logger has an transport added`, () => {
+      const id = 'my-transport';
+      const logger = new Logger();
+      logger.addTransport(id, new MyTransport(sinon.spy()));
+      expect(logger.hasTransport(id)).to.be.true;
+    });
+
+    it(`returns false transport is not added to logger`, () => {
+      const id = 'my-transport';
+      const logger = new Logger();
+      expect(logger.hasTransport(id)).to.be.false;
+    });
+
+    it('returns transports', () => {
+      const transports = {
+        console: new MyTransport(sinon.spy()),
+        file: new MyTransport(sinon.spy())
       };
-      this.logger.addAdapter('console', adapters.console);
-      this.logger.addAdapter('file',  adapters.file);
-      expect(this.logger.getAdapters()).to.be.eql(adapters);
+
+      const logger = new Logger();
+      logger.addTransport('console', transports.console);
+      logger.addTransport('file',  transports.file);
+      expect(logger.getTransports()).to.have.members([
+        transports.console, transports.file
+      ]);
+    });
+
+    it(`returns all mappings as an object`, () => {
+      const transports = {
+        console: new MyTransport(sinon.spy()),
+        file: new MyTransport(sinon.spy())
+      };
+
+      const logger = new Logger();
+      logger.addTransport('console', transports.console);
+      logger.addTransport('file',  transports.file);
+      expect(logger.getMappings()).to.be.eql(transports);
     });
   });
 
   it("only logs after starting", () => {
-    this.logger.addAdapter('my-logger', this.testAdapter);
+    const logger = new Logger();
+    logger.addTransport('my-logger', new MyTransport(this.lib));
     const message = 'My log message';
 
-    expect(this.logger.isRunning()).to.be.false;
-    expect(this.logger.isStopped()).to.be.true;
-    this.logger.info(message);
+    expect(logger.isRunning()).to.be.false;
+    expect(logger.isStopped()).to.be.true;
+    logger.info(message);
     expect(this.lib.info).to.not.be.called;
 
-    this.logger.start();
-    expect(this.logger.isRunning()).to.be.true;
-    expect(this.logger.isStopped()).to.be.false;
-    this.logger.info(message);
+    logger.start();
+    expect(logger.isRunning()).to.be.true;
+    expect(logger.isStopped()).to.be.false;
+    logger.info(message);
     expect(this.lib.info).to.be.calledOnce;
     expect(this.lib.info.calledWith(message)).to.be.true;
   });
 
   it("allows logging output to be stopped", () => {
-    this.logger.addAdapter('my-logger', this.testAdapter);
+    const logger = new Logger();
+    logger.addTransport('my-logger', new MyTransport(this.lib));
     const message = 'My log message';
 
-    expect(this.logger.isRunning()).to.be.false;
-    expect(this.logger.isStopped()).to.be.true;
-    this.logger.start();
-    expect(this.logger.isRunning()).to.be.true;
-    expect(this.logger.isStopped()).to.be.false;
-    this.logger.info(message);
+    expect(logger.isRunning()).to.be.false;
+    expect(logger.isStopped()).to.be.true;
+    logger.start();
+    expect(logger.isRunning()).to.be.true;
+    expect(logger.isStopped()).to.be.false;
+    logger.info(message);
     expect(this.lib.info.calledWith(message)).to.be.true;
 
-    this.logger.stop();
-    expect(this.logger.isRunning()).to.be.false;
-    expect(this.logger.isStopped()).to.be.true;
+    logger.stop();
+    expect(logger.isRunning()).to.be.false;
+    expect(logger.isStopped()).to.be.true;
 
-    this.logger.info(message);
+    logger.info(message);
     expect(this.lib.info).to.not.be.calledTwice;
   });
 
   describe('logging', () => {
-    it('allows multiple logging adapters to log same message', () => {
+    it('allows multiple logging transports to log same message', () => {
       const firstLib = {debug: sinon.spy()};
-      const firstAdapter = new TestAdapter(firstLib);
+      const firstTransport = new MyTransport(firstLib);
       const secondLib = {debug: sinon.spy()};
-      const secondAdapter = new TestAdapter(secondLib);
+      const secondTransport = new MyTransport(secondLib);
       const message = 'My log message';
 
-      this.logger.addAdapter('first', firstAdapter);
-      this.logger.addAdapter('second', secondAdapter);
-      this.logger.start();
+      const logger = new Logger();
+      logger.addTransport('first', firstTransport);
+      logger.addTransport('second', secondTransport);
+      logger.start();
 
-      this.logger.debug(message);
+      logger.debug(message);
       expect(firstLib.debug.calledWith(message)).to.be.true;
       expect(firstLib.debug).to.be.calledOnce;
       expect(secondLib.debug.calledWith(message)).to.be.true;
@@ -165,38 +240,42 @@ describe("Logger", function() {
 
     describe('logs message as', () => {
       it("debug", () => {
-        this.logger.addAdapter('my-logger', this.testAdapter);
-        this.logger.start();
+        const logger = new Logger();
+        logger.addTransport('my-logger', new MyTransport(this.lib));
+        logger.start();
 
         const message = 'My log message';
-        this.logger.debug(message);
+        logger.debug(message);
         expect(this.lib.debug.calledWith(message)).to.be.true;
       });
 
       it("info", () => {
-        this.logger.addAdapter('my-logger', this.testAdapter);
-        this.logger.start();
+        const logger = new Logger();
+        logger.addTransport('my-logger', new MyTransport(this.lib));
+        logger.start();
 
         const message = 'My log message';
-        this.logger.info(message);
+        logger.info(message);
         expect(this.lib.info.calledWith(message)).to.be.true;
       });
 
       it("warning", () => {
-        this.logger.addAdapter('my-logger', this.testAdapter);
-        this.logger.start();
+        const logger = new Logger();
+        logger.addTransport('my-logger', new MyTransport(this.lib));
+        logger.start();
 
         const message = 'My log message';
-        this.logger.warning(message);
+        logger.warning(message);
         expect(this.lib.warning.calledWith(message)).to.be.true;
       });
 
       it("error", () => {
-        this.logger.addAdapter('my-logger', this.testAdapter);
-        this.logger.start();
+        const logger = new Logger();
+        logger.addTransport('my-logger', new MyTransport(this.lib));
+        logger.start();
 
         const message = 'My log message';
-        this.logger.error(message);
+        logger.error(message);
         expect(this.lib.error.calledWith(message)).to.be.true;
       });
     });

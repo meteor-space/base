@@ -1,16 +1,32 @@
-import SpaceError from '../../lib/error.js';
+import SpaceError from '../../src/error.js';
+import {MatchError} from 'simplecheck';
+import {expect} from 'chai';
 
 describe("SpaceError", function() {
 
-  const MyError = SpaceError.extend('MyError', {
-    message: 'The default message for this error'
-  });
+  class MyError extends SpaceError {
+    constructor(messageOrData = 'The default message for this error') {
+      super(messageOrData);
+    }
+  }
 
-  it("is an instance of error", function() {
+  class MyOtherError extends SpaceError {
+    message = 'The other default message for this error';
+  }
+
+  class MyCustomError extends MyError {
+    fields() {
+      return Object.assign(super.fields(), {
+        customField: String
+      });
+    }
+  }
+
+  it("is an instance of Error", () => {
     expect(new MyError()).to.be.instanceof(Error);
   });
 
-  it("has same behavior as Space.Struct", function() {
+  it("has same behavior as Error", () => {
     const data = { message: 'test', code: 123 };
     const error = new MyError(data);
     expect(error).to.be.instanceof(Error);
@@ -20,48 +36,57 @@ describe("SpaceError", function() {
     expect(error.code).to.equal(data.code);
   });
 
-  it("is easy to add additional fields", function() {
-    MyError.fields = { customField: String };
-    const data = { message: 'test', code: 123, customField: 'test' };
-    const error = new MyError(data);
-    expect(error.customField).to.equal('test');
-    MyError.fields = {};
-  });
-
-  it("throws the prototype message by default", function() {
-    const throwWithDefaultMessage = function() {
-      throw new MyError();
-    };
-    expect(throwWithDefaultMessage).to.throw(MyError.prototype.message);
-  });
-
-  it("takes an optional message during construction", function() {
-    const myMessage = 'this is a custom message';
-    const throwWithCustomMessage = function() {
-      throw new MyError(myMessage);
-    };
-    expect(throwWithCustomMessage).to.throw(myMessage);
-  });
-
-  it("includes a stack trace", function() {
-    const error = new MyError();
-    expect(error.stack).to.be.a.string;
-  });
-
-  describe("applying mixins", function() {
-
-    it("supports mixin callbacks", function() {
-      const MyMixin = {
-        onConstruction: sinon.spy(),
-        onDependenciesReady: sinon.spy()
-      };
-      const MyMixinError = SpaceError.extend('MyMixinError', { mixin: MyMixin });
-      const param = 'test';
-      const error = new MyMixinError(param);
-      expect(MyMixin.onConstruction).to.have.been.calledOn(error);
-      expect(MyMixin.onConstruction).to.have.been.calledWithExactly(param);
+  describe(`construction`, () => {
+    it(`can be instantiated without passed arguments`, () => {
+      const error = new SpaceError();
+      expect(error.message).to.be.equal('');
     });
 
+    it("takes an optional message as a string during construction", () => {
+      const myMessage = 'this is a custom message';
+      expect(() => {throw new MyError(myMessage);}).to.throw(myMessage);
+    });
+
+    it("takes an optional properties matching fields pattern on construction", () => {
+      const data = { message: 'test', code: 123, customField: 'test' };
+      const error = new MyCustomError(data);
+      expect(error.customField).to.equal('test');
+    });
+
+    it(`allows to set message as instance property via class properties `, () => {
+      expect(new MyOtherError().message).to.be.equal(
+        'The other default message for this error'
+      );
+    });
+
+    it("throws the prototype message by default", () => {
+      expect(() => {throw new MyError();}).to.throw(MyError.prototype.message);
+    });
+
+    it("includes a stack trace", () => {
+      const error = new MyError();
+      expect(error.stack).to.be.a.string;
+    });
+
+    it(`throws error match error if passed argument is not a string or object`, () => {
+      expect(() => {throw new MyError(1234);}).to.throw(MatchError);
+    });
+
+    it(`ensures that additional custom fields are matching fields pattern`, () => {
+      expect(() => {
+        throw new MyCustomError({customField: 'foo'});
+      }).to.not.throw(MatchError);
+      expect(() => {
+        throw new MyCustomError({customField: 1234});
+      }).to.throw(MatchError);
+    });
   });
 
+  describe(`converison`, () => {
+    it(`returns data as plain object`, () => {
+      const data = { message: 'not found', code: 404,  customField: 'foo'};
+      const error = new MyCustomError(data);
+      expect(error.toPlainObject()).to.be.sameAs(data);
+    });
+  });
 });

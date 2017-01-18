@@ -1,6 +1,9 @@
-import {Injector} from '../../lib/injector.js';
-import SpaceObject from '../../lib/object.js';
-import Space from '../../lib/space.js';
+import {
+  Injector, ValueProvider, InstanceProvider, SingletonProvider
+} from '../../src/injector.js';
+import dependencies from '../../src/decorators/dependencies-decorator.js';
+import {expect} from 'chai';
+import sinon from 'sinon';
 
 describe('Injector', function() {
 
@@ -8,45 +11,119 @@ describe('Injector', function() {
     this.injector = new Injector();
   });
 
-  // ============ MAPPINGS ============
-
-  describe('working with mappings', () => {
-
-    it('injects into requested dependency', () => {
-      const myObject = {dependencies: {test: 'test'}};
-      const testValue = {};
-      this.injector.map('test').to(testValue);
-      this.injector.map('myObject').to(myObject);
-
-      expect(this.injector.get('myObject').test).to.equal(testValue);
+  describe(`construction`, () => {
+    it('initializes mappings as empty object', () => {
+      const injector = new Injector();
+      expect(injector.getMappings()).to.be.instanceof(Object);
+      expect(injector.getMappings()).to.be.empty;
     });
 
-    it(`throws error if mapping doesn't exist`, () => {
-      const id = 'blablub';
-      expect(()=> this.injector.get(id)).to.throw(
-        this.injector.ERRORS.noMappingFound(id).message
+    it(`initializes default providers if none are passed on construction`, () => {
+      expect(new Injector().getProviders()).to.be.eql(Injector.DEFAULT_PROVIDERS);
+    });
+
+    it(`takes providers as an object with instantiationType: provider relation`, () => {
+      const providers = {my: sinon.spy()};
+      const injector = new Injector(providers);
+      expect(injector.getProviders()).to.be.eql(providers);
+    });
+  });
+
+  describe(`providers`, () => {
+    const loremIpsum = 'lorem ipsum';
+    class LoremIpsumProvider {
+      provide() {
+        return loremIpsum;
+      }
+    }
+
+    it(`returns all availabe providers as an object with relation of
+    instantiationType: provider`, () => {
+      this.injector.addProvider('toLoremIpsum', LoremIpsumProvider);
+
+      const expectedProviders = {
+        toLoremIpsum: LoremIpsumProvider,
+        to: ValueProvider,
+        toStaticValue: ValueProvider,
+        asStaticValue: ValueProvider,
+        toClass: InstanceProvider,
+        toInstancesOf: InstanceProvider,
+        asSingleton: SingletonProvider,
+        toSingleton: SingletonProvider
+      };
+      expect(this.injector.getProviders()).to.be.eql(expectedProviders);
+    });
+
+    it('adds customer provider', () => {
+      this.injector.addProvider('toLoremIpsum', LoremIpsumProvider);
+      this.injector.map('test').toLoremIpsum();
+      expect(this.injector.get('test')).to.equal(loremIpsum);
+    });
+
+    it(`throws invalid instantiation type  when instantiation type is not passed`, () => {
+      expect(() => {this.injector.addProvider(LoremIpsumProvider);}).to.throw(
+        Injector.ERRORS.invalidInstantiationType
       );
     });
 
-    it('throws error if mapping would be overriden', () => {
-      this.injector.map('test').to('test');
-      const override = () => this.injector.map('test').to('other');
-      expect(override).to.throw(Error);
+    it('throws error if provider would be overriden', () => {
+      const instantiationType = 'toLoremIpsum';
+      this.injector.addProvider(instantiationType, LoremIpsumProvider);
+      expect(() => {
+        this.injector.addProvider(instantiationType, LoremIpsumProvider);
+      }).to.throw(
+        Injector.ERRORS.providerExists(instantiationType)
+      );
     });
 
-    it('can remove existing mappings', () => {
-      this.injector.map('test').to('test');
-      this.injector.remove('test');
-      expect(()=> this.injector.get('test')).to.throw(Error);
+    it(`returns provider by injectionType`, () => {
+      expect(this.injector.getProvider('to')).to.be.equal(ValueProvider);
+      expect(this.injector.getProvider('toStaticValue')).to.be.equal(ValueProvider);
+      expect(this.injector.getProvider('asStaticValue')).to.be.equal(ValueProvider);
+      expect(this.injector.getProvider('toClass')).to.be.equal(InstanceProvider);
+      expect(this.injector.getProvider('toInstancesOf')).to.be.equal(InstanceProvider);
+      expect(this.injector.getProvider('asSingleton')).to.be.equal(SingletonProvider);
+      expect(this.injector.getProvider('toSingleton')).to.be.equal(SingletonProvider);
     });
 
-    it('provides an alias for getting values', () => {
-      this.injector.map('test').to('test');
-      expect(this.injector.create('test')).to.equal('test');
+    it(`returns null if instantiation type is not provided`, () => {
+      expect(this.injector.getProvider('my-instantiation-type')).to.be.equal(null);
+    });
+  });
+
+  describe('mappings', () => {
+    it(`throws invalid id error if passed id on mapping is undefined or null`, () => {
+      expect(() => {
+        this.injector.map(undefined);
+      }).to.throw(Injector.ERRORS.invalidId);
+      expect(() => {
+        this.injector.map(null);
+      }).to.throw(Injector.ERRORS.invalidId);
     });
 
-    it('uses the toString method if its not a string id', () => {
-      class TestClass extends SpaceObject {
+    it('throws mapping exists error if mapping would be overriden', () => {
+      const id = 'foo';
+      this.injector.map(id).to('bar');
+      expect(() => {
+        this.injector.map(id).to('other');
+      }).to.throw(Injector.ERRORS.mappingExists(id));
+    });
+
+    it('injects into requested dependency', () => {
+      const myDependant = {
+        dependencies: {'nameForDependency': 'dependencyId'}
+      };
+      const testValue = {};
+      this.injector.map('dependencyId').to(testValue);
+      this.injector.map('myDependant').to(myDependant);
+
+      expect(
+        this.injector.get('myDependant').nameForDependency
+      ).to.equal(testValue);
+    });
+
+    it('uses the toString method if id is not a string', () => {
+      class TestClass  {
         static toString() {return 'TestClass';}
       }
 
@@ -54,84 +131,169 @@ describe('Injector', function() {
       expect(this.injector.get('TestClass')).to.be.instanceof(TestClass);
     });
 
-    it('throws error if you try to map undefined', () => {
-      expect(()=> this.injector.map(undefined)).to.throw(
-        this.injector.ERRORS.cannotMapUndefinedId()
+    it(`throws mapping if provided id is undefined or null`, () => {
+      expect(()=> this.injector.get(undefined)).to.throw(
+        Injector.ERRORS.invalidId
       );
-      expect(()=> this.injector.map(null)).to.throw(
-        this.injector.ERRORS.cannotMapUndefinedId()
+      expect(()=> this.injector.get(null)).to.throw(
+        Injector.ERRORS.invalidId
       );
+    });
+
+    it(`throws mapping not found error if mapping doesn't exist`, () => {
+      const id = 'foo';
+      expect(()=> this.injector.get(id)).to.throw(
+        Injector.ERRORS.mappingNotFound(id)
+      );
+    });
+
+    it('can remove existing mappings', () => {
+      const id = 'foo';
+      this.injector.map(id).to('bar');
+      this.injector.remove(id);
+      expect(()=> {this.injector.get(id);}).to.throw(
+        Injector.ERRORS.mappingNotFound(id)
+      );
+    });
+
+    it('provides an alias for getting values', () => {
+      this.injector.map('foo').to('bar');
+      expect(this.injector.create('foo')).to.equal('bar');
+    });
+
+    it(`returns id from mapped value`, () => {
+      const value = 'my-value';
+      this.injector.map('test').to(value);
+      expect(this.injector.getIdForValue(value)).to.be.equal('test');
+    });
+
+    it(`returns null from not existing value mapping`, () => {
+      const value = 'my-non-existing-value';
+      expect(this.injector.getIdForValue(value)).to.be.equal(null);
+    });
+
+    describe(`conversion`, () => {
+      it(`converts mapping to a string`, () => {
+        expect(
+          this.injector.map('test').toString()
+        ).to.be.equal('Instance <Mapping>');
+      });
+    });
+
+    it(`returns mapping id`, () => {
+      const id = 'my-id';
+      expect(this.injector.map(id).getId()).to.be.equal(id);
+    });
+
+    it(`throws error if providers were set innaproprietly`, () => {
+      const injector = new Injector({toInvalid: {}});
+      expect(() => {
+        injector.map('test').toInvalid('test');
+      }).to.throw(
+        `ProviderClass is not a constructor. An unexpected error occured for instantiation type 'toInvalid' provider`
+      );
+    });
+
+    describe('overriding mappings', () => {
+      it('allows to override mappings', () => {
+        const id = 'foo';
+        this.injector.map(id).to('test');
+        this.injector.override(id).to('other');
+        expect(this.injector.get(id)).to.equal('other');
+      });
+
+      it('dynamically updates all dependent objects with the new dependency', () => {
+        const myDependant = {
+          dependencies: {'nameForDependency': 'dependencyId'}
+        };
+
+        const firstValue = {first: true};
+        const secondValue = {second: true};
+        this.injector.map('dependencyId').to(firstValue);
+
+        this.injector.injectInto(myDependant);
+        expect(myDependant.nameForDependency).to.equal(firstValue);
+
+        this.injector.override('dependencyId').to(secondValue);
+        expect(myDependant.nameForDependency).to.equal(secondValue);
+      });
+
+      it('allows to de-register a dependent object from the mappings', () => {
+        const myDependant = {
+          dependencies: {
+            first: 'First',
+            second: 'Second'
+          }
+        };
+        const firstValue = { first: true };
+        const secondValue = { second: true };
+        this.injector.map('First').to(firstValue);
+        this.injector.map('Second').to(secondValue);
+
+        this.injector.injectInto(myDependant);
+        const firstMapping = this.injector.getMappingFor('First');
+        const secondMapping = this.injector.getMappingFor('Second');
+        expect(firstMapping.hasDependent(myDependant)).to.be.true;
+        expect(secondMapping.hasDependent(myDependant)).to.be.true;
+
+        // Release the reference to the dependent
+        this.injector.release(myDependant);
+        expect(firstMapping.hasDependent(myDependant)).to.be.false;
+        expect(secondMapping.hasDependent(myDependant)).to.be.false;
+      });
+
+      it('tells the dependent object when a dependency changed', () => {
+        const dependentObject = {
+          dependencies: {
+            test: 'Test'
+          },
+          onDependencyChanged: sinon.spy()
+        };
+        const firstValue = {};
+        const secondValue = {};
+        this.injector.map('Test').to(firstValue);
+        this.injector.injectInto(dependentObject);
+        this.injector.override('Test').to(secondValue);
+
+        expect(dependentObject.onDependencyChanged).to.have.been.calledWith(
+          'test', secondValue
+        );
+      });
     });
   });
-
-  describe('overriding mappings', () => {
-    it('allows to override mappings', () => {
-      this.injector.map('test').to('test');
-      this.injector.override('test').to('other');
-      expect(this.injector.get('test')).to.equal('other');
-    });
-
-    it('dynamically updates all dependent objects with the new dependency', () => {
-      const myObject = {dependencies: {test: 'test'}};
-      const firstValue = {first: true};
-      const secondValue = {second: true};
-      this.injector.map('test').to(firstValue);
-      this.injector.injectInto(myObject);
-      expect(myObject.test).to.equal(firstValue);
-      this.injector.override('test').to(secondValue);
-      expect(myObject.test).to.equal(secondValue);
-    });
-
-    it('allows to de-register a dependent object from the mappings', () => {
-      const myObject = {
-        dependencies: {
-          first: 'First',
-          second: 'Second'
-        }
-      };
-      const firstValue = { first: true };
-      const secondValue = { second: true };
-      this.injector.map('First').to(firstValue);
-      this.injector.map('Second').to(secondValue);
-
-      this.injector.injectInto(myObject);
-      const firstMapping = this.injector.getMappingFor('First');
-      const secondMapping = this.injector.getMappingFor('Second');
-      expect(firstMapping.hasDependent(myObject)).to.be.true;
-      expect(secondMapping.hasDependent(myObject)).to.be.true;
-      // Release the reference to the dependent
-      this.injector.release(myObject);
-      expect(firstMapping.hasDependent(myObject)).to.be.false;
-      expect(secondMapping.hasDependent(myObject)).to.be.false;
-    });
-
-    it('tells the dependent object when a dependency changed', () => {
-      const dependentObject = {
-        dependencies: {
-          test: 'Test'
-        },
-        onDependencyChanged: sinon.spy()
-      };
-      const firstValue = {};
-      const secondValue = {};
-      this.injector.map('Test').to(firstValue);
-      this.injector.injectInto(dependentObject);
-      this.injector.override('Test').to(secondValue);
-
-      expect(dependentObject.onDependencyChanged).to.have.been.calledWith(
-        'test', secondValue
-      );
-    });
-  });
-
-  // ========== INJECTING DEPENDENCIES =========
 
   describe('injecting dependencies', () => {
+    it(`throws error if required dependency does not exist on injection for object`, () => {
+      const nonExistentId = 'not-existing-dependency-id';
+      const instance = {
+        dependencies: {'name': nonExistentId}
+      };
+      expect(() => {
+        this.injector.injectInto(instance);
+      }).to.throw(
+        Injector.ERRORS.mappingNotFound(nonExistentId)
+      );
+    });
+
+    it(`throws error if required dependency does not exist on injection for class`, () => {
+      const nonExistentId = 'not-existing-dependency-id';
+      @dependencies({name: nonExistentId})
+      class Test {}
+      const instance = new Test();
+      expect(() => {
+        this.injector.injectInto(instance);
+      }).to.throw(
+        // Needs to be as one liner
+        `No mapping found for <not-existing-dependency-id> for {name: 'not-existing-dependency-id'} in <[object Object]>. Did you forget to map it in your application?`
+      );
+    });
 
     it('injects static values', () => {
       const value = {};
       this.injector.map('test').to(value);
-      const instance = SpaceObject.create({dependencies: {value: 'test'}});
+      const instance = {
+        dependencies: {value: 'test'}
+      };
       this.injector.injectInto(instance);
       expect(instance.value).to.equal(value);
     });
@@ -148,8 +310,11 @@ describe('Injector', function() {
     });
 
     it('handles inherited dependencies', () => {
-      const Base = SpaceObject.extend({dependencies: {base: 'base'}});
-      const Extended = Base.extend({dependencies: {extended: 'extended'}});
+      @dependencies({base: 'base'})
+      class Base {}
+      @dependencies({extended: 'extended'})
+      class Extended extends Base {}
+
       this.injector.map('base').to('base');
       this.injector.map('extended').to('extended');
 
@@ -160,10 +325,10 @@ describe('Injector', function() {
     });
 
     it('never overrides existing properties', () => {
-      const instance = SpaceObject.create({
+      const instance = {
         dependencies: {test: 'test'},
         test: 'value'
-      });
+      };
 
       this.injector.map('test').to('test');
       this.injector.injectInto(instance);
@@ -172,26 +337,23 @@ describe('Injector', function() {
     });
 
     describe('when dependencies are ready', () => {
-
       it('tells the instance that they are ready', () => {
-        const value = 'test';
-        const instance = SpaceObject.create({
+        const instance = {
           dependencies: {value: 'value'},
           onDependenciesReady: sinon.spy()
-        });
+        };
 
         this.injector.map('value').to('value');
         this.injector.injectInto(instance);
-        this.injector.injectInto(instance); // shouldnt trigger twice;
+        this.injector.injectInto(instance); // shouldn't trigger twice;
 
         expect(instance.onDependenciesReady).to.have.been.calledOnce;
       });
 
-      it('tells every single instance exactly once', () => {
+      it('tells every single instance that they are ready exactly once', () => {
         const readySpy = sinon.spy();
-        class TestClass extends SpaceObject {
+        class TestClass  {
           constructor() {
-            super();
             this.dependencies = {value: 'test'};
             this.onDependenciesReady = readySpy;
           }
@@ -210,12 +372,10 @@ describe('Injector', function() {
     });
   });
 
-  // ============ DEFAULT PROVIDERS ============
 
   describe('default providers', () => {
 
     describe('static value providers', () => {
-
       it('maps to static value', () => {
         const value = 'test';
         this.injector.map('first').to(value);
@@ -223,15 +383,6 @@ describe('Injector', function() {
 
         expect(this.injector.get('first')).to.equal(value);
         expect(this.injector.get('second')).to.equal(value);
-      });
-
-      it('supports Space namespace lookup', () => {
-        Space.__test__ = {TestClass: SpaceObject.extend()};
-        const path = 'Space.__test__.TestClass';
-        this.injector.map(path).asStaticValue();
-
-        expect(this.injector.get(path)).to.equal(Space.__test__.TestClass);
-        delete Space.__test__;
       });
 
       it('can uses static toString method if available', () => {
@@ -242,10 +393,15 @@ describe('Injector', function() {
         this.injector.map(Test).asStaticValue();
         expect(this.injector.get('Test')).to.equal(Test);
       });
+
+      it(`converts provider to string`, () => {
+        expect(
+          new ValueProvider().toString()
+        ).to.be.equal('Instance <ValueProvider>');
+      });
     });
 
     describe('instance provider', () => {
-
       it('creates new instances for each request', () => {
         class Test {}
         this.injector.map('Test').toClass(Test);
@@ -257,10 +413,15 @@ describe('Injector', function() {
         expect(second).to.be.instanceof(Test);
         expect(first).not.to.equal(second);
       });
+
+      it(`converts provider to string`, () => {
+        expect(
+          new InstanceProvider().toString()
+        ).to.be.equal('Instance <InstanceProvider>');
+      });
     });
 
     describe('singleton provider', () => {
-
       it('maps class as singleton', () => {
         class Test {
           static toString() {return 'Test';}
@@ -283,35 +444,11 @@ describe('Injector', function() {
         expect(first).to.equal(second);
       });
 
-      it('looks up the value on Space namespace if only a path is given', () => {
-        Space.__test__ = {TestClass: SpaceObject.extend()};
-        this.injector.map('Space.__test__.TestClass').asSingleton();
-
-        const first = this.injector.get('Space.__test__.TestClass');
-        const second = this.injector.get('Space.__test__.TestClass');
-
-        expect(first).to.be.instanceof(Space.__test__.TestClass);
-        expect(first).to.equal(second);
-        delete Space.__test__;
+      it(`converts provider to string`, () => {
+        expect(
+          new SingletonProvider().toString()
+        ).to.be.equal('Instance <SingletonProvider>');
       });
-    });
-  });
-
-  // ============ CUSTOM PROVIDERS ============
-
-  describe('adding custom providers', () => {
-    it('adds the provider to the api', () => {
-      const loremIpsum = 'lorem ipsum';
-
-      this.injector.addProvider('toLoremIpsum', SpaceObject.extend({
-        Constructor: function() {
-          this.provide = function() {
-            return loremIpsum;
-          };
-        }
-      }));
-      this.injector.map('test').toLoremIpsum();
-      expect(this.injector.get('test')).to.equal(loremIpsum);
     });
   });
 });
