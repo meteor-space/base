@@ -33,9 +33,6 @@ class Module {
    * @param {Object} [properties.configuration] Configuration for Module.
    */
   constructor(properties = {}) {
-    // On time writing this package there is issue with Babel and class
-    // properties on inheriting classes
-    // TODO: move this to class property when its fixed
     if (isNil(properties.modules)) {properties.modules = [];}
     if (isNil(properties.configuration)) {
       properties.configuration = {

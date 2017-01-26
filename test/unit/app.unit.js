@@ -187,9 +187,6 @@ describe('App', function() {
 
   describe(`mutation`, () => {
     it('merges configurations of all modules', () => {
-      // On time writing this package there is issue with Babel and class
-      // properties on inheriting classes
-      // TODO: move this to class property when its fixed
       class GrandchildModule extends Module {
         constructor() {
           super({
