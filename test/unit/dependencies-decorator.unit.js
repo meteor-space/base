@@ -3,7 +3,7 @@ import chai, {expect} from 'chai';
 const sinonChai = require("sinon-chai");
 chai.use(sinonChai);
 
-describe(`Dependencies`, function() {
+describe(`dependencies`, function() {
   describe(`string arguments`, () => {
     @dependencies('MyParentDependency')
     class StringParent {}
