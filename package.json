@@ -2,6 +2,7 @@
   "name": "space-base",
   "version": "4.1.4",
   "description": "Modular Application Architecture",
+  "main": "lib/index.js",
   "keywords": [
     "space",
     "modular",
@@ -49,7 +50,6 @@
     "sinon-chai": "^2.8.0",
     "mocha": "^3.2.0",
     "space-testing": "git://github.com/meteor-space/testing.git#feature\/convert-to-npm"
-
   },
   "scripts": {
     "build": "npm run compile",
