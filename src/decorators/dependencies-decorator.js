@@ -28,16 +28,15 @@ const mapDependenciesFromArray = function(ids) {
 const processArguments = function(args) {
   const deps = {};
   for (let arg of args) {
-    // @dependencies('my-dependency')
-    // @dependencies(MyClas'my-dependency')
+    // dependencies('my-dependency')(MyClass)
     if (isString(arg)) {
       deps[arg] = arg;
-    // @dependencies(['dependency-1', 'dependency-2'])]
-    // @dependencies([MyClass, 'dependency-2'])]
+    // dependencies(['dependency-1', 'dependency-2'])](MyClass)
+    // dependencies([MyClass, 'dependency-2'])](MyClass)
     } else if (isArray(arg)) {
       assign(deps, mapDependenciesFromArray(arg));
-    // @dependencies({'mapping': 'dependency'})
-    // @dependencies({'mapping': MyClass})
+    // dependencies({'mapping': 'dependency'})(MyClass)
+    // dependencies({'mapping': MyClass})(MyClass)
     } else if (isPlainObject(arg)) {
       const sanitized = mapValues(arg, (value) => {
         return value.toString();
