@@ -1,5 +1,5 @@
 import {ensure} from 'simplecheck';
-import {isNil} from 'lodash';
+import {isNil, assign} from 'lodash';
 
 class Struct {
 
@@ -18,11 +18,22 @@ class Struct {
    * not match fields pattern.
    */
   constructor(data = {}) {
-    this._ensureDataMatchesFieldsPattern(data);
+    const processedData = this.construction(data);
+    this._ensureDataMatchesFieldsPattern(processedData, this.fields());
 
-    for (let [key, value] of Object.entries(data)) {
+    for (let [key, value] of Object.entries(processedData)) {
       this[key] = value;
     }
+  }
+
+  /**
+   * On construction hook.
+   * @param  {Object} data Unprocessed data.
+   * @return {Object} Processed data.
+   */
+  construction(data) {
+    let processedData = assign({}, data);
+    return processedData;
   }
 
   /**
@@ -42,11 +53,12 @@ class Struct {
   /**
    * Ensures if provided data does match defined pattern.
    * @param  {Object} data Data to validate.
+   * @param  {Object} fields Fields pattern for matching provided data.
    * @throws {MatchError} Will throw an error if the passed data object does
    * not match fields pattern.
    */
-  _ensureDataMatchesFieldsPattern(data) {
-    ensure(data, this.fields());
+  _ensureDataMatchesFieldsPattern(data, fields = this.fields()) {
+    ensure(data, fields);
   }
 }
 

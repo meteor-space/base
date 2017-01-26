@@ -22,6 +22,26 @@ describe('Struct', function() {
     expect(new Struct({}).fields()).to.be.eql({});
   });
 
+  it(`provides construction hook to process data`, () => {
+    const processor = sinon.stub();
+
+    class MyStruct extends Struct {
+      fields() {
+        return {value: String};
+      }
+      construction(data) {
+        processor(data);
+        data.value = 'processed-value';
+        return data;
+      }
+    }
+    const data = {value: 'my-value'};
+    const instance = new MyStruct(data);
+    expect(instance.value).to.be.equal('processed-value');
+    expect(processor).to.be.calledOnce;
+    expect(processor).to.be.calledWithExactly(data);
+  });
+
   describe('defining fields', () => {
     it('assigns the properties to the instance', () => {
       const properties = {name: 'Dominik', age: 26};
