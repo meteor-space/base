@@ -69,10 +69,10 @@ class Logger {
   /**
    * Returns transport.
    * @param  {String} id Transport's id.
-   * @return {LoggingTransport|*)
+   * @return {LoggingTransport|*|undefined)
    */
   getTransport(id) {
-    return this._transports[id] || null;
+    return this._transports[id];
   }
 
   /**

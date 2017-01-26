@@ -59,10 +59,10 @@ class Injector {
   /**
    * Gets provider for instantiation type.
    * @param {String} instantiationType
-   * @return {Provider|*|null}
+   * @return {Provider|*|undefined}
    */
   getProvider(instantiationType) {
-    return this._providers[instantiationType] || null;
+    return this._providers[instantiationType];
   }
 
   /**

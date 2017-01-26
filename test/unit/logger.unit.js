@@ -125,7 +125,7 @@ describe("Logger", function() {
       logger.addTransport('file', fileTransport);
       expect(logger.getTransport('console')).to.equal(consoleTransport);
       expect(logger.getTransport('file')).to.equal(fileTransport);
-      expect(logger.getTransport('non-existing-transport')).to.be.null;
+      expect(logger.getTransport('non-existing-transport')).to.be.undefined;
     });
 
     it('removes transport', () => {
@@ -135,7 +135,7 @@ describe("Logger", function() {
       const logger = new Logger();
       logger.addTransport(id, transport);
       logger.removeTransport(id);
-      expect(logger.getTransport(id)).to.be.null;
+      expect(logger.getTransport(id)).to.be.undefined;
       expect(logger.hasTransport(id)).to.be.false;
     });
 

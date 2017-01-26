@@ -26,7 +26,7 @@ const isClass = function(value) {
 /**
  * Returns parent class.
  * @param  {*} ES6 Class or instance of a class.
- * @return {*|null} Parent class or null
+ * @return {*|undefined} Parent class or null
  */
 const parentClass = function(Class) {
   let cnstr;
@@ -40,13 +40,13 @@ const parentClass = function(Class) {
   if (!isNil(parent) && parent.name !== '' && isClass(parent)) {
     return parent;
   }
-  return null;
+  return undefined;
 };
 
 /**
  * Returns parent class prototype.
  * @param  {*} ES6 Class or instance of a class.
- * @return {Object} Prototype of parent class.
+ * @return {Object|undefined} Prototype of parent class.
  */
 const parentClassPrototype = function(Class) {
   let cnstr;
@@ -60,7 +60,7 @@ const parentClassPrototype = function(Class) {
   if (!isNil(parent) && parent.name !== '' && isClass(parent)) {
     return parent.prototype;
   }
-  return null;
+  return undefined;
 };
 
 
