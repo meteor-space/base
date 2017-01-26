@@ -1,7 +1,6 @@
 const assign = require('lodash/assign');
 const fs = require('fs');
 
-
 let babelrc = null;
 let babelrcFile = null;
 try {
@@ -38,7 +37,7 @@ module.exports = function(wallaby) {
       }
     },
     delays: {
-      run: 700
+      run: 1000
     }
   };
 };
