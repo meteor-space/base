@@ -86,8 +86,8 @@ describe('Injector', function() {
       expect(this.injector.getProvider('toSingleton')).to.be.equal(SingletonProvider);
     });
 
-    it(`returns null if instantiation type is not provided`, () => {
-      expect(this.injector.getProvider('my-instantiation-type')).to.be.equal(null);
+    it(`returns undefined if instantiation type is not provided`, () => {
+      expect(this.injector.getProvider('my-instantiation-type')).to.be.equal(undefined);
     });
   });
 
