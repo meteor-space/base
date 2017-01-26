@@ -55,9 +55,9 @@ const processArguments = function(args) {
  * Maps processed dependencies to target's prototype.
  * @param  {...*} args Argument with type of string, array with strings, object.
  * @example
- * dependencies('dependency')
- * dependencies(['dependency-1', 'dependency-2'])
- * dependencies({'mapping': 'dependency', 'other-mapping': 'other-dependency'})
+ * dependencies('dependency')(MyClass)
+ * dependencies(['dependency-1', 'dependency-2'])(MyClass)
+ * dependencies({'mapping': 'dependency', 'other-mapping': 'other-dependency'})(MyClass)
  */
 const dependencies = function(...args) {
   return function(target) {
