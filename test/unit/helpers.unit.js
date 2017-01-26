@@ -57,7 +57,7 @@ describe(`helpers`, function() {
       });
 
       it(`returns null if parent class is last on inharitance chain`, () => {
-        expect(parentClass(Parent)).to.be.equal(null);
+        expect(parentClass(Parent)).to.be.equal(undefined);
       });
     });
 
@@ -87,7 +87,7 @@ describe(`helpers`, function() {
       });
 
       it(`returns null if parent class is last on inharitance chain`, () => {
-        expect(parentClassPrototype(Parent)).to.be.equal(null);
+        expect(parentClassPrototype(Parent)).to.be.equal(undefined);
       });
     });
   });

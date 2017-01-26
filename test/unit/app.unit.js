@@ -6,11 +6,13 @@ import ConsoleTransport from '../../src/logging-transports/console-transport.js'
 import LoggingTransport from '../../src/logging-transports/logging-transport.js';
 import chai, {expect} from 'chai';
 import sinon from 'sinon';
+const {spaceChai} = require('space-testing');
+chai.use(spaceChai);
 
 describe('App', function() {
 
   it('extends Module', () => {
-    expect(App.prototype).to.be.instanceof(Module);
+    expect(App).to.extend(Module);
   });
 
   describe('construction', () => {
