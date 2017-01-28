@@ -1,13 +1,15 @@
 import Struct from './struct.js';
 import SpaceError from './error.js';
 import {Injector, InjectionError, Provider} from './injector.js';
-import Logger from './logger.js';
+import BaseLogger from './logger.js';
 import LoggingTransport from './logging-transports/logging-transport.js';
 import ConsoleTransport from './logging-transports/console-transport.js';
 import Module from './module.js';
 import App from './app.js';
 import helpers from './helpers.js';
 import dependencies from './decorators/dependencies-decorator.js';
+
+const Logger = new BaseLogger;
 
 const Space = {
   Struct: Struct,
