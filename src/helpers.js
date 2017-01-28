@@ -1,4 +1,5 @@
 import {isNil} from 'lodash';
+import cloneFunction from 'clone-function';
 
 // http://stackoverflow.com/questions/30758961/how-to-check-if-a-variable-is-an-es6-class-declaration
 /**
@@ -11,11 +12,23 @@ const isClass = function(value) {
     return false;
   }
   try {
-    value();
+    /*
+    TODO:
+    Currently there is no way to test if provided value is ES6 class without
+    actually making the call to it and catching thrown error. And that breaks
+    any call count assertions.
+
+    Ideally replace this with:
+    1. A valid way of evaluating if passed value is a class.
+    2. Creating a ideal duplicate of class and proceeding with thrown
+    error checking.
+     */
+    const clonedValue = cloneFunction(value);
+    clonedValue();
     return false;
   } catch (error) {
     if (
-        /^Class constructor|^Cannot call a class as a function/.test(error.message)
+        /^Class constructor|^Cannot call a class as a function|^_classCallCheck3 is not defined/.test(error.message)
     ) {
       return true;
     }
