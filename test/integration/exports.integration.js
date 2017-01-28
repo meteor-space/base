@@ -48,7 +48,7 @@ describe(`exports`, function() {
   });
 
   it(`Logger`, () => {
-    expect(LoggerExported).to.be.equal(Logger);
+    expect(LoggerExported).to.be.instanceof(Logger);
   });
 
   it(`LoggingTransport`, () => {
@@ -80,7 +80,7 @@ describe(`exports`, function() {
     expect(Space.Error).to.be.equal(SpaceError);
     expect(Space.Injector).to.be.equal(Injector);
     expect(Space.InjectionError).to.be.equal(InjectionError);
-    expect(Space.Logger).to.be.equal(Logger);
+    expect(Space.Logger).to.be.instanceof(Logger);
     expect(Space.LoggingTransport).to.be.equal(LoggingTransport);
     expect(Space.ConsoleTransport).to.be.equal(ConsoleTransport);
     expect(Space.Module).to.be.equal(Module);
