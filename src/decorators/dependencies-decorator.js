@@ -65,7 +65,7 @@ const dependencies = function(...args) {
       target.prototype.dependencies = {};
     }
     target.prototype.dependencies = deps;
-  }
+  };
 };
 
 export default dependencies;
